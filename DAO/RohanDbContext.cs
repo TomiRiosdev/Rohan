@@ -1,16 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using DAO.DomainModel;
 using Microsoft.EntityFrameworkCore;
 
-namespace DAO.EntityFramework;
+namespace DAO;
 
 public partial class RohanDbContext : DbContext
 {
+    public RohanDbContext()
+    {
+    }
+
     public RohanDbContext(DbContextOptions<RohanDbContext> options)
         : base(options)
     {
-        
     }
 
     public virtual DbSet<CategoriaProducto> CategoriaProductos { get; set; }
@@ -21,9 +23,10 @@ public partial class RohanDbContext : DbContext
 
     public virtual DbSet<TipoProducto> TipoProductos { get; set; }
 
-    public virtual DbSet<UnidadMedidum> UnidadMedida { get; set; }
+    public virtual DbSet<UnidadMedida> UnidadMedidas { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
         => optionsBuilder.UseSqlServer("Data Source=DESKTOP-0PHAJEN\\MSSQLSERVER03;Initial Catalog=DBRohan;User ID=UserRohan;Password=1234; trustservercertificate=True");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -80,14 +83,11 @@ public partial class RohanDbContext : DbContext
                 .IsUnicode(false);
         });
 
-        modelBuilder.Entity<UnidadMedidum>(entity =>
+        modelBuilder.Entity<UnidadMedida>(entity =>
         {
-            entity.HasKey(e => e.IdUnidadMedida).HasName("PK_Unidad Medida");
+            entity.HasKey(e => e.IdUnidadMedida);
 
             entity.Property(e => e.IdUnidadMedida).ValueGeneratedNever();
-            entity.Property(e => e.Habilitado)
-                .HasMaxLength(50)
-                .IsUnicode(false);
             entity.Property(e => e.Nombre)
                 .HasMaxLength(50)
                 .IsUnicode(false);

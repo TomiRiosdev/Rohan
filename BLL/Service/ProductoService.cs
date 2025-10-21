@@ -1,24 +1,21 @@
 ﻿using AutoMapper;
-using DAO.DomainModel;
+using BLL.MappingProfiles;
+using DAO;
+using DAO.Implementations.SQLServer;
 using DAO.Interface;
 using ModelsDTO;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BLL.Service
 {
-    public class ProductoService    
+    public class ProductoService
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IMapper _mapper; // Inyectamos el mapeador
+        private readonly IMapper _mapper = MapperConfigInitializer.Mapper;
 
-        public ProductoService(IUnitOfWork unitOfWork, IMapper mapper)
+        // Constructor público para la Inyección de Dependencias
+        public ProductoService()
         {
-            _unitOfWork = unitOfWork;
-            _mapper = mapper;
+            _unitOfWork = new UnitOfWork();
         }
 
         public void AddProducto(ProductoDTO productoDto)
@@ -56,7 +53,7 @@ namespace BLL.Service
             return _mapper.Map<IEnumerable<ProductoDTO>>(productos);
         }
 
-        public IEnumerable<ProductoDTO> GetProductosHabilitados()
+        public IEnumerable<ProductoDTO> GetProductosDeshabilitados()
         {
             var productos = _unitOfWork.ProductoRepository.GetAll()
                 .Where(p => p.Habilitado); // Filtrar solo los habilitados

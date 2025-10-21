@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using DAO.DomainModel;
+using DAO;
 using ModelsDTO;
 using System;
 using System.Collections.Generic;
@@ -8,7 +8,7 @@ using System.Runtime;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BLL.AutoMapper
+namespace BLL.MappingProfiles
 {
     public class GeneralProfile : Profile
     {
@@ -22,7 +22,8 @@ namespace BLL.AutoMapper
             CreateMap<CategoriaProducto, CategoriaDTO>().ReverseMap();
             CreateMap<Proveedore, ProveedorDTO>().ReverseMap();
             CreateMap<TipoProducto, TipoProductoDTO>().ReverseMap();
-            CreateMap<UnidadMedidum, UnidadMedidaDTO>().ReverseMap();
+            CreateMap<UnidadMedida, UnidadMedidaDTO>().ReverseMap();    
+
 
         }
     }

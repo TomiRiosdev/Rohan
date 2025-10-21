@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace DAO.DomainModel;
+namespace DAO;
 
-public partial class CategoriaProducto
+public partial class TipoProducto
 {
-    public Guid IdCategoriaProdcuto { get; set; }
+    public Guid IdTipoProducto { get; set; }
 
     public string Nombre { get; set; } = null!;
 

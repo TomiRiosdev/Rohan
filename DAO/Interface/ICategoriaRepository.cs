@@ -1,4 +1,4 @@
-﻿using DAO.DomainModel;
+﻿using DAO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,5 +11,6 @@ namespace DAO.Interface
     {
         // Método específico para la lógica de negocio (ej. buscar para validación de unicidad)
         CategoriaProducto GetByNombre(string name);
+        IEnumerable<CategoriaProducto> GetAllDesHabilitados(); // Para el soft delete
     }
 }

@@ -11,8 +11,12 @@ namespace DAO.Interface
         // Métodos para exponer los repositorios específicos
         IProductoRepository ProductoRepository { get; }
         ICategoriaRepository CategoriaRepository { get; }
+        IProveedorRepository ProveedorRepository { get; }
+        IUnidadMedidaRepository UnidadMedidaRepository { get; }
+        ITipoProductoRepository TipoProductoRepository { get; }
 
         // Método para guardar los cambios en la base de datos
+
         void SaveChanges();
     }
 }

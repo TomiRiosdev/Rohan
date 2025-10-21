@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace DAO.DomainModel;
+namespace DAO;
 
 public partial class Proveedore
 {

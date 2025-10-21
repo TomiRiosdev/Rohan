@@ -1,28 +1,55 @@
-﻿using DAO.DomainModel;
-using DAO.EntityFramework;
+﻿using DAO;
+using DAO;
 using DAO.Interface;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DAO.Implementations.SQLServer
 {
-    public class ProductoRepository :GenericRepository<Producto>, IProductoRepository
+    public class ProductoRepository : IProductoRepository
     {
-        public ProductoRepository(RohanDbContext dbContext) { }
-        public IEnumerable<Producto> GetByNombre(string name)
+        private readonly RohanDbContext _dbContext;
+        public ProductoRepository(RohanDbContext dbContext)
         {
-            // Implementación del método específico: búsqueda por nombre
-            return _dbSet.Where(p => p.Nombre.Contains(name)).ToList();
+              _dbContext = dbContext;
         }
 
-        public IEnumerable<Producto> GetAllHabilitados()
+        public Guid Add(Producto entity)
         {
-            // Implementación para el 'soft delete': solo devuelve los habilitados
-            // Asumiendo que tu modelo 'Producto' tiene una propiedad 'Habilitado'
-            return _dbSet.Where(p => p.Habilitado).ToList();
+            throw new NotImplementedException();
         }
+
+        public void Remove(Guid id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Update(Producto entity)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Producto GetById(Guid id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<Producto> GetAll()
+        {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<Producto> GetAllDesHabilitados()
+        {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<Producto> GetByNombre(string name)
+        {
+            throw new NotImplementedException();
+        }
+
+       
     }
 }

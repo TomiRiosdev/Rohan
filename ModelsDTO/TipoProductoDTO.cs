@@ -9,7 +9,7 @@ namespace ModelsDTO
     public class TipoProductoDTO
     {
         public Guid IdTipoProducto { get; set; }
-        public string Nombre { get; set; } = null!;
+        public string Nombre { get; set; } 
         public bool Habilitado { get; set; }
     }
 }

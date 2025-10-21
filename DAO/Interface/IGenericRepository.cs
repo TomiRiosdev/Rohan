@@ -8,7 +8,7 @@ namespace DAO.Interface
 {
     public interface IGenericRepository<T> where T : class
     {
-        void Add(T entity);
+        Guid Add(T entity);
         void Update(T entity);
         void Remove(Guid id);
         T GetById(Guid id);

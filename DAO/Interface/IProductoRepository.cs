@@ -1,4 +1,4 @@
-﻿using DAO.DomainModel;
+﻿using DAO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +11,6 @@ namespace DAO.Interface
     {
         // Método específico para Producto
         IEnumerable<Producto> GetByNombre(string name);
-        IEnumerable<Producto> GetAllHabilitados(); // Para el soft delete
+        IEnumerable<Producto> GetAllDesHabilitados(); // Para el soft delete
     }
 }
