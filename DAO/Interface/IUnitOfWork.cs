@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DAO.Interface
 {
@@ -13,7 +9,8 @@ namespace DAO.Interface
         ICategoriaRepository CategoriaRepository { get; }
         IProveedorRepository ProveedorRepository { get; }
         IUnidadMedidaRepository UnidadMedidaRepository { get; }
-        ITipoProductoRepository TipoProductoRepository { get; }
+        ISucursalRepository SucursalRepository { get; }
+        ITipoSucursalRepository TipoSucursalRepository { get; }
 
         // Método para guardar los cambios en la base de datos
 

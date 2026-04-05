@@ -1,16 +1,10 @@
-﻿using DAO;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Models;
 
 namespace DAO.Interface
 {
-    public interface ICategoriaRepository : IGenericRepository<CategoriaProducto>
+    public interface ICategoriaRepository : IGenericRepository<Categoria>
     {
-        // Método específico para la lógica de negocio (ej. buscar para validación de unicidad)
-        CategoriaProducto GetByNombre(string name);
-        IEnumerable<CategoriaProducto> GetAllDesHabilitados(); // Para el soft delete
+        Categoria GetByNombre(string name);
+        bool ExistsByName(string nombre);
     }
 }

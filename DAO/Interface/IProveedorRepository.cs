@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using DAO;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Models;
 
 namespace DAO.Interface
 {
-    public interface IProveedorRepository : IGenericRepository<Proveedore>
+    public interface IProveedorRepository : IGenericRepository<Proveedor>
     {
-        Proveedore GetByNombre(string name);
-        IEnumerable<Proveedore> GetAllDesHabilitados(); // Para el soft delete
+        IEnumerable<Proveedor>GetByNombre(string name);
+        IEnumerable<Proveedor> GetAllDesHabilitados(); // Para el soft delete
+        bool ExistsByName(string nombre);
     }
 }

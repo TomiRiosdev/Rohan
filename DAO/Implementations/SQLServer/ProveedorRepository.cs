@@ -1,95 +1,159 @@
-﻿using DAO;
-using DAO;
+﻿using Models;
 using DAO.Interface;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DAO.Implementations.SQLServer
 {
     public class ProveedorRepository : IProveedorRepository
     {
-        private readonly RohanDbContext _dbContext;
-        public ProveedorRepository(RohanDbContext dbContext)
-        { 
-              _dbContext = dbContext;
-        }
-
-        public Guid Add(Proveedore entity)
+        private readonly RohanContext _dbContext;
+        public ProveedorRepository(RohanContext dbContext)
         {
-            if(entity == null)
+            _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext), "El contexto de base de datos no puede ser nulo.");
+        }
+        
+
+        public Guid Add(Proveedor entity)
+        {
+            try
             {
-                throw new ArgumentNullException(nameof(entity), "La entidad no puede ser nula.");
+                if(entity == null)
+                    throw new ArgumentNullException(nameof(entity), "El proveedor a agregar no puede ser nulo.");
+                entity.IdProveedor = Guid.NewGuid(); // Asigna un nuevo GUID al proveedor
+                entity.Habilitado = true; // Asegura que el proveedor esté habilitado al agregarlo
+                
+                _dbContext.Proveedor.Add(entity);
+                _dbContext.SaveChanges(); // Guarda los cambios en la base de datos
+
+                return entity.IdProveedor; 
             }
-            entity.IdProveedor = Guid.NewGuid();
-            _dbContext.Proveedores.Add(entity);
-
-            return entity.IdProveedor;
-        }
-
-        public IEnumerable<Proveedore> GetAll()
-        {
-            if (_dbContext.Proveedores == null)
+            catch (DbUpdateException ex)
+            { 
+                throw new Exception("DAO Error: Error de persistencia al agregar el proveedor. Verifique restricciones de base de datos.", ex);
+            }
+            catch (Exception ex)
             {
-                throw new InvalidOperationException("El conjunto de Proveedores es nulo.");
+                throw new Exception("DAO Error: Ocurrió un error inesperado al intentar agregar el proveedor.", ex);
             }
-
-            return _dbContext.Proveedores
-                .Where(p => p.Habilitado)
-                .ToList();
         }
 
-        public IEnumerable<Proveedore> GetAllDesHabilitados()
+        public bool ExistsByName(string nombre)
         {
-           if (_dbContext.Proveedores == null)
+            return _dbContext.Proveedor
+            .Any(p => p.Nombre.ToLower() == nombre.ToLower());
+        }
+
+        public IEnumerable<Proveedor> GetAll()
+        {
+            try
             {
-                throw new InvalidOperationException("El conjunto de Proveedores es nulo.");
+                return _dbContext.Proveedor
+                    .Where(p => p.Habilitado == true)
+                    .AsNoTracking() 
+                    .ToList();
             }
-            return _dbContext.Proveedores
-                .Where(p => !p.Habilitado) // Asumiendo que 'Habilitado' es una propiedad booleana en Proveedore
-                .ToList();
-        }
-
-        public Proveedore GetById(Guid id)
-        {
-            // Validación de ID va mejor en la BLL, pero se mantiene aquí por consistencia.
-            if (id == Guid.Empty)
+            catch (Exception ex)
             {
-                throw new ArgumentException("El ID no puede ser vacío.", nameof(id));
-            }
 
-            // Consulta por ID y por estado Habilitado
-            return _dbContext.Proveedores
-                .FirstOrDefault(p => p.IdProveedor == id && p.Habilitado == true);
+                throw new Exception("DAO Error: No se pudieron obtener los proveedores habilitados.", ex);
+            }
         }
 
-        public Proveedore GetByNombre(string name)
+        public IEnumerable<Proveedor> GetAllDesHabilitados()
         {
-            var proveedor = _dbContext.Proveedores
-                    .FirstOrDefault(p => p.Habilitado == true &&
-                                         p.Nombre.Equals(name, StringComparison.OrdinalIgnoreCase));
-            return proveedor;
+            try
+            {
+                return _dbContext.Proveedor
+                    .Where(p => p.Habilitado == false)
+                    .AsNoTracking()
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+
+                throw new Exception("DAO Error: No se pudieron obtener los proveedores deshabilitados.", ex);
+            }
+        }
+
+        public Proveedor GetById(Guid id)
+        {
+            try
+            {
+                if (id == Guid.Empty)
+                    throw new ArgumentException("El ID proporcionado no es válido.", nameof(id));
+
+                // Buscamos el proveedor sin importar si está habilitado o no (para auditoría)
+                var proveedor = _dbContext.Proveedor.Find(id);
+
+                if (proveedor == null)
+                    throw new KeyNotFoundException($"No se encontró ningún proveedor con el ID: {id}");
+
+                return proveedor;
+            }
+            catch (KeyNotFoundException) { throw; }
+            catch (Exception ex)
+            {
+                throw new Exception($"DAO Error: Error al buscar el proveedor con ID {id}.", ex);
+            }
+        }
+
+        public IEnumerable<Proveedor> GetByNombre(string name)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(name))
+                    throw new ArgumentException("El nombre del Proveedor no puede ser vacío.", nameof(name));
+                return _dbContext.Proveedor
+                    .Where(p => p.Nombre.Contains(name) && p.Habilitado == true)
+                    .AsNoTracking()
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"DAO Error: Error al buscar producto por nombre: {name}.", ex);
+            }
         }
 
         public void Remove(Guid id)
         {
-            var proveedor = _dbContext.Proveedores.Find(id);
-            if(proveedor != null)
+            try
             {
-                // ELIMINACIÓN LÓGICA (Soft Delete): Cambia el estado en lugar de removerlo.
+                var proveedor = _dbContext.Proveedor.Find(id);
+                if (proveedor == null)
+                    throw new KeyNotFoundException("No se puede eliminar un proveedor inexistente.");
+
+                // SOFT DELETE
                 proveedor.Habilitado = false;
 
-                // Actualizar el estado de seguimiento del objeto en el contexto
                 _dbContext.Entry(proveedor).State = EntityState.Modified;
+                _dbContext.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("DAO Error: Falló la deshabilitación lógica del proveedor.", ex);
             }
         }
 
-        public void Update(Proveedore entity)
+        public void Update(Proveedor entity)
         {
-            _dbContext.Entry(entity).State = EntityState.Modified;
+            try
+            {
+                if (entity == null)
+                    throw new ArgumentNullException(nameof(entity));
+
+                _dbContext.Entry(entity).State = EntityState.Modified;
+                _dbContext.SaveChanges();
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                throw new Exception("DAO Error: El proveedor fue modificado por otro usuario. Recargue los datos.", ex);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("DAO Error: No se pudo actualizar la información del proveedor.", ex);
+            }
         }
+
+       
     }
 }

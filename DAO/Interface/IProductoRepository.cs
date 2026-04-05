@@ -1,9 +1,4 @@
-﻿using DAO;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Models;
 
 namespace DAO.Interface
 {
@@ -12,5 +7,10 @@ namespace DAO.Interface
         // Método específico para Producto
         IEnumerable<Producto> GetByNombre(string name);
         IEnumerable<Producto> GetAllDesHabilitados(); // Para el soft delete
+        bool ExistsByName(string nombre);
+        bool ExistsByNameExceptId(string nombre, Guid idExcluir);
+        bool ExistsByCodigoSku(int codigoSku);
+        bool ExistsByCodigoSkuExceptId(int codigoSku, Guid idExcluir);
+
     }
 }

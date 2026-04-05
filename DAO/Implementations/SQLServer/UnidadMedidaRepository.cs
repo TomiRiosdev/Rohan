@@ -1,81 +1,103 @@
-﻿using DAO;
-using DAO;
-using DAO.Interface;
+﻿using DAO.Interface;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Models;
+
 
 namespace DAO.Implementations.SQLServer
 {
     public class UnidadMedidaRepository : IUnidadMedidaRepository
     {
-        private readonly RohanDbContext _dbContext;
+        private readonly RohanContext _dbContext;
 
-        public UnidadMedidaRepository(RohanDbContext dbContext)
+        public UnidadMedidaRepository(RohanContext dbContext)
         {
             _dbContext = dbContext;
         }
 
         public Guid Add(UnidadMedida entity)
         {
-            if (entity == null)
+            try
             {
-                throw new ArgumentNullException(nameof(entity), "La entidad no puede ser nula.");
-            }
-            entity.IdUnidadMedida = Guid.NewGuid(); // Asigna el ID aquí por convención
-            _dbContext.UnidadMedidas.Add(entity);
+                if(entity == null)
+                    throw new ArgumentNullException(nameof(entity), "La entidad no puede ser nula.");
+                if(entity.IdUnidadMedida == Guid.Empty)
+                  entity.IdUnidadMedida = Guid.NewGuid();
 
-            return entity.IdUnidadMedida;
+                _dbContext.UnidadMedida.Add(entity);
+                _dbContext.SaveChanges();
+                return entity.IdUnidadMedida;
+            }
+            catch (Exception ex)
+            {
+
+                throw new Exception("DAO Error: No se pudo agregar la Unidad de Medida..", ex);
+            }
+        }
+
+        public bool ExistsByName(string nombre)
+        {
+            return _dbContext.UnidadMedida
+            .Any(p => p.Descripcion.ToLower() == nombre.ToLower());
         }
 
         public IEnumerable<UnidadMedida> GetAll()
         {
-            return _dbContext.UnidadMedidas
-                .Where(u => u.Habilitado)
-                .ToList();
-        }
-
-        public IEnumerable<UnidadMedida> GetAllDesHabilitados()
-        {
-            // DEVUELVE SOLO DESHABILITADOS (Para el formulario de rehabilitación)
-            return _dbContext.UnidadMedidas
-                .Where(u => !u.Habilitado)
-                .ToList();
+            try
+            {
+                return _dbContext.UnidadMedida.ToList();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("DAO Error: Falló la obtención de Unidad de Medida..", ex);
+            }
         }
 
         public UnidadMedida GetById(Guid id)
         {
-            // BUSCA POR ID Y POR ESTADO HABILITADO
-            if (id == Guid.Empty)
+            try
             {
-                throw new ArgumentException("El ID no puede ser vacío.", nameof(id));
+                return _dbContext.UnidadMedida.Find(id);
             }
-            return _dbContext.UnidadMedidas
-                     .FirstOrDefault(u => u.IdUnidadMedida == id && u.Habilitado == true);
+            catch (Exception ex)
+            {
+
+                throw new Exception("DAO Error: Falló la obtención de Unidad de Medida.", ex);
+            }
         }
 
         public UnidadMedida GetByNombre(string name)
         {
-            // BUSCA POR NOMBRE Y POR ESTADO HABILITADO
-            return _dbContext.UnidadMedidas
-                         .FirstOrDefault(u => u.Habilitado == true &&
-                                              u.Nombre.Equals(name, StringComparison.OrdinalIgnoreCase));
+            try
+            {
+                return _dbContext.UnidadMedida
+                     .FirstOrDefault(um => um.Descripcion.ToLower() == name.ToLower());
+            }
+            catch (Exception ex)
+            {
+
+                throw new Exception("DAO Error: Falló la obtención de Unidad de Medida.", ex);
+            }
         }
 
         public void Remove(Guid id)
         {
-            var entidad = _dbContext.UnidadMedidas.Find(id);
-            if (entidad != null)
+            try
             {
-                entidad.Habilitado = false;
-                _dbContext.Entry(entidad).State = EntityState.Modified;
+                var entity = GetById(id);
+                if(entity == null)
+                {
+                    _dbContext.UnidadMedida.Remove(entity);
+                    _dbContext.SaveChanges();
+                }
+                   
             }
-            var proveedor = _dbContext.Proveedores.Find(id);
-            
+            catch (Exception ex)
+            {
+
+                throw new Exception("DAO Error: Falló la eliminacion de Unidad de Medida.", ex);
+            }
         }
+        
 
         public void Update(UnidadMedida entity)
         {

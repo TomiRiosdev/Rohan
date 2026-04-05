@@ -1,27 +1,41 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+﻿using Microsoft.Extensions.DependencyInjection;
+using UI.GestiónProducto;
 
 namespace UI
 {
     public partial class Login : Form
     {
-        public Login()
+        private readonly IServiceProvider _serviceProvider;
+        public Login
+        (
+            IServiceProvider serviceProvider
+        )
         {
             InitializeComponent();
+            _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         }
 
         private void btnIniciarSesión_Click(object sender, EventArgs e)
         {
-            this.Hide();
-            new GestionProductoForms().ShowDialog();
-            this.Show();
+            try
+            {
+                var fmsPrincipal = _serviceProvider.GetRequiredService<fmsPrincipal>();
+
+                this.Hide();                    // Oculta el login
+                fmsPrincipal.Show();              // Muestra el menú principal     
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al abrir el sistema: {ex.Message}", "Error",
+                               MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+
+        }
+
+        private void btnSalir_Click(object sender, EventArgs e)
+        {
+            this.Close();
         }
     }
 }
