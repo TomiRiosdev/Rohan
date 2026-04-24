@@ -44,12 +44,14 @@
             label2 = new Label();
             cbxTipoSucursal = new ComboBox();
             groupBox1 = new GroupBox();
+            txtLocalidad = new TextBox();
+            label3 = new Label();
             groupBox1.SuspendLayout();
             SuspendLayout();
             // 
             // txtTel
             // 
-            txtTel.Location = new Point(111, 190);
+            txtTel.Location = new Point(111, 298);
             txtTel.Name = "txtTel";
             txtTel.Size = new Size(273, 27);
             txtTel.TabIndex = 27;
@@ -68,12 +70,13 @@
             // 
             btnAtras.BackColor = Color.Azure;
             btnAtras.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold);
-            btnAtras.Location = new Point(354, 464);
+            btnAtras.Location = new Point(338, 518);
             btnAtras.Name = "btnAtras";
             btnAtras.Size = new Size(73, 33);
             btnAtras.TabIndex = 24;
             btnAtras.Text = "Atras";
             btnAtras.UseVisualStyleBackColor = false;
+            btnAtras.Click += btnAtras_Click;
             // 
             // txtEmail
             // 
@@ -100,7 +103,7 @@
             // 
             lblCuit.AutoSize = true;
             lblCuit.Font = new Font("Segoe UI Semibold", 11.25F, FontStyle.Bold);
-            lblCuit.Location = new Point(6, 239);
+            lblCuit.Location = new Point(6, 251);
             lblCuit.Name = "lblCuit";
             lblCuit.Size = new Size(85, 20);
             lblCuit.TabIndex = 20;
@@ -110,7 +113,7 @@
             // 
             lblTelefono.AutoSize = true;
             lblTelefono.Font = new Font("Segoe UI Semibold", 11.25F, FontStyle.Bold);
-            lblTelefono.Location = new Point(6, 197);
+            lblTelefono.Location = new Point(6, 305);
             lblTelefono.Name = "lblTelefono";
             lblTelefono.Size = new Size(68, 20);
             lblTelefono.TabIndex = 19;
@@ -150,16 +153,17 @@
             // 
             btnAgregar.BackColor = Color.Azure;
             btnAgregar.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold);
-            btnAgregar.Location = new Point(160, 348);
+            btnAgregar.Location = new Point(160, 409);
             btnAgregar.Name = "btnAgregar";
             btnAgregar.Size = new Size(89, 38);
             btnAgregar.TabIndex = 15;
             btnAgregar.Text = "Agregar";
             btnAgregar.UseVisualStyleBackColor = false;
+            btnAgregar.Click += btnAgregar_Click;
             // 
             // txtCodPostal
             // 
-            txtCodPostal.Location = new Point(111, 232);
+            txtCodPostal.Location = new Point(111, 244);
             txtCodPostal.Name = "txtCodPostal";
             txtCodPostal.Size = new Size(273, 27);
             txtCodPostal.TabIndex = 28;
@@ -168,7 +172,7 @@
             // 
             label2.AutoSize = true;
             label2.Font = new Font("Segoe UI Semibold", 11.25F, FontStyle.Bold);
-            label2.Location = new Point(6, 287);
+            label2.Location = new Point(6, 356);
             label2.Name = "label2";
             label2.Size = new Size(95, 20);
             label2.TabIndex = 29;
@@ -177,40 +181,59 @@
             // cbxTipoSucursal
             // 
             cbxTipoSucursal.FormattingEnabled = true;
-            cbxTipoSucursal.Location = new Point(111, 279);
+            cbxTipoSucursal.Location = new Point(111, 348);
             cbxTipoSucursal.Name = "cbxTipoSucursal";
             cbxTipoSucursal.Size = new Size(273, 28);
             cbxTipoSucursal.TabIndex = 30;
             // 
             // groupBox1
             // 
+            groupBox1.Controls.Add(txtLocalidad);
+            groupBox1.Controls.Add(label3);
             groupBox1.Controls.Add(lblNombre);
             groupBox1.Controls.Add(cbxTipoSucursal);
             groupBox1.Controls.Add(lblRazonSocial);
-            groupBox1.Controls.Add(btnAgregar);
             groupBox1.Controls.Add(label2);
-            groupBox1.Controls.Add(lblEmail);
-            groupBox1.Controls.Add(txtCodPostal);
-            groupBox1.Controls.Add(lblTelefono);
             groupBox1.Controls.Add(txtTel);
+            groupBox1.Controls.Add(btnAgregar);
+            groupBox1.Controls.Add(lblTelefono);
             groupBox1.Controls.Add(lblCuit);
+            groupBox1.Controls.Add(lblEmail);
             groupBox1.Controls.Add(txtNombre);
+            groupBox1.Controls.Add(txtCodPostal);
             groupBox1.Controls.Add(txtDireccion);
             groupBox1.Controls.Add(txtEmail);
             groupBox1.Font = new Font("Segoe UI Semibold", 11.25F, FontStyle.Bold);
             groupBox1.Location = new Point(12, 52);
             groupBox1.Name = "groupBox1";
-            groupBox1.Size = new Size(405, 392);
+            groupBox1.Size = new Size(399, 460);
             groupBox1.TabIndex = 31;
             groupBox1.TabStop = false;
             groupBox1.Text = "Datos de la sucursal";
+            // 
+            // txtLocalidad
+            // 
+            txtLocalidad.Location = new Point(111, 191);
+            txtLocalidad.Name = "txtLocalidad";
+            txtLocalidad.Size = new Size(273, 27);
+            txtLocalidad.TabIndex = 32;
+            // 
+            // label3
+            // 
+            label3.AutoSize = true;
+            label3.Font = new Font("Segoe UI Semibold", 11.25F, FontStyle.Bold);
+            label3.Location = new Point(6, 198);
+            label3.Name = "label3";
+            label3.Size = new Size(74, 20);
+            label3.TabIndex = 31;
+            label3.Text = "Localidad";
             // 
             // fmsCrearSucursal
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.AliceBlue;
-            ClientSize = new Size(439, 509);
+            ClientSize = new Size(423, 558);
             Controls.Add(groupBox1);
             Controls.Add(label1);
             Controls.Add(btnAtras);
@@ -242,5 +265,7 @@
         private Label label2;
         private ComboBox cbxTipoSucursal;
         private GroupBox groupBox1;
+        private TextBox txtLocalidad;
+        private Label label3;
     }
 }

@@ -383,7 +383,17 @@ namespace UI.GestiónProducto
 
         private void txtBusquedaLibre_TextChanged(object sender, EventArgs e)
         {
+            string criterio = cboBuscarPor.Text.ToString();
 
+            if (criterio == "Nombre")
+            {
+                txtBusquedaLibre.PlaceholderText = "Ingrese el nombre del producto...";
+
+            }
+            else if (criterio == "SKU")
+            {
+                txtBusquedaLibre.PlaceholderText = "Ingrese el codigo SKU...";
+            }
         }
     }
 }

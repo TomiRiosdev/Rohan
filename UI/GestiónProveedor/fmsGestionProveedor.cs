@@ -190,6 +190,7 @@ namespace UI.GestiónProveedor
                 MessageBox.Show($"Error al buscar: {ex.Message}");
             }
         }
+      
         private void btnAtras_Click(object sender, EventArgs e)
         {
             var fmsPrincipal = _serviceProvider.GetRequiredService<fmsPrincipal>();

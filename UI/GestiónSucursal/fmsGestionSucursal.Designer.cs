@@ -41,6 +41,7 @@
             btnAgregar = new Button();
             dgvSucursal = new DataGridView();
             btnAtras = new Button();
+            btnAgregarTipoSucursal = new Button();
             ((System.ComponentModel.ISupportInitialize)dgvSucursal).BeginInit();
             SuspendLayout();
             // 
@@ -48,8 +49,9 @@
             // 
             txtBuscar.Location = new Point(257, 163);
             txtBuscar.Name = "txtBuscar";
-            txtBuscar.Size = new Size(189, 23);
+            txtBuscar.Size = new Size(224, 23);
             txtBuscar.TabIndex = 23;
+            txtBuscar.TextChanged += txtBuscar_TextChanged;
             // 
             // cbxBuscar
             // 
@@ -73,12 +75,13 @@
             // 
             btnBuscar.BackColor = Color.Azure;
             btnBuscar.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold);
-            btnBuscar.Location = new Point(453, 158);
+            btnBuscar.Location = new Point(487, 158);
             btnBuscar.Name = "btnBuscar";
             btnBuscar.Size = new Size(69, 33);
             btnBuscar.TabIndex = 20;
             btnBuscar.Text = "Buscar";
             btnBuscar.UseVisualStyleBackColor = false;
+            btnBuscar.Click += btnBuscar_Click;
             // 
             // label1
             // 
@@ -100,6 +103,7 @@
             btnActualizar.TabIndex = 18;
             btnActualizar.Text = "Actualizar";
             btnActualizar.UseVisualStyleBackColor = false;
+            btnActualizar.Click += btnActualizar_Click;
             // 
             // btnListarDeshabilitados
             // 
@@ -111,6 +115,7 @@
             btnListarDeshabilitados.TabIndex = 17;
             btnListarDeshabilitados.Text = "Listar \r\nDeshabilitados\r\n";
             btnListarDeshabilitados.UseVisualStyleBackColor = false;
+            btnListarDeshabilitados.Click += btnListarDeshabilitados_Click;
             // 
             // btnActivar
             // 
@@ -122,6 +127,7 @@
             btnActivar.TabIndex = 16;
             btnActivar.Text = "Activar";
             btnActivar.UseVisualStyleBackColor = false;
+            btnActivar.Click += btnActivar_Click;
             // 
             // btnDeshabilitar
             // 
@@ -133,6 +139,7 @@
             btnDeshabilitar.TabIndex = 15;
             btnDeshabilitar.Text = "Deshabilitar ";
             btnDeshabilitar.UseVisualStyleBackColor = false;
+            btnDeshabilitar.Click += btnDeshabilitar_Click;
             // 
             // btnModificar
             // 
@@ -144,6 +151,7 @@
             btnModificar.TabIndex = 14;
             btnModificar.Text = "Modificar ";
             btnModificar.UseVisualStyleBackColor = false;
+            btnModificar.Click += btnModificar_Click;
             // 
             // btnAgregar
             // 
@@ -162,26 +170,40 @@
             dgvSucursal.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgvSucursal.Location = new Point(12, 224);
             dgvSucursal.Name = "dgvSucursal";
-            dgvSucursal.Size = new Size(800, 169);
+            dgvSucursal.Size = new Size(953, 231);
             dgvSucursal.TabIndex = 24;
             // 
             // btnAtras
             // 
             btnAtras.BackColor = Color.Azure;
             btnAtras.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold);
-            btnAtras.Location = new Point(736, 437);
+            btnAtras.Location = new Point(889, 496);
             btnAtras.Name = "btnAtras";
             btnAtras.Size = new Size(76, 29);
             btnAtras.TabIndex = 25;
             btnAtras.Text = "Atras";
             btnAtras.UseVisualStyleBackColor = false;
+            btnAtras.Click += btnAtras_Click;
+            // 
+            // btnAgregarTipoSucursal
+            // 
+            btnAgregarTipoSucursal.BackColor = Color.Azure;
+            btnAgregarTipoSucursal.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold);
+            btnAgregarTipoSucursal.Location = new Point(672, 71);
+            btnAgregarTipoSucursal.Name = "btnAgregarTipoSucursal";
+            btnAgregarTipoSucursal.Size = new Size(104, 49);
+            btnAgregarTipoSucursal.TabIndex = 26;
+            btnAgregarTipoSucursal.Text = "Agregar Tipo Sucursal";
+            btnAgregarTipoSucursal.UseVisualStyleBackColor = false;
+            btnAgregarTipoSucursal.Click += btnAgregarTipoSucursal_Click;
             // 
             // fmsGestionSucursal
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.AliceBlue;
-            ClientSize = new Size(824, 478);
+            ClientSize = new Size(977, 537);
+            Controls.Add(btnAgregarTipoSucursal);
             Controls.Add(btnAtras);
             Controls.Add(dgvSucursal);
             Controls.Add(txtBuscar);
@@ -197,6 +219,7 @@
             Controls.Add(btnAgregar);
             Name = "fmsGestionSucursal";
             Text = "Gestion de Sucursal";
+            Load += fmsGestionSucursal_Load;
             ((System.ComponentModel.ISupportInitialize)dgvSucursal).EndInit();
             ResumeLayout(false);
             PerformLayout();
@@ -217,5 +240,6 @@
         private Button btnAgregar;
         private DataGridView dgvSucursal;
         private Button btnAtras;
+        private Button btnAgregarTipoSucursal;
     }
 }

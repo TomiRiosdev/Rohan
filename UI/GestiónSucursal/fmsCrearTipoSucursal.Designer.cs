@@ -29,9 +29,9 @@
         private void InitializeComponent()
         {
             groupBox1 = new GroupBox();
+            lblNombre = new Label();
             btnAgregar = new Button();
             txtNombre = new TextBox();
-            lblNombre = new Label();
             btnAtras = new Button();
             groupBox1.SuspendLayout();
             SuspendLayout();
@@ -48,22 +48,6 @@
             groupBox1.TabStop = false;
             groupBox1.Text = "Agregar Tipo de Sucursal";
             // 
-            // btnAgregar
-            // 
-            btnAgregar.Location = new Point(276, 34);
-            btnAgregar.Name = "btnAgregar";
-            btnAgregar.Size = new Size(76, 32);
-            btnAgregar.TabIndex = 1;
-            btnAgregar.Text = "Agregar";
-            btnAgregar.UseVisualStyleBackColor = true;
-            // 
-            // txtNombre
-            // 
-            txtNombre.Location = new Point(63, 40);
-            txtNombre.Name = "txtNombre";
-            txtNombre.Size = new Size(207, 23);
-            txtNombre.TabIndex = 0;
-            // 
             // lblNombre
             // 
             lblNombre.AutoSize = true;
@@ -73,6 +57,23 @@
             lblNombre.TabIndex = 1;
             lblNombre.Text = "Nombre";
             // 
+            // btnAgregar
+            // 
+            btnAgregar.Location = new Point(276, 34);
+            btnAgregar.Name = "btnAgregar";
+            btnAgregar.Size = new Size(76, 32);
+            btnAgregar.TabIndex = 1;
+            btnAgregar.Text = "Agregar";
+            btnAgregar.UseVisualStyleBackColor = true;
+            btnAgregar.Click += btnAgregar_Click;
+            // 
+            // txtNombre
+            // 
+            txtNombre.Location = new Point(63, 40);
+            txtNombre.Name = "txtNombre";
+            txtNombre.Size = new Size(207, 23);
+            txtNombre.TabIndex = 0;
+            // 
             // btnAtras
             // 
             btnAtras.Location = new Point(288, 111);
@@ -81,6 +82,7 @@
             btnAtras.TabIndex = 2;
             btnAtras.Text = "Atras";
             btnAtras.UseVisualStyleBackColor = true;
+            btnAtras.Click += btnAtras_Click;
             // 
             // fmsCrearTipoSucursal
             // 

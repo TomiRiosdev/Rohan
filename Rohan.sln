@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DomainModel", "ModelsDTO\Do
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bootstrapper", "Bootstrapper\Bootstrapper.csproj", "{95A98B12-C8E9-4DF8-95FA-0FF0DDF31702}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Service", "Service\Service.csproj", "{276B9553-70C2-4C74-86ED-5B88A8827358}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{95A98B12-C8E9-4DF8-95FA-0FF0DDF31702}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{95A98B12-C8E9-4DF8-95FA-0FF0DDF31702}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{95A98B12-C8E9-4DF8-95FA-0FF0DDF31702}.Release|Any CPU.Build.0 = Release|Any CPU
+		{276B9553-70C2-4C74-86ED-5B88A8827358}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{276B9553-70C2-4C74-86ED-5B88A8827358}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{276B9553-70C2-4C74-86ED-5B88A8827358}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{276B9553-70C2-4C74-86ED-5B88A8827358}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
