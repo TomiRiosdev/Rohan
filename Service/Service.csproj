@@ -32,6 +32,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -41,20 +42,55 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DataAccess\IdiomaRepository.cs" />
+    <Compile Include="DataAccess\Implementations\Adapters\FamiliaAdapter.cs" />
+    <Compile Include="DataAccess\Implementations\Adapters\PatenteAdapter.cs" />
+    <Compile Include="DataAccess\Implementations\Adapters\UsuarioAdapter.cs" />
+    <Compile Include="DataAccess\Implementations\BitácoraRepository.cs" />
+    <Compile Include="DataAccess\Implementations\FamiliaFamiliaRepository.cs" />
+    <Compile Include="DataAccess\Implementations\FamiliaPatenteRepository.cs" />
+    <Compile Include="DataAccess\Implementations\FamiliaRepository.cs" />
+    <Compile Include="DataAccess\Implementations\FileLogger.cs" />
+    <Compile Include="DataAccess\Implementations\PatenteRepository.cs" />
+    <Compile Include="DataAccess\Implementations\PermisosRepository.cs" />
+    <Compile Include="DataAccess\Implementations\UsuarioFamiliaRepository.cs" />
+    <Compile Include="DataAccess\Implementations\UsuarioPatenteRepository.cs" />
+    <Compile Include="DataAccess\Implementations\UsuarioRepository.cs" />
+    <Compile Include="DataAccess\Interface\IAdapter.cs" />
+    <Compile Include="DataAccess\Interface\IGenericRepository.cs" />
+    <Compile Include="DataAccess\Interface\IJoinRepository.cs" />
+    <Compile Include="DataAccess\Interface\ILogger.cs" />
+    <Compile Include="DataAccess\Interface\IUsuarioRepository.cs" />
+    <Compile Include="DataAccess\Tools\SqlHelper.cs" />
     <Compile Include="DomainModel\Composite\Component.cs" />
     <Compile Include="DomainModel\Composite\Familia.cs" />
     <Compile Include="DomainModel\Composite\Patente.cs" />
     <Compile Include="DomainModel\Composite\Usuario.cs" />
     <Compile Include="DomainModel\Exceptions\WordNotFoundException.cs" />
+    <Compile Include="DomainModel\Logging\Bitacora.cs" />
+    <Compile Include="DomainModel\Logging\Criticida.cs" />
+    <Compile Include="DomainModel\Logging\LogEntry.cs" />
+    <Compile Include="DomainModel\Logging\LogLevel.cs" />
+    <Compile Include="Facade\CryptographyService.cs" />
+    <Compile Include="Facade\Extensions\IdiomaExtension.cs" />
+    <Compile Include="Facade\LoggerService.cs" />
+    <Compile Include="Facade\LoginService.cs" />
+    <Compile Include="Facade\SessionManager.cs" />
+    <Compile Include="Logic\BitácoraService.cs" />
+    <Compile Include="Logic\FamiliaService.cs" />
     <Compile Include="Logic\IdiomaService.cs" />
+    <Compile Include="Logic\LoggerConfigurations.cs" />
+    <Compile Include="Logic\PatenteService.cs" />
+    <Compile Include="Logic\PermisosService.cs" />
+    <Compile Include="Logic\UsuarioService.cs" />
+    <Compile Include="Logic\Validation\UsuarioValidation.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="DataAccess\" />
-    <Folder Include="Facade\" />
+    <Folder Include="DataAccess\DataBase\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

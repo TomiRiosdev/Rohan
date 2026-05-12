@@ -15,6 +15,10 @@ using DAO.Implementations.SQLServer;
 using DAO.Interface;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
+using Service.DateAccess.Implementations;
+using Service.DateAccess.Interface;
+using Service.Logic;
+using Service.Logic.Validation;
 
 
 namespace Bootstrapper
@@ -63,6 +67,15 @@ namespace Bootstrapper
             services.AddTransient<ProveedorFacade>();
             services.AddTransient<SucursalFacade>();
             services.AddTransient<TipoSucursalFacade>();
+
+            // ====================== Services Usuario ======================
+            services.AddTransient<IUsuarioRepository, UsuarioRepository>();
+            services.AddScoped<PermisosRepository>();
+            services.AddScoped<PermisosService>();
+
+            services.AddTransient<UsuarioService>(); 
+
+
 
 
             return services;

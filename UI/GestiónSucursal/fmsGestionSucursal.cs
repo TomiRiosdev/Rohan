@@ -242,7 +242,6 @@ namespace UI.GestiónSucursal
             cbxBuscar.Items.Add("Nombre");
             cbxBuscar.Items.Add("Tipo de Sucursal");
             cbxBuscar.SelectedIndex = 0;
-
         }
         private void ConfigurarDataGridView()
         {
@@ -303,7 +302,6 @@ namespace UI.GestiónSucursal
             });
 
         }
-
         private void txtBuscar_TextChanged(object sender, EventArgs e)
         {
             string criterio = cbxBuscar.Text.ToString();

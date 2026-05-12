@@ -1,36 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO.Pipes;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Service.DomainModel.Composite
 {
     public class Usuario
     {
         public Guid IdUsuario { get; set; }
-        public string username { get; set; }
+        public string Username { get; set; }
         public string Nombre { get; set; }
-        public string Apellido { get; set; }
+        public string Password { get; set; }
         public string Email { get; set; }
         public string Telefono { get; set; }
         public bool Habilitado { get; set; }   
         public DateTime Fecha { get; set; }
+        public Guid? IdSucursal { get; set; }
+   
 
-        private string password;
-
-
-
-        /// <summary>
-        /// Para gestionar el patrón composite debemos utilizar una lista de Component
-        /// </summary>
-        ///
-        public List<Component> Privilegios { get; set; }
-
-        /// <summary>
-        /// Generar recursividad sobre el composite para obtener el menú de opciones
-        /// </summary>
+        public List<Component> Privilegios { get; set; } = new List<Component>();
         public List<Patente> Patentes
         {
             get
@@ -41,11 +27,8 @@ namespace Service.DomainModel.Composite
             }
         }
 
-        /// <summary>
-        /// Recorre las familias y patentes de un usuario
-        /// </summary>
-        /// <param name="patentes">Lista de patentes</param>
-        /// <param name="componentes">Lista de componentes que se recorren</param>
+        
+
         private void RecorrerFamilias(List<Patente> patentes, List<Component> componentes)
         {
             foreach (var componente in componentes)
@@ -62,32 +45,26 @@ namespace Service.DomainModel.Composite
             }
         }
 
-        public string Password
+        public Usuario(Guid id, string username, string nombre, string email, string password,
+                    string telefono, DateTime fecha, bool habilitado, Guid? idSucursal)
         {
-            get
-            {
-                return password;
-            }
-            set
-            {
-                password = CryptographyService.HashMd5(value);
-            }
+            this.IdUsuario = id;
+            this.Username = username;
+            this.Nombre = nombre;
+            this.Email = email;
+            this.Password = password;
+            this.Telefono = telefono;
+            this.Fecha = fecha;
+            this.Habilitado = habilitado;
+            this.IdSucursal = idSucursal;
+
         }
 
-        public Usuario(string nombre, string email, string password, bool habilitado = true)
-        {
-            Nombre = nombre;
-            Email = email;
-            Password = password;
-            Habilitado = habilitado;
-        }
-
-        public Usuario(Guid idUsuario, string nombre, string email, string password, bool habilitado = true) : this(nombre, email, password, habilitado)
+        public Usuario(Guid idUsuario,string username, string nombre, string email,string telefono ,string password, Guid? idSucursal = null, bool habilitado = true) 
         {
             IdUsuario = idUsuario;
         }
 
-        //Necesito constructor por defecto para el ORM
         public Usuario()
         {
 

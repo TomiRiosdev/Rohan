@@ -29,8 +29,8 @@
         private void InitializeComponent()
         {
             btnIniciarSesión = new Button();
-            textBox1 = new TextBox();
-            textBox2 = new TextBox();
+            txtUserName = new TextBox();
+            txtPassword = new TextBox();
             label1 = new Label();
             label2 = new Label();
             linkLabel1 = new LinkLabel();
@@ -39,77 +39,88 @@
             // 
             // btnIniciarSesión
             // 
-            btnIniciarSesión.Location = new Point(91, 252);
+            btnIniciarSesión.BackColor = Color.Azure;
+            btnIniciarSesión.Font = new Font("Segoe UI Semibold", 11.25F, FontStyle.Bold);
+            btnIniciarSesión.Location = new Point(117, 266);
             btnIniciarSesión.Name = "btnIniciarSesión";
-            btnIniciarSesión.Size = new Size(93, 39);
+            btnIniciarSesión.Size = new Size(116, 46);
             btnIniciarSesión.TabIndex = 0;
             btnIniciarSesión.Text = "Iniciar Sesión";
-            btnIniciarSesión.UseVisualStyleBackColor = true;
+            btnIniciarSesión.UseVisualStyleBackColor = false;
             btnIniciarSesión.Click += btnIniciarSesión_Click;
             // 
-            // textBox1
+            // txtUserName
             // 
-            textBox1.Location = new Point(87, 149);
-            textBox1.Name = "textBox1";
-            textBox1.Size = new Size(175, 23);
-            textBox1.TabIndex = 1;
+            txtUserName.Location = new Point(117, 149);
+            txtUserName.Name = "txtUserName";
+            txtUserName.Size = new Size(186, 23);
+            txtUserName.TabIndex = 1;
             // 
-            // textBox2
+            // txtPassword
             // 
-            textBox2.Location = new Point(87, 201);
-            textBox2.Name = "textBox2";
-            textBox2.Size = new Size(175, 23);
-            textBox2.TabIndex = 2;
+            txtPassword.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            txtPassword.Location = new Point(117, 205);
+            txtPassword.Name = "txtPassword";
+            txtPassword.PasswordChar = '*';
+            txtPassword.Size = new Size(186, 23);
+            txtPassword.TabIndex = 2;
             // 
             // label1
             // 
             label1.AutoSize = true;
+            label1.Font = new Font("Segoe UI Semibold", 11.25F, FontStyle.Bold);
             label1.Location = new Point(12, 149);
             label1.Name = "label1";
-            label1.Size = new Size(47, 15);
+            label1.Size = new Size(62, 20);
             label1.TabIndex = 3;
             label1.Text = "Usuario";
             // 
             // label2
             // 
             label2.AutoSize = true;
+            label2.Font = new Font("Segoe UI Semibold", 11.25F, FontStyle.Bold);
             label2.Location = new Point(12, 204);
             label2.Name = "label2";
-            label2.Size = new Size(67, 15);
+            label2.Size = new Size(86, 20);
             label2.TabIndex = 4;
             label2.Text = "Contraseña";
             // 
             // linkLabel1
             // 
             linkLabel1.AutoSize = true;
-            linkLabel1.Location = new Point(65, 308);
+            linkLabel1.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
+            linkLabel1.Location = new Point(90, 325);
             linkLabel1.Name = "linkLabel1";
-            linkLabel1.Size = new Size(144, 15);
+            linkLabel1.Size = new Size(143, 15);
             linkLabel1.TabIndex = 5;
             linkLabel1.TabStop = true;
             linkLabel1.Text = "¿Olvidaste la Contraseña? ";
+            linkLabel1.LinkClicked += linkLabel1_LinkClicked;
             // 
             // btnSalir
             // 
-            btnSalir.Location = new Point(102, 363);
+            btnSalir.BackColor = Color.Azure;
+            btnSalir.Font = new Font("Segoe UI Semibold", 11.25F, FontStyle.Bold);
+            btnSalir.Location = new Point(133, 384);
             btnSalir.Name = "btnSalir";
             btnSalir.Size = new Size(67, 31);
             btnSalir.TabIndex = 6;
             btnSalir.Text = "Salir";
-            btnSalir.UseVisualStyleBackColor = true;
+            btnSalir.UseVisualStyleBackColor = false;
             btnSalir.Click += btnSalir_Click;
             // 
             // Login
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(279, 417);
+            BackColor = Color.AliceBlue;
+            ClientSize = new Size(335, 427);
             Controls.Add(btnSalir);
             Controls.Add(linkLabel1);
             Controls.Add(label2);
             Controls.Add(label1);
-            Controls.Add(textBox2);
-            Controls.Add(textBox1);
+            Controls.Add(txtPassword);
+            Controls.Add(txtUserName);
             Controls.Add(btnIniciarSesión);
             Name = "Login";
             Text = "Login";
@@ -120,8 +131,8 @@
         #endregion
 
         private Button btnIniciarSesión;
-        private TextBox textBox1;
-        private TextBox textBox2;
+        private TextBox txtUserName;
+        private TextBox txtPassword;
         private Label label1;
         private Label label2;
         private LinkLabel linkLabel1;

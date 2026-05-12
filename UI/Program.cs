@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using UI.GestiónProducto;
 using UI.GestiónProveedor;
 using UI.GestiónSucursal;
+using UI.GestionUsuario;
 
 namespace UI
 {
@@ -50,11 +51,18 @@ namespace UI
             services.AddTransient<fmsModificarProveedor>();
 
             // Formularios de Gestión de Sucursal
-             services.AddTransient<fmsGestionSucursal>();
-             services.AddTransient<fmsCrearSucursal>();
+            services.AddTransient<fmsGestionSucursal>();
+            services.AddTransient<fmsCrearSucursal>();
             services.AddTransient<fmsModificarSucursal>();
-             services.AddTransient<fmsCrearTipoSucursal>();
- 
+            services.AddTransient<fmsCrearTipoSucursal>();
+
+            // Formularios de Gestión de Usuario
+            services.AddTransient<fmsAgregarUsuario>();
+            services.AddTransient<fmsGestionUsuario>();
+            services.AddTransient<fmsModificarUsuario>();
+            services.AddTransient<fmsAgregarPermisos>();
+            services.AddTransient<fmsRecuperarContraseña>();
+
         }
     }
 }
