@@ -62,7 +62,7 @@ namespace UI
             services.AddTransient<fmsModificarUsuario>();
             services.AddTransient<fmsAgregarPermisos>();
             services.AddTransient<fmsRecuperarContraseña>();
-
+            services.AddTransient<fmsSeleccionarSucursal>();
         }
     }
 }

@@ -20,15 +20,12 @@ namespace Service.Facade
 
         private SessionManager() { }
         public Usuario UsuarioLogueado { get; private set; }
-
         public Guid? IdSucursalActual { get; set; }
         public string NombreSucursalActual { get; set; }
 
         public void Login(Usuario usuario)
         {
             UsuarioLogueado = usuario;
-            // Si el usuario tiene una sucursal fija (empleado), la cargamos de una vez.
-            // Si es Admin (null), esto quedará en null hasta que él elija en el siguiente form.
             IdSucursalActual = usuario.IdSucursal;
         }
 
@@ -53,21 +50,22 @@ namespace Service.Facade
             return false;
         }
 
-        private bool ValidarPermisoRecursivo(Component componente, string dataKey)
+        private bool ValidarPermisoRecursivo(Component componente, string nombreODataKey)
         {
+            // Si es una Patente, comparamos el DataKey
             if (componente is Patente patente)
             {
-                if (patente.DataKey == dataKey) return true;
+                if (patente.DataKey == nombreODataKey) return true;
             }
+            // Si es una Familia, comparamos el Nombre Y buscamos en los hijos
             else if (componente is Familia familia)
             {
-                // Protegemos contra nulos por si la familia viene sin hijos
-                if (familia.Nombre != null)
+                // CAMBIO CLAVE: También comparamos el nombre de la familia
+                if (familia.Nombre == nombreODataKey) return true;
+
+                foreach (var hijo in familia.GetHijos())
                 {
-                    foreach (var hijo in familia.GetHijos())
-                    {
-                        if (ValidarPermisoRecursivo(hijo, dataKey)) return true;
-                    }
+                    if (ValidarPermisoRecursivo(hijo, nombreODataKey)) return true;
                 }
             }
             return false;

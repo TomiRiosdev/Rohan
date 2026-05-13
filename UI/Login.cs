@@ -1,16 +1,20 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using BLL.GestiónSucursal.Facade;
+using Microsoft.Extensions.DependencyInjection;
+using Service.DateAccess.Implementations;
 using Service.Facade;
 using Service.Logic;
-using UI.GestiónProducto;
+
 
 namespace UI
 {
     public partial class Login : Form
     {
         private readonly IServiceProvider _serviceProvider;
+      
         public Login
         (
             IServiceProvider serviceProvider
+           
         )
         {
             InitializeComponent();
@@ -20,31 +24,81 @@ namespace UI
         private void btnIniciarSesión_Click(object sender, EventArgs e)
         {
             try
-            {
-                UsuarioService usuarioService = new UsuarioService();
-                var usuarioValido = usuarioService.ValidarCredenciales(txtUserName.Text, txtPassword.Text);
-                SessionManager.Current.Login(usuarioValido);
+            { 
+                var usuarioService = _serviceProvider.GetRequiredService<UsuarioService>();
+                var permisosRepo = _serviceProvider.GetRequiredService<PermisosRepository>();
 
-                // Logica para sucursales y permisos 
+                // 2. Validamos credenciales
+                var usuarioValido = usuarioService.ValidarCredenciales(txtUserName.Text, txtPassword.Text);
+
                 if (usuarioValido != null)
                 {
-                    MessageBox.Show("¡Bienvenido, " + usuarioValido.Nombre + "!", "Inicio de Sesión Exitoso", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    fmsPrincipal mainForm = new fmsPrincipal(_serviceProvider);
-                    mainForm.Show();
-                    this.Hide();
-                }
-                else
-                {
-                    MessageBox.Show("Credenciales inválidas. Por favor, inténtalo de nuevo.", "Error de Inicio de Sesión", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
+                    // 3. Cargamos la mochila de privilegios (Composite) antes de decidir el flujo
+                    permisosRepo.CargarPrivilegios(usuarioValido);
 
+                    // 4. Seteamos la sesión inicial
+                    SessionManager.Current.Login(usuarioValido);
 
+                    // 5. Validamos si es Administrador Real por Patente/Permiso
+                    // Usamos el DataKey 
+                    bool esAdminGlobal = SessionManager.Current.TienePermiso("Administrador");
+
+                    if (esAdminGlobal)
+                    {
+                        // Flujo Admin: Debe elegir sucursal obligatoriamente
+                        var fmsSelector = _serviceProvider.GetRequiredService<fmsSeleccionarSucursal>();
+
+                        if (fmsSelector.ShowDialog() == DialogResult.OK)
+                        {
+                            AbrirPrincipal(usuarioValido.Nombre);
+                        }
+                        else
+                        {
+                            // Si cancela el selector, cerramos la sesión por seguridad
+                            SessionManager.Current.Logout();
+                        }
+                    }
+                    else if (usuarioValido.IdSucursal != null)
+                    {
+                        SessionManager.Current.Login(usuarioValido);
+
+                        // Si el usuario tiene una sucursal fija (no es Admin)
+                        if (usuarioValido.IdSucursal.HasValue)
+                        {
+                            // Usamos el SucursalService para traer la info de esa sucursal específica
+                            var sucursalService = _serviceProvider.GetRequiredService<SucursalFacade>();
+                            var sucursal = sucursalService.GetById(usuarioValido.IdSucursal.Value);
+
+                            // Guardamos el nombre en el SessionManager
+                            SessionManager.Current.NombreSucursalActual = sucursal.Nombre;
+                            AbrirPrincipal(usuarioValido.Nombre);
+                        }
+                        else
+                        {
+                            // Usuario sin sucursal y sin ser Admin (Error de seguridad)
+                            SessionManager.Current.Logout();
+                            throw new Exception("El usuario no tiene una sucursal asignada. Contacte al Administrador.");
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show("Credenciales inválidas.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message, "Error de autenticación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
 
+        }
+
+        private void AbrirPrincipal(string Usuario)
+        {
+            MessageBox.Show($"¡Bienvenido, {Usuario}!", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            var mainForm = _serviceProvider.GetRequiredService<fmsPrincipal>();
+            mainForm.Show();
+            this.Hide();
         }
 
         private void btnSalir_Click(object sender, EventArgs e)

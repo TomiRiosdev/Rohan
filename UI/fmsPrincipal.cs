@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Service.Facade;
 using UI.GestiónProducto;
 using UI.GestiónProveedor;
 using UI.GestiónSucursal;
@@ -16,6 +17,7 @@ namespace UI
         {
             InitializeComponent();
             _serviceProvider = serviceProvider;
+            CargarInformacionSucursal();
         }
 
         private void btnGestionProducto_Click(object sender, EventArgs e)
@@ -52,6 +54,31 @@ namespace UI
             var fmsGestiónUsuario = _serviceProvider.GetRequiredService<fmsGestionUsuario>();
             this.Hide();
             fmsGestiónUsuario.ShowDialog();
+        }
+
+        private void CargarInformacionSucursal()
+        {
+            Guid? idActual = SessionManager.Current.IdSucursalActual;
+
+            if (idActual.HasValue)
+            {
+                // Si tiene valor, mostramos el nombre que guardamos en el login o al cambiar
+                lblSucursalDireccion.Text = $"Sucursal: {SessionManager.Current.NombreSucursalActual}";
+            }
+            else
+            {
+                lblAdministrador.Visible = true;
+                lblAdministrador.Text = "Acceso: Administración Global";
+                lblSucursalDireccion.Text = $"Sucursal: {SessionManager.Current.NombreSucursalActual}";
+                
+
+            }
+        }
+
+        private void fmsPrincipal_Load(object sender, EventArgs e)
+        {
+            btnCambiarSucursal.Visible = (SessionManager.Current.UsuarioLogueado.IdSucursal == null);
+            lblAdministrador.Visible = false;
         }
     }
 }

@@ -4,6 +4,7 @@ using Service.DomainModel.Logging;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 
 
 namespace Service.Logic
@@ -14,7 +15,9 @@ namespace Service.Logic
 
         public List<Familia> GetAllFamilias()
         {
-            return _repo.GetAllFamilias();
+            return _repo.GetAllFamilias()
+                 .Where(f => f.Nombre != "Administrador")
+                 .ToList();
         }
 
         public List<Patente> GetAllPatentes()

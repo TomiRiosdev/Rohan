@@ -34,6 +34,9 @@
             btnGestionUsuario = new Button();
             btnGestionStock = new Button();
             btnCerrarSesión = new Button();
+            lblSucursalDireccion = new Label();
+            btnCambiarSucursal = new Button();
+            lblAdministrador = new Label();
             SuspendLayout();
             // 
             // btnGestionProducto
@@ -88,7 +91,7 @@
             // 
             btnGestionStock.BackColor = Color.Azure;
             btnGestionStock.Font = new Font("Segoe UI Semibold", 11.25F, FontStyle.Bold);
-            btnGestionStock.Location = new Point(12, 49);
+            btnGestionStock.Location = new Point(12, 97);
             btnGestionStock.Name = "btnGestionStock";
             btnGestionStock.Size = new Size(93, 59);
             btnGestionStock.TabIndex = 4;
@@ -99,13 +102,42 @@
             // 
             btnCerrarSesión.BackColor = Color.Azure;
             btnCerrarSesión.Font = new Font("Segoe UI Semibold", 11.25F, FontStyle.Bold);
-            btnCerrarSesión.Location = new Point(12, 613);
+            btnCerrarSesión.Location = new Point(12, 628);
             btnCerrarSesión.Name = "btnCerrarSesión";
-            btnCerrarSesión.Size = new Size(83, 50);
+            btnCerrarSesión.Size = new Size(142, 35);
             btnCerrarSesión.TabIndex = 5;
             btnCerrarSesión.Text = "Cerrar Sesión";
             btnCerrarSesión.UseVisualStyleBackColor = false;
             btnCerrarSesión.Click += btnCerrarSesión_Click;
+            // 
+            // lblSucursalDireccion
+            // 
+            lblSucursalDireccion.AutoSize = true;
+            lblSucursalDireccion.Location = new Point(12, 9);
+            lblSucursalDireccion.Name = "lblSucursalDireccion";
+            lblSucursalDireccion.Size = new Size(51, 15);
+            lblSucursalDireccion.TabIndex = 6;
+            lblSucursalDireccion.Text = "Sucursal";
+            // 
+            // btnCambiarSucursal
+            // 
+            btnCambiarSucursal.BackColor = Color.Azure;
+            btnCambiarSucursal.Font = new Font("Segoe UI Semibold", 11.25F, FontStyle.Bold);
+            btnCambiarSucursal.Location = new Point(174, 627);
+            btnCambiarSucursal.Name = "btnCambiarSucursal";
+            btnCambiarSucursal.Size = new Size(142, 36);
+            btnCambiarSucursal.TabIndex = 7;
+            btnCambiarSucursal.Text = "Cambiar sucursal";
+            btnCambiarSucursal.UseVisualStyleBackColor = false;
+            // 
+            // lblAdministrador
+            // 
+            lblAdministrador.AutoSize = true;
+            lblAdministrador.Location = new Point(12, 33);
+            lblAdministrador.Name = "lblAdministrador";
+            lblAdministrador.Size = new Size(83, 15);
+            lblAdministrador.TabIndex = 8;
+            lblAdministrador.Text = "Administrador";
             // 
             // fmsPrincipal
             // 
@@ -113,6 +145,9 @@
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.AliceBlue;
             ClientSize = new Size(1456, 675);
+            Controls.Add(lblAdministrador);
+            Controls.Add(btnCambiarSucursal);
+            Controls.Add(lblSucursalDireccion);
             Controls.Add(btnCerrarSesión);
             Controls.Add(btnGestionStock);
             Controls.Add(btnGestionUsuario);
@@ -121,7 +156,9 @@
             Controls.Add(btnGestionProducto);
             Name = "fmsPrincipal";
             Text = "fmsPrincipal";
+            Load += fmsPrincipal_Load;
             ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
@@ -132,5 +169,8 @@
         private Button btnGestionUsuario;
         private Button btnGestionStock;
         private Button btnCerrarSesión;
+        private Label lblSucursalDireccion;
+        private Button btnCambiarSucursal;
+        private Label lblAdministrador;
     }
 }
