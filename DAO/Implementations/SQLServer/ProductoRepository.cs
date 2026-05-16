@@ -28,7 +28,7 @@ namespace DAO.Implementations.SQLServer
                 entity.Habilitado = true;
 
                 _dbContext.Producto.Add(entity);
-                _dbContext.SaveChanges();
+                
 
                 return entity.IdProducto;
             }
@@ -47,7 +47,7 @@ namespace DAO.Implementations.SQLServer
 
                 producto.Habilitado = false; // Soft Delete
                 _dbContext.Entry(producto).State = EntityState.Modified;
-                _dbContext.SaveChanges();
+                
             }
             catch (Exception ex)
             {
@@ -62,7 +62,7 @@ namespace DAO.Implementations.SQLServer
                 if (entity == null) throw new ArgumentNullException(nameof(entity));
 
                 _dbContext.Entry(entity).State = EntityState.Modified;
-                _dbContext.SaveChanges();
+                
             }
             catch (Exception ex)
             {

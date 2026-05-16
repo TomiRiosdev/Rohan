@@ -10,6 +10,7 @@ namespace UI
     public partial class fmsPrincipal : Form
     {
         private readonly IServiceProvider _serviceProvider;
+        private Form formularioActivo = null;
         public fmsPrincipal
         (
             IServiceProvider serviceProvider
@@ -22,10 +23,7 @@ namespace UI
 
         private void btnGestionProducto_Click(object sender, EventArgs e)
         {
-            var fmsGestiónProducto = _serviceProvider.GetRequiredService<fmsGestiónProducto>();
-            this.Hide();
-            fmsGestiónProducto.ShowDialog();
-
+            AbrirFormularioEnContenedor<fmsGestiónProducto>();
         }
 
         private void btnCerrarSesión_Click(object sender, EventArgs e)
@@ -37,23 +35,18 @@ namespace UI
 
         private void btnGestionProveedor_Click(object sender, EventArgs e)
         {
-            var fmsGestiónProveedor = _serviceProvider.GetRequiredService<fmsGestionProveedor>();
-            this.Hide();
-            fmsGestiónProveedor.ShowDialog();
+           AbrirFormularioEnContenedor<fmsGestionProveedor>();
         }
 
         private void btnGestionSucursal_Click(object sender, EventArgs e)
         {
-            var fmsGestiónSucursal = _serviceProvider.GetRequiredService<fmsGestionSucursal>();
-            this.Hide();
-            fmsGestiónSucursal.ShowDialog();
+            AbrirFormularioEnContenedor<fmsGestionSucursal>();
+            
         }
 
         private void btnGestionUsuario_Click(object sender, EventArgs e)
         {
-            var fmsGestiónUsuario = _serviceProvider.GetRequiredService<fmsGestionUsuario>();
-            this.Hide();
-            fmsGestiónUsuario.ShowDialog();
+            AbrirFormularioEnContenedor<fmsGestionUsuario>();
         }
 
         private void CargarInformacionSucursal()
@@ -64,21 +57,70 @@ namespace UI
             {
                 // Si tiene valor, mostramos el nombre que guardamos en el login o al cambiar
                 lblSucursalDireccion.Text = $"Sucursal: {SessionManager.Current.NombreSucursalActual}";
+                lblAdministrador.Text = $"Usuario: {SessionManager.Current.UsuarioLogueado.Nombre}";
             }
-            else
-            {
-                lblAdministrador.Visible = true;
-                lblAdministrador.Text = "Acceso: Administración Global";
-                lblSucursalDireccion.Text = $"Sucursal: {SessionManager.Current.NombreSucursalActual}";
-                
 
-            }
         }
 
         private void fmsPrincipal_Load(object sender, EventArgs e)
         {
             btnCambiarSucursal.Visible = (SessionManager.Current.UsuarioLogueado.IdSucursal == null);
-            lblAdministrador.Visible = false;
+
         }
+
+        private void btnCambiarSucursal_Click(object sender, EventArgs e)
+        {
+            // 1. Le pedimos una nueva instancia del selector al ServiceProvider
+            var fmsSelector = _serviceProvider.GetRequiredService<fmsSeleccionarSucursal>();
+
+            // 2. Lo mostramos de forma modal flotante
+            if (fmsSelector.ShowDialog() == DialogResult.OK)
+            {
+                // 3. Si el Admin seleccionó una nueva sucursal y le dio a "Ingresar",
+                // refrescamos los labels de la interfaz con los nuevos datos del SessionManager
+                CargarInformacionSucursal();
+
+                MessageBox.Show($"Cambiando contexto operativo a: {SessionManager.Current.NombreSucursalActual}",
+                                "Cambio Exitoso", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                // 4. (Opcional) Si tenés grillas de stock o datos cargados en esta pantalla,
+                // acá deberías llamar a sus métodos de actualización para que filtren por el nuevo ID.
+            }
+        }
+        private void AbrirFormularioEnContenedor<T>() where T : Form
+        {
+            // 1. Si ya hay un formulario abierto, lo cerramos para liberar memoria RAM
+            if (formularioActivo != null)
+            {
+                formularioActivo.Close();
+            }
+
+            // 2. Pedimos la instancia del formulario al ServiceProvider (Inyección de Dependencias)
+            T formularioHijo = _serviceProvider.GetRequiredService<T>();
+            formularioActivo = formularioHijo;
+
+            // 3. Configuraciones para que se comporte como un control común dentro del panel
+            formularioHijo.TopLevel = false;
+            formularioHijo.FormBorderStyle = FormBorderStyle.None;
+
+            formularioHijo.Dock = DockStyle.Fill;
+            // Agregalo al panel de tu fmsPrincipal (reemplazá "panelContenedor" por el nombre de tu Panel)
+            panelContenedor.Controls.Add(formularioHijo);
+
+            // 4. Lógica de centrado dinámico usando el tamaño de tu panel
+          //  formularioHijo.Location = new Point(
+          //      (panelContenedor.Width - formularioHijo.Width) / 2,
+          //      (panelContenedor.Height - formularioHijo.Height) / 2
+          //  );
+
+            // 5. Evitamos que se estire feo si se maximiza la pantalla principal
+         //   formularioHijo.Anchor = AnchorStyles.None;
+
+            formularioHijo.BringToFront(); // En C# es BringToFront(), ojo con el tipeo de la imagen
+            formularioHijo.Show();
+        }
+
+
+
     }
 }

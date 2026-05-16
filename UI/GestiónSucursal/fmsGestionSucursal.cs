@@ -206,6 +206,7 @@ namespace UI.GestiónSucursal
             base.OnShown(e);
             CargarSucursales();        // Actualiza los datos cada vez que se muestra
         }
+        
         private void CargarSucursales()
         {
             try
@@ -222,6 +223,7 @@ namespace UI.GestiónSucursal
                                       "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+        
         private void CargarSucursalesDeshabilitadas()
         {
             try
@@ -236,6 +238,7 @@ namespace UI.GestiónSucursal
                                       "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+        
         private void ConfigurarFiltrosInciales()
         {
             cbxBuscar.Items.Clear();
@@ -243,6 +246,7 @@ namespace UI.GestiónSucursal
             cbxBuscar.Items.Add("Tipo de Sucursal");
             cbxBuscar.SelectedIndex = 0;
         }
+        
         private void ConfigurarDataGridView()
         {
             dgvSucursal.AutoGenerateColumns = false;
@@ -263,7 +267,7 @@ namespace UI.GestiónSucursal
             {
                 DataPropertyName = "Direccion",
                 HeaderText = "Dirección",
-                Width = 200
+                Width = 195
             });
 
             dgvSucursal.Columns.Add(new DataGridViewTextBoxColumn
@@ -291,17 +295,18 @@ namespace UI.GestiónSucursal
             {
                 DataPropertyName = "Telefono",
                 HeaderText = "Telefono",
-                Width = 150
+                Width = 130
             });
 
             dgvSucursal.Columns.Add(new DataGridViewTextBoxColumn
             {
                 DataPropertyName = "CodigoPostal",
                 HeaderText = "Codigo Postal",
-                Width = 100
+                Width = 69
             });
 
         }
+     
         private void txtBuscar_TextChanged(object sender, EventArgs e)
         {
             string criterio = cbxBuscar.Text.ToString();

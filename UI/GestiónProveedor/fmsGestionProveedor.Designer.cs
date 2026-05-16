@@ -36,7 +36,6 @@
             btnActualizar = new Button();
             dgvProveedor = new DataGridView();
             label1 = new Label();
-            btnAtras = new Button();
             btnBuscar = new Button();
             label2 = new Label();
             cbxBuscar = new ComboBox();
@@ -121,7 +120,7 @@
             dgvProveedor.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgvProveedor.Location = new Point(12, 209);
             dgvProveedor.Name = "dgvProveedor";
-            dgvProveedor.Size = new Size(858, 382);
+            dgvProveedor.Size = new Size(1087, 458);
             dgvProveedor.TabIndex = 6;
             // 
             // label1
@@ -133,18 +132,6 @@
             label1.Size = new Size(192, 30);
             label1.TabIndex = 7;
             label1.Text = "Gestión Proveedor";
-            // 
-            // btnAtras
-            // 
-            btnAtras.BackColor = Color.Azure;
-            btnAtras.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold);
-            btnAtras.Location = new Point(794, 615);
-            btnAtras.Name = "btnAtras";
-            btnAtras.Size = new Size(76, 29);
-            btnAtras.TabIndex = 8;
-            btnAtras.Text = "Atras";
-            btnAtras.UseVisualStyleBackColor = false;
-            btnAtras.Click += btnAtras_Click;
             // 
             // btnBuscar
             // 
@@ -189,12 +176,11 @@
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.AliceBlue;
-            ClientSize = new Size(884, 656);
+            ClientSize = new Size(1111, 700);
             Controls.Add(txtBuscar);
             Controls.Add(cbxBuscar);
             Controls.Add(label2);
             Controls.Add(btnBuscar);
-            Controls.Add(btnAtras);
             Controls.Add(label1);
             Controls.Add(dgvProveedor);
             Controls.Add(btnActualizar);
@@ -221,7 +207,6 @@
         private Button btnActualizar;
         private DataGridView dgvProveedor;
         private Label label1;
-        private Button btnAtras;
         private Button btnBuscar;
         private Label label2;
         private ComboBox cbxBuscar;

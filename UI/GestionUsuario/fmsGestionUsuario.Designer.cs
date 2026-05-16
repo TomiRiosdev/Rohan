@@ -29,7 +29,6 @@
         private void InitializeComponent()
         {
             btnGestionPermiso = new Button();
-            btnAtras = new Button();
             dgvUsuario = new DataGridView();
             cbxSucursal = new ComboBox();
             label2 = new Label();
@@ -48,7 +47,7 @@
             // 
             btnGestionPermiso.BackColor = Color.Azure;
             btnGestionPermiso.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold);
-            btnGestionPermiso.Location = new Point(342, 73);
+            btnGestionPermiso.Location = new Point(672, 73);
             btnGestionPermiso.Name = "btnGestionPermiso";
             btnGestionPermiso.Size = new Size(104, 49);
             btnGestionPermiso.TabIndex = 40;
@@ -56,22 +55,10 @@
             btnGestionPermiso.UseVisualStyleBackColor = false;
             btnGestionPermiso.Click += btnGestionPermiso_Click;
             // 
-            // btnAtras
-            // 
-            btnAtras.BackColor = Color.Azure;
-            btnAtras.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold);
-            btnAtras.Location = new Point(500, 611);
-            btnAtras.Name = "btnAtras";
-            btnAtras.Size = new Size(76, 29);
-            btnAtras.TabIndex = 39;
-            btnAtras.Text = "Atras";
-            btnAtras.UseVisualStyleBackColor = false;
-            btnAtras.Click += btnAtras_Click;
-            // 
             // dgvUsuario
             // 
             dgvUsuario.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgvUsuario.Location = new Point(14, 264);
+            dgvUsuario.Location = new Point(12, 200);
             dgvUsuario.Name = "dgvUsuario";
             dgvUsuario.Size = new Size(562, 327);
             dgvUsuario.TabIndex = 38;
@@ -79,7 +66,7 @@
             // cbxSucursal
             // 
             cbxSucursal.FormattingEnabled = true;
-            cbxSucursal.Location = new Point(170, 212);
+            cbxSucursal.Location = new Point(168, 159);
             cbxSucursal.Name = "cbxSucursal";
             cbxSucursal.Size = new Size(248, 23);
             cbxSucursal.TabIndex = 36;
@@ -88,7 +75,7 @@
             // 
             label2.AutoSize = true;
             label2.Font = new Font("Segoe UI Semibold", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            label2.Location = new Point(14, 210);
+            label2.Location = new Point(12, 157);
             label2.Name = "label2";
             label2.Size = new Size(150, 21);
             label2.TabIndex = 35;
@@ -98,7 +85,7 @@
             // 
             btnBuscar.BackColor = Color.Azure;
             btnBuscar.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold);
-            btnBuscar.Location = new Point(438, 205);
+            btnBuscar.Location = new Point(436, 152);
             btnBuscar.Name = "btnBuscar";
             btnBuscar.Size = new Size(69, 33);
             btnBuscar.TabIndex = 34;
@@ -110,7 +97,7 @@
             // 
             label1.AutoSize = true;
             label1.Font = new Font("Segoe UI Semibold", 15.75F, FontStyle.Bold);
-            label1.Location = new Point(12, 11);
+            label1.Location = new Point(12, 9);
             label1.Name = "label1";
             label1.Size = new Size(162, 30);
             label1.TabIndex = 33;
@@ -120,7 +107,7 @@
             // 
             btnActualizar.BackColor = Color.Azure;
             btnActualizar.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold);
-            btnActualizar.Location = new Point(452, 73);
+            btnActualizar.Location = new Point(562, 73);
             btnActualizar.Name = "btnActualizar";
             btnActualizar.Size = new Size(104, 49);
             btnActualizar.TabIndex = 32;
@@ -132,7 +119,7 @@
             // 
             btnListarDeshabilitados.BackColor = Color.Azure;
             btnListarDeshabilitados.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold);
-            btnListarDeshabilitados.Location = new Point(14, 139);
+            btnListarDeshabilitados.Location = new Point(342, 73);
             btnListarDeshabilitados.Name = "btnListarDeshabilitados";
             btnListarDeshabilitados.Size = new Size(104, 49);
             btnListarDeshabilitados.TabIndex = 31;
@@ -144,7 +131,7 @@
             // 
             btnActivar.BackColor = Color.Azure;
             btnActivar.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold);
-            btnActivar.Location = new Point(124, 139);
+            btnActivar.Location = new Point(452, 73);
             btnActivar.Name = "btnActivar";
             btnActivar.Size = new Size(104, 49);
             btnActivar.TabIndex = 30;
@@ -193,9 +180,8 @@
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.AliceBlue;
-            ClientSize = new Size(590, 661);
+            ClientSize = new Size(794, 581);
             Controls.Add(btnGestionPermiso);
-            Controls.Add(btnAtras);
             Controls.Add(dgvUsuario);
             Controls.Add(cbxSucursal);
             Controls.Add(label2);
@@ -218,7 +204,6 @@
         #endregion
 
         private Button btnGestionPermiso;
-        private Button btnAtras;
         private DataGridView dgvUsuario;
         private ComboBox cbxSucursal;
         private Label label2;

@@ -24,7 +24,6 @@ namespace DAO.Implementations.SQLServer
                   entity.IdUnidadMedida = Guid.NewGuid();
 
                 _dbContext.UnidadMedida.Add(entity);
-                _dbContext.SaveChanges();
                 return entity.IdUnidadMedida;
             }
             catch (Exception ex)
@@ -87,7 +86,6 @@ namespace DAO.Implementations.SQLServer
                 if(entity == null)
                 {
                     _dbContext.UnidadMedida.Remove(entity);
-                    _dbContext.SaveChanges();
                 }
                    
             }
@@ -98,7 +96,6 @@ namespace DAO.Implementations.SQLServer
             }
         }
         
-
         public void Update(UnidadMedida entity)
         {
             _dbContext.Entry(entity).State = EntityState.Modified;

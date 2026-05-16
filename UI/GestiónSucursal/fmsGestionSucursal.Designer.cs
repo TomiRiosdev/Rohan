@@ -40,7 +40,6 @@
             btnModificar = new Button();
             btnAgregar = new Button();
             dgvSucursal = new DataGridView();
-            btnAtras = new Button();
             btnAgregarTipoSucursal = new Button();
             ((System.ComponentModel.ISupportInitialize)dgvSucursal).BeginInit();
             SuspendLayout();
@@ -170,20 +169,8 @@
             dgvSucursal.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgvSucursal.Location = new Point(12, 224);
             dgvSucursal.Name = "dgvSucursal";
-            dgvSucursal.Size = new Size(953, 231);
+            dgvSucursal.Size = new Size(1087, 440);
             dgvSucursal.TabIndex = 24;
-            // 
-            // btnAtras
-            // 
-            btnAtras.BackColor = Color.Azure;
-            btnAtras.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold);
-            btnAtras.Location = new Point(889, 496);
-            btnAtras.Name = "btnAtras";
-            btnAtras.Size = new Size(76, 29);
-            btnAtras.TabIndex = 25;
-            btnAtras.Text = "Atras";
-            btnAtras.UseVisualStyleBackColor = false;
-            btnAtras.Click += btnAtras_Click;
             // 
             // btnAgregarTipoSucursal
             // 
@@ -202,9 +189,8 @@
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.AliceBlue;
-            ClientSize = new Size(977, 537);
+            ClientSize = new Size(1111, 700);
             Controls.Add(btnAgregarTipoSucursal);
-            Controls.Add(btnAtras);
             Controls.Add(dgvSucursal);
             Controls.Add(txtBuscar);
             Controls.Add(cbxBuscar);
@@ -239,7 +225,6 @@
         private Button btnModificar;
         private Button btnAgregar;
         private DataGridView dgvSucursal;
-        private Button btnAtras;
         private Button btnAgregarTipoSucursal;
     }
 }

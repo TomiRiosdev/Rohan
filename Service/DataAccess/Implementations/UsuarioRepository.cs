@@ -10,7 +10,7 @@ using Service.DateAccess.Interface;
 namespace Service.DateAccess.Implementations
 {
    public class UsuarioRepository : IUsuarioRepository
-    {
+   {
         // Este es el método que usará tu LoginService
         public Usuario GetByUserName(string username)
         {
@@ -167,5 +167,18 @@ namespace Service.DateAccess.Implementations
             }
             return new List<Usuario>();
         }
-    }
+
+        public int ContarAdministradoresActivos()
+        {
+            // Contamos cuántos usuarios habilitados tienen asignada la familia 'Administrador'
+            string query = @"SELECT COUNT(DISTINCT u.IdUsuario) 
+                     FROM [dbo].[Usuario] u
+                     INNER JOIN [dbo].[UsuarioFamilia] uf ON u.IdUsuario = uf.IdUsuario
+                     INNER JOIN [dbo].[Familia] f ON uf.IdFamilia = f.IdFamilia
+                     WHERE f.Nombre = 'Administrador' AND u.Habilitado = 1";
+
+            // Usamos el ExecuteScalar de tu SqlHelper que devuelve un Object y lo casteamos
+            return (int)SqlHelper.ExecuteScalar(query, CommandType.Text);
+        }
+   }
 }

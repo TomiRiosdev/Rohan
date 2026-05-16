@@ -26,9 +26,9 @@ namespace UI.GestionUsuario
 
         private void btnAtras_Click(object sender, EventArgs e)
         {
-            var fmsGestionUsuario = _serviceProvider.GetRequiredService<fmsGestionUsuario>();
+           
             this.Close();
-            fmsGestionUsuario.Show();
+           
         }
 
         private void btnAgregar_Click(object sender, EventArgs e)

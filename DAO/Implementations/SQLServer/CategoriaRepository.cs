@@ -26,8 +26,6 @@ namespace DAO.Implementations.SQLServer
                     entity.IdCategoria = Guid.NewGuid();
 
                 _dbContext.Categoria.Add(entity);
-                // Guardar los cambios en la base de datos para que se refleje el nuevo registro
-                _dbContext.SaveChanges(); 
                 return entity.IdCategoria;
             }
             catch (Exception ex)
@@ -88,7 +86,6 @@ namespace DAO.Implementations.SQLServer
                 if (entity !=null)
                 {
                     _dbContext.Categoria.Remove(entity);
-                    _dbContext.SaveChanges(); // Guardar los cambios para reflejar la eliminación
                 }
             }
             catch (Exception ex)
@@ -109,8 +106,7 @@ namespace DAO.Implementations.SQLServer
 
              
                 _dbContext.Entry(entity).State = EntityState.Modified;
-
-                
+      
                 _dbContext.Categoria.Update(entity); 
             }
             catch (Exception ex)

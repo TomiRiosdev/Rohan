@@ -26,7 +26,7 @@ namespace DAO.Implementations.SQLServer
                 entity.Habilitado = true;
 
                 _dbContext.Sucursal.Add(entity);
-                _dbContext.SaveChanges();
+               
                 return entity.IdSucursal;
             }
             catch (Exception ex)
@@ -46,7 +46,7 @@ namespace DAO.Implementations.SQLServer
 
                 sucursal.Habilitado = false;
                 _dbContext.Entry(sucursal).State = EntityState.Modified;
-                _dbContext.SaveChanges();
+                
             }
             catch (Exception ex)
             {
@@ -63,7 +63,7 @@ namespace DAO.Implementations.SQLServer
                     throw new ArgumentException(nameof(entity), "La sucursal no puede ser nula");
 
                 _dbContext.Entry(entity).State = EntityState.Modified;
-                _dbContext.SaveChanges();
+              
             }
             catch (Exception ex)
             {

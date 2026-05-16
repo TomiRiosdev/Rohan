@@ -11,6 +11,8 @@ namespace DAO.Interface
         IUnidadMedidaRepository UnidadMedidaRepository { get; }
         ISucursalRepository SucursalRepository { get; }
         ITipoSucursalRepository TipoSucursalRepository { get; }
+        IStockPorSucursalRepository StockPorSucursalRepository { get; }
+       IProductoProveedorRepository ProductoProveedorRepository { get; }
 
         // Método para guardar los cambios en la base de datos
 

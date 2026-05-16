@@ -10,7 +10,7 @@ namespace BLL.GestiónSucursal.Mapper
         {
 
             if (sucursal == null)
-                throw new ArgumentNullException(nameof(sucursal), "La entidad Producto no puede ser null.");
+                throw new ArgumentNullException(nameof(sucursal), "La entidad Sucursal no puede ser null.");
 
             return new SucursalDTO
             {
@@ -30,7 +30,7 @@ namespace BLL.GestiónSucursal.Mapper
         public static Sucursal ToEntity(this SucursalDTO dto)
         {
             if (dto == null)
-                throw new ArgumentNullException(nameof(dto), "El DTO Producto no puede ser null.");
+                throw new ArgumentNullException(nameof(dto), "El DTO Sucursal no puede ser null.");
 
             return new Sucursal
             {

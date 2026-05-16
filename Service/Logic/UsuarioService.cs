@@ -12,10 +12,12 @@ namespace Service.Logic
     public class UsuarioService
     {
         private readonly UsuarioRepository _usuarioRepo;
+        private readonly PermisosRepository _permisosRepo;
 
         public UsuarioService()
         {
             _usuarioRepo = new UsuarioRepository();
+            _permisosRepo = new PermisosRepository();
         }
 
         public void RegistrarUsuario(Usuario usuario)
@@ -154,18 +156,32 @@ namespace Service.Logic
 
         public void DeshabilitarUsuario(Guid idUsuario)
         {
-            if (idUsuario == Guid.Empty) throw new Exception("Debe seleccionar un usuario de la grilla.");
+            // 1. CONTROL SEGURO: No deshabilitarse a uno mismo
+            Guid idUsuarioActual = SessionManager.Current.UsuarioLogueado.IdUsuario;
+            if (idUsuario == idUsuarioActual)
+            {
+                throw new Exception("Operación inválida: No podés deshabilitar tu propio usuario mientras estás en sesión.");
+            }
 
-            Usuario usuarioExistente = _usuarioRepo.GetById(idUsuario);
-            if (usuarioExistente == null) throw new Exception("El usuario no existe en la base de datos.");
+            // 2. Buscamos el usuario completo en la DB para analizarlo (incluyendo sus permisos)
+            Usuario usuarioAValidar = _usuarioRepo.GetById(idUsuario);
 
-            // Le bajamos el pulgar
-            usuarioExistente.Habilitado = false;
+            // Es mandatorio cargarle los privilegios desde el repositorio de permisos
+            // para que la mochila del Composite no esté vacía.
+            _permisosRepo.CargarPrivilegios(usuarioAValidar);
 
-            _usuarioRepo.Update(usuarioExistente);
+            // 3. CONTROL SEGURO: Si es administrador, verificar que no sea el último
+            if (UsuarioEsAdministrador(usuarioAValidar))
+            {
+                int adminsActivos = _usuarioRepo.ContarAdministradoresActivos();
+                if (adminsActivos <= 1)
+                {
+                    throw new Exception("Operación inválida: El sistema no puede quedar huérfano. No se puede deshabilitar al único Administrador activo.");
+                }
+            }
 
-            BitácoraService bitacora = new BitácoraService();
-            bitacora.RegistrarLog($"Se deshabilitó al usuario: {usuarioExistente.Nombre}", Criticidad.Warning);
+            // Si pasó ambos filtros, ejecutamos la baja lógica
+            _usuarioRepo.Remove(idUsuario);
         }
 
         public void HabilitarUsuario(Guid idUsuario)
@@ -240,5 +256,42 @@ namespace Service.Logic
                 throw new Exception("No se encontró ningún usuario.");
             }
         }
+
+        private bool UsuarioEsAdministrador(Usuario usuario)
+        {
+            if (usuario == null || usuario.Privilegios == null) return false;
+
+            // Recorremos sus privilegios acumulados usando una función recursiva local
+            foreach (var privilegio in usuario.Privilegios)
+            {
+                if (ValidarSiTieneAdminRecursivo(privilegio))
+                    return true;
+            }
+            return false;
+        }
+
+        private bool ValidarSiTieneAdminRecursivo(Component componente)
+        {
+            // Si es una Familia, nos fijamos en su nombre
+            if (componente is Familia familia)
+            {
+                if (familia.Nombre == "Administrador") return true;
+
+                // Si no es el nombre, buscamos dentro de sus hijos por si está anidado
+                foreach (var hijo in familia.GetHijos())
+                {
+                    if (ValidarSiTieneAdminRecursivo(hijo)) return true;
+                }
+            }
+            // Si es una Patente, podrías verificar si tiene una patente maestra de administración
+            else if (componente is Patente patente)
+            {
+                if (patente.DataKey == "fmsGestionSucursal") return true;
+            }
+
+            return false;
+        }
+
+
     }
 }

@@ -36,6 +36,7 @@ namespace UI.GestionUsuario
             CargarCombos(); 
             btnActivar.Enabled = false;
         }
+       
         protected override void OnShown(EventArgs e)
         {
             base.OnShown(e);
@@ -102,7 +103,6 @@ namespace UI.GestionUsuario
         private void btnGestionPermiso_Click(object sender, EventArgs e)
         {
             var fmsAgregarPermisos = _serviceProvider.GetRequiredService<fmsAgregarPermisos>();
-            this.Close();
             fmsAgregarPermisos.Show();
         }
 
@@ -131,37 +131,41 @@ namespace UI.GestionUsuario
                 }
             }
         }
-        #endregion
 
-        #region METODOS 
-        private void CargarUsuarios()
+        private void btnBuscar_Click(object sender, EventArgs e)
         {
             try
             {
-                var usuarios = _usuarioService.ListarHabilitados();
+                if (cbxSucursal.SelectedValue == null)
+                {
+                    MessageBox.Show("Por favor, seleccione una sucursal para filtrar.", "Atención",
+                                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                Guid idSucursalSeleccionada = (Guid)cbxSucursal.SelectedValue;
+
+                var todosLosUsuarios = _usuarioService.ListarHabilitados();
+
+                var usuariosFiltrados = todosLosUsuarios
+                    .Where(u => u.IdSucursal == idSucursalSeleccionada)
+                    .ToList();
 
                 dgvUsuario.DataSource = null;
-                dgvUsuario.DataSource = usuarios.ToList();
+                dgvUsuario.DataSource = usuariosFiltrados;
+
+                if (usuariosFiltrados.Count == 0)
+                {
+                    MessageBox.Show("No se encontraron usuarios en la sucursal seleccionada.", "Búsqueda",
+                                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al cargar los usuarios: {ex.Message}",
-                                      "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Ocurrió un error al filtrar: " + ex.Message, "Error",
+                                MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-        }
 
-        private void CargarUsuariosDeshabilitados()
-        {
-            try
-            {
-                var deshabilitados = _usuarioService.ListarDeshabilitados();
-                dgvUsuario.DataSource = null;
-                dgvUsuario.DataSource = deshabilitados.ToList();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Error al cargar deshabilitados: " + ex.Message);
-            }
         }
 
         private void btnListarDeshabilitados_Click(object sender, EventArgs e)
@@ -246,6 +250,41 @@ namespace UI.GestionUsuario
             CargarUsuarios();
         }
 
+
+        #endregion
+
+        #region METODOS 
+        private void CargarUsuarios()
+        {
+            try
+            {
+                var usuarios = _usuarioService.ListarHabilitados();
+
+                dgvUsuario.DataSource = null;
+                dgvUsuario.DataSource = usuarios.ToList();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al cargar los usuarios: {ex.Message}",
+                                      "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void CargarUsuariosDeshabilitados()
+        {
+            try
+            {
+                var deshabilitados = _usuarioService.ListarDeshabilitados();
+                dgvUsuario.DataSource = null;
+                dgvUsuario.DataSource = deshabilitados.ToList();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al cargar deshabilitados: " + ex.Message);
+            }
+        }
+
+       
         #endregion
 
         private void CargarCombos()
@@ -266,42 +305,7 @@ namespace UI.GestionUsuario
             }
         }
 
-        private void btnBuscar_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                if (cbxSucursal.SelectedValue == null)
-                {
-                    MessageBox.Show("Por favor, seleccione una sucursal para filtrar.", "Atención",
-                                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
-    
-                Guid idSucursalSeleccionada = (Guid)cbxSucursal.SelectedValue;
-
-                var todosLosUsuarios = _usuarioService.ListarHabilitados();
-
-                var usuariosFiltrados = todosLosUsuarios
-                    .Where(u => u.IdSucursal == idSucursalSeleccionada)
-                    .ToList();
-
-                dgvUsuario.DataSource = null; 
-                dgvUsuario.DataSource = usuariosFiltrados;
-
-                if (usuariosFiltrados.Count == 0)
-                {
-                    MessageBox.Show("No se encontraron usuarios en la sucursal seleccionada.", "Búsqueda",
-                                    MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Ocurrió un error al filtrar: " + ex.Message, "Error",
-                                MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-
-        }
-       
+         
     }
 }
 

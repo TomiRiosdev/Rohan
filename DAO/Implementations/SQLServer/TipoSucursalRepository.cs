@@ -26,8 +26,7 @@ namespace DAO.Implementations.SQLServer
                     entity.IdTipoSucursal = Guid.NewGuid();
 
                 _dbContext.TipoSucursal.Add(entity);
-                // Guardar los cambios en la base de datos para que se refleje el nuevo registro
-                _dbContext.SaveChanges();
+               
                 return entity.IdTipoSucursal;
             }
             catch (Exception ex)
@@ -91,7 +90,7 @@ namespace DAO.Implementations.SQLServer
                 if (entity != null)
                 {
                     _dbContext.TipoSucursal.Remove(entity);
-                    _dbContext.SaveChanges(); // Guardar los cambios para reflejar la eliminación
+                   
                 }
             }
             catch (Exception ex)
@@ -112,8 +111,6 @@ namespace DAO.Implementations.SQLServer
 
 
                 _dbContext.Entry(entity).State = EntityState.Modified;
-
-
                 _dbContext.TipoSucursal.Update(entity);
             }
             catch (Exception ex)

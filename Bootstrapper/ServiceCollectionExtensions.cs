@@ -3,6 +3,8 @@ using BLL.GestiónProducto.Facade;
 using BLL.GestiónProducto.Interface;
 using BLL.GestiónProducto.Service;
 using BLL.GestiónProducto.Validator;
+using BLL.GestiónStock.Interface;
+using BLL.GestiónStock.Service;
 using BLL.GestiónSucursal.Facade;
 using BLL.GestiónSucursal.Interface;
 using BLL.GestiónSucursal.Service;
@@ -11,6 +13,7 @@ using BLL.GestioónProveedor.Facade;
 using BLL.GestioónProveedor.Interface;
 using BLL.GestioónProveedor.Service;
 using BLL.GestioónProveedor.Validator;
+using DAO;
 using DAO.Implementations.SQLServer;
 using DAO.Interface;
 using FluentValidation;
@@ -18,7 +21,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Service.DateAccess.Implementations;
 using Service.DateAccess.Interface;
 using Service.Logic;
-using Service.Logic.Validation;
 
 
 namespace Bootstrapper
@@ -27,8 +29,12 @@ namespace Bootstrapper
     {
         public static IServiceCollection AddApplicationLayer(this IServiceCollection services)
         {
+           
+       
+
             // ====================== DAO / Repositories ======================
             services.AddTransient<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<RohanContext>();
             // ====================== DAO Prodducto
             services.AddTransient<ICategoriaRepository, CategoriaRepository>();
             services.AddTransient<IProductoRepository, ProductoRepository>();
@@ -38,7 +44,9 @@ namespace Bootstrapper
             // ====================== DAO Sucursal
             services.AddTransient<ISucursalRepository, SucursalRepository>();
             services.AddTransient<ITipoSucursalRepository, TipoSucursalRepository>();
-
+            // ====================== DAO Stock
+            services.AddTransient<IStockPorSucursalRepository, StockPorSucursalRepository>();
+            services.AddTransient<IProductoProveedorRepository, ProductoProveedorRepository>();
 
             // ====================== Services (BLL) ======================
             // ====================== Services Producto
@@ -50,6 +58,9 @@ namespace Bootstrapper
             // ====================== Services Sucursal
             services.AddScoped<ISucursalService, SucursalSerice>();
             services.AddScoped<ITipoSucursalService, TipoSucursalService>();
+            // ====================== Services Stock
+            services.AddScoped<IStockPorSucursalService, StockPorSucursalService>();
+            services.AddScoped<IProductoProveedorService, ProductoProveedorService>();
 
 
             // ====================== BLL Validators ======================

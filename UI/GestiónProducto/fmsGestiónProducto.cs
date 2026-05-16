@@ -81,7 +81,7 @@ namespace UI.GestiónProducto
                 Name = "CategoriaNombre",
                 HeaderText = "Categoría",
                 DataPropertyName = "CategoriaNombre",
-                Width = 200
+                Width = 198
             });
 
             dgvProductos.Columns.Add(new DataGridViewTextBoxColumn

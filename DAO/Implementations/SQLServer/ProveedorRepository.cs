@@ -23,7 +23,7 @@ namespace DAO.Implementations.SQLServer
                 entity.Habilitado = true; // Asegura que el proveedor esté habilitado al agregarlo
                 
                 _dbContext.Proveedor.Add(entity);
-                _dbContext.SaveChanges(); // Guarda los cambios en la base de datos
+         
 
                 return entity.IdProveedor; 
             }
@@ -126,7 +126,7 @@ namespace DAO.Implementations.SQLServer
                 proveedor.Habilitado = false;
 
                 _dbContext.Entry(proveedor).State = EntityState.Modified;
-                _dbContext.SaveChanges();
+               
             }
             catch (Exception ex)
             {
@@ -142,7 +142,7 @@ namespace DAO.Implementations.SQLServer
                     throw new ArgumentNullException(nameof(entity));
 
                 _dbContext.Entry(entity).State = EntityState.Modified;
-                _dbContext.SaveChanges();
+               
             }
             catch (DbUpdateConcurrencyException ex)
             {
@@ -153,7 +153,6 @@ namespace DAO.Implementations.SQLServer
                 throw new Exception("DAO Error: No se pudo actualizar la información del proveedor.", ex);
             }
         }
-
-       
+      
     }
 }

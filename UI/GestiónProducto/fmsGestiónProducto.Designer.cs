@@ -30,7 +30,6 @@ namespace UI.GestiónProducto
         private void InitializeComponent()
         {
             dgvProductos = new DataGridView();
-            button1 = new Button();
             btnAgregar = new Button();
             btnModificar = new Button();
             btnEliminar = new Button();
@@ -55,18 +54,6 @@ namespace UI.GestiónProducto
             dgvProductos.Size = new Size(1086, 444);
             dgvProductos.TabIndex = 0;
             dgvProductos.CellContentClick += dgvProductos_CellContentClick;
-            // 
-            // button1
-            // 
-            button1.BackColor = Color.Azure;
-            button1.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold);
-            button1.Location = new Point(1018, 654);
-            button1.Name = "button1";
-            button1.Size = new Size(80, 34);
-            button1.TabIndex = 1;
-            button1.Text = "Atras";
-            button1.UseVisualStyleBackColor = false;
-            button1.Click += button1_Click;
             // 
             // btnAgregar
             // 
@@ -96,7 +83,7 @@ namespace UI.GestiónProducto
             // 
             btnEliminar.BackColor = Color.Azure;
             btnEliminar.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnEliminar.Location = new Point(342, 71);
+            btnEliminar.Location = new Point(232, 72);
             btnEliminar.Name = "btnEliminar";
             btnEliminar.Size = new Size(104, 48);
             btnEliminar.TabIndex = 4;
@@ -108,7 +95,7 @@ namespace UI.GestiónProducto
             // 
             btnProductoEliminado.BackColor = Color.Azure;
             btnProductoEliminado.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold);
-            btnProductoEliminado.Location = new Point(452, 70);
+            btnProductoEliminado.Location = new Point(342, 72);
             btnProductoEliminado.Name = "btnProductoEliminado";
             btnProductoEliminado.Size = new Size(104, 49);
             btnProductoEliminado.TabIndex = 12;
@@ -120,7 +107,7 @@ namespace UI.GestiónProducto
             // 
             btnHabilitar.BackColor = Color.Azure;
             btnHabilitar.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnHabilitar.Location = new Point(562, 71);
+            btnHabilitar.Location = new Point(452, 72);
             btnHabilitar.Name = "btnHabilitar";
             btnHabilitar.Size = new Size(104, 49);
             btnHabilitar.TabIndex = 6;
@@ -172,7 +159,7 @@ namespace UI.GestiónProducto
             // 
             btnAgregarCatUnMed.BackColor = Color.Azure;
             btnAgregarCatUnMed.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold);
-            btnAgregarCatUnMed.Location = new Point(232, 70);
+            btnAgregarCatUnMed.Location = new Point(672, 72);
             btnAgregarCatUnMed.Name = "btnAgregarCatUnMed";
             btnAgregarCatUnMed.Size = new Size(104, 49);
             btnAgregarCatUnMed.TabIndex = 12;
@@ -192,7 +179,7 @@ namespace UI.GestiónProducto
             // 
             btnLimpiar.BackColor = Color.Azure;
             btnLimpiar.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnLimpiar.Location = new Point(672, 71);
+            btnLimpiar.Location = new Point(562, 72);
             btnLimpiar.Name = "btnLimpiar";
             btnLimpiar.Size = new Size(104, 49);
             btnLimpiar.TabIndex = 14;
@@ -230,7 +217,6 @@ namespace UI.GestiónProducto
             Controls.Add(btnEliminar);
             Controls.Add(btnModificar);
             Controls.Add(btnAgregar);
-            Controls.Add(button1);
             Controls.Add(dgvProductos);
             Name = "fmsGestiónProducto";
             Text = "GestionProducto";
@@ -243,7 +229,6 @@ namespace UI.GestiónProducto
         #endregion
 
         private DataGridView dgvProductos;
-        private Button button1;
         private Button btnAgregar;
         private Button btnModificar;
         private Button btnEliminar;
