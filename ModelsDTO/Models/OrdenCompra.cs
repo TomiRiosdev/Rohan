@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Models;
+
 
 namespace Models;
 
@@ -12,6 +12,8 @@ public partial class OrdenCompra
     public Guid? IdUsuario { get; set; }
 
     public Guid? IdEstadoOc { get; set; }
+
+    public int? NroSolicitud { get; set; }
 
     public DateTime? FechaOc { get; set; }
 

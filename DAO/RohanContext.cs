@@ -1,5 +1,5 @@
-﻿using Models;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using Models;
 
 namespace DAO;
 
@@ -25,32 +25,28 @@ public partial class RohanContext : DbContext
     public virtual DbSet<MovimientosStock> MovimientosStock { get; set; }
 
     public virtual DbSet<OrdenCompra> OrdenCompra { get; set; }
-
     public virtual DbSet<OrdenCompraDetalle> OrdenCompraDetalle { get; set; }
 
     public virtual DbSet<Producto> Producto { get; set; }
 
     public virtual DbSet<ProductoProveedor> ProductoProveedor { get; set; }
-
     public virtual DbSet<Proveedor> Proveedor { get; set; }
 
     public virtual DbSet<SolicitudPedido> SolicitudPedido { get; set; }
 
     public virtual DbSet<SolicitudPedidoDetalle> SolicitudPedidoDetalle { get; set; }
-
     public virtual DbSet<StockPorSucursal> StockPorSucursal { get; set; }
 
     public virtual DbSet<Sucursal> Sucursal { get; set; }
 
     public virtual DbSet<TipoMovimiento> TipoMovimiento { get; set; }
-
     public virtual DbSet<TipoSucursal> TipoSucursal { get; set; }
 
     public virtual DbSet<TipoUsuario> TipoUsuario { get; set; }
 
     public virtual DbSet<UnidadMedida> UnidadMedida { get; set; }
 
-    public virtual DbSet<VinculoSolicitudOc> VinculoSolicitudOc { get; set; }
+    public virtual DbSet<VinculoSolicitudOc> VinculoSolicitudOc  { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
@@ -397,7 +393,7 @@ public partial class RohanContext : DbContext
                 .HasForeignKey(d => d.IdOrdenCompraDetalle)
                 .HasConstraintName("FK_VinculoSolicitudOC_OrdenCompraDetalle");
 
-            entity.HasOne(d => d.IdSolicitudPedidoDetalleNavigation).WithMany(p => p.VinculoSolicitudOcs)
+            entity.HasOne(d => d.IdSolicitudPedidoDetalleNavigation).WithMany(p => p.VinculoSolicitudOc)
                 .HasForeignKey(d => d.IdSolicitudPedidoDetalle)
                 .HasConstraintName("FK_VinculoSolicitudOC_SolicitudPedidoDetalle");
         });

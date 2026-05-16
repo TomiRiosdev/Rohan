@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Models;
+using System;
 using System.Collections.Generic;
 
 namespace Models;
@@ -16,6 +17,8 @@ public partial class OrdenCompraDetalle
     public int? CantidadRecibida { get; set; }
 
     public decimal? PrecioPactado { get; set; }
+
+    public int? Renglon { get; set; }
 
     public virtual ICollection<Lote> Lotes { get; set; } = new List<Lote>();
 

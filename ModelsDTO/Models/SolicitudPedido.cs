@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Models;
+using System;
 using System.Collections.Generic;
 
 namespace Models;
@@ -10,6 +11,8 @@ public partial class SolicitudPedido
     public Guid? IdUsuario { get; set; }
 
     public Guid? IdSucursal { get; set; }
+
+    public int? NroSolicitud { get; set; }
 
     public DateTime? FechaSolicitud { get; set; }
 

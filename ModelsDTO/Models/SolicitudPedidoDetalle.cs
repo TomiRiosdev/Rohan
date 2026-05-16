@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Models;
+using System;
 using System.Collections.Generic;
 
 namespace Models;
@@ -13,9 +14,11 @@ public partial class SolicitudPedidoDetalle
 
     public int? Cantidad { get; set; }
 
+    public int? Renglon { get; set; }
+
     public virtual Producto? IdProductoNavigation { get; set; }
 
     public virtual SolicitudPedido? IdSolicitudNavigation { get; set; }
 
-    public virtual ICollection<VinculoSolicitudOc> VinculoSolicitudOcs { get; set; } = new List<VinculoSolicitudOc>();
+    public virtual ICollection<VinculoSolicitudOc> VinculoSolicitudOc { get; set; } = new List<VinculoSolicitudOc>();
 }
