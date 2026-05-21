@@ -2,6 +2,7 @@ using Bootstrapper;
 using Microsoft.Extensions.DependencyInjection;
 using UI.GestiónProducto;
 using UI.GestiónProveedor;
+using UI.GestiónStock;
 using UI.GestiónSucursal;
 using UI.GestionUsuario;
 
@@ -63,6 +64,10 @@ namespace UI
             services.AddTransient<fmsAgregarPermisos>();
             services.AddTransient<fmsRecuperarContraseña>();
             services.AddTransient<fmsSeleccionarSucursal>();
+
+            // Formularios de Gestión de Stock
+             services.AddTransient<fmsGestionStock>();
+            
         }
     }
 }

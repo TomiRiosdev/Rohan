@@ -132,7 +132,8 @@ namespace Service.Logic
                 if(usuario.IdUsuario == Guid.Empty)
                     throw new Exception("El ID del usuario no puede estar vacío.");
 
-                
+                UsuarioValidator.Validar(usuario.Username, usuario.Nombre, usuario.Email, usuario.Password, usuario.Telefono);
+
 
                 var entity = _usuarioRepo.GetById(usuario.IdUsuario);
                 if (entity == null)

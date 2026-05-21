@@ -13,12 +13,6 @@
   <ItemGroup>
     <ProjectReference Include="..\DAO\DAO.csproj" />
     <ProjectReference Include="..\ModelsDTO\DomainModel.csproj" />
-    <ProjectReference Include="..\Service\Service.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="GestiónCompraOC\" />
-    <Folder Include="GestiónStock\Facade\" />
   </ItemGroup>
 
 </Project>

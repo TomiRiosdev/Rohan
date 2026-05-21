@@ -1,4 +1,9 @@
-﻿using System;
+﻿using DAO.Interface.GestionCompra;
+using DAO.Interface.GestionProducto;
+using DAO.Interface.GestionProveedor;
+using DAO.Interface.GestionStock;
+using DAO.Interface.GestionSucursal;
+using System;
 
 namespace DAO.Interface
 {
@@ -11,8 +16,12 @@ namespace DAO.Interface
         IUnidadMedidaRepository UnidadMedidaRepository { get; }
         ISucursalRepository SucursalRepository { get; }
         ITipoSucursalRepository TipoSucursalRepository { get; }
-        IStockPorSucursalRepository StockPorSucursalRepository { get; }
-       IProductoProveedorRepository ProductoProveedorRepository { get; }
+        IStocklRepository StockPorSucursalRepository { get; }
+        IProductoProveedorRepository ProductoProveedorRepository { get; }
+        ISolicitudPedidoRepository SolicitudPedidoRepository { get; }
+        IMovimientosStockRepository MovimientosStockRepository { get; }
+        ILoteRepository LoteRepository { get; }
+        ITipoMovimientoRepository TipoMovimientoRepository { get; }
 
         // Método para guardar los cambios en la base de datos
 

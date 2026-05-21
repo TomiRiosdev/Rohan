@@ -46,7 +46,7 @@
             btnGestionProducto.Font = new Font("Segoe UI Semibold", 11.25F, FontStyle.Bold);
             btnGestionProducto.Location = new Point(12, 393);
             btnGestionProducto.Name = "btnGestionProducto";
-            btnGestionProducto.Size = new Size(93, 60);
+            btnGestionProducto.Size = new Size(93, 55);
             btnGestionProducto.TabIndex = 0;
             btnGestionProducto.Text = "Gestión Productos";
             btnGestionProducto.UseVisualStyleBackColor = false;
@@ -56,9 +56,9 @@
             // 
             btnGestionProveedor.BackColor = Color.Azure;
             btnGestionProveedor.Font = new Font("Segoe UI Semibold", 11.25F, FontStyle.Bold);
-            btnGestionProveedor.Location = new Point(12, 473);
+            btnGestionProveedor.Location = new Point(12, 466);
             btnGestionProveedor.Name = "btnGestionProveedor";
-            btnGestionProveedor.Size = new Size(93, 61);
+            btnGestionProveedor.Size = new Size(93, 54);
             btnGestionProveedor.TabIndex = 1;
             btnGestionProveedor.Text = "Gestión Proveedor";
             btnGestionProveedor.UseVisualStyleBackColor = false;
@@ -68,9 +68,9 @@
             // 
             btnGestionSucursal.BackColor = Color.Azure;
             btnGestionSucursal.Font = new Font("Segoe UI Semibold", 11.25F, FontStyle.Bold);
-            btnGestionSucursal.Location = new Point(12, 558);
+            btnGestionSucursal.Location = new Point(12, 541);
             btnGestionSucursal.Name = "btnGestionSucursal";
-            btnGestionSucursal.Size = new Size(93, 56);
+            btnGestionSucursal.Size = new Size(93, 49);
             btnGestionSucursal.TabIndex = 2;
             btnGestionSucursal.Text = "Gestión Sucursal";
             btnGestionSucursal.UseVisualStyleBackColor = false;
@@ -80,7 +80,7 @@
             // 
             btnGestionUsuario.BackColor = Color.Azure;
             btnGestionUsuario.Font = new Font("Segoe UI Semibold", 11.25F, FontStyle.Bold);
-            btnGestionUsuario.Location = new Point(12, 635);
+            btnGestionUsuario.Location = new Point(12, 615);
             btnGestionUsuario.Name = "btnGestionUsuario";
             btnGestionUsuario.Size = new Size(93, 52);
             btnGestionUsuario.TabIndex = 3;
@@ -92,12 +92,13 @@
             // 
             btnGestionStock.BackColor = Color.Azure;
             btnGestionStock.Font = new Font("Segoe UI Semibold", 11.25F, FontStyle.Bold);
-            btnGestionStock.Location = new Point(12, 75);
+            btnGestionStock.Location = new Point(12, 42);
             btnGestionStock.Name = "btnGestionStock";
             btnGestionStock.Size = new Size(93, 59);
             btnGestionStock.TabIndex = 4;
             btnGestionStock.Text = "Gestión Stock";
             btnGestionStock.UseVisualStyleBackColor = false;
+            btnGestionStock.Click += btnGestionStock_Click;
             // 
             // btnCerrarSesión
             // 
@@ -145,9 +146,9 @@
             // 
             // panelContenedor
             // 
-            panelContenedor.Location = new Point(129, 33);
+            panelContenedor.Location = new Point(121, 33);
             panelContenedor.Name = "panelContenedor";
-            panelContenedor.Size = new Size(1183, 677);
+            panelContenedor.Size = new Size(1191, 677);
             panelContenedor.TabIndex = 9;
             // 
             // fmsPrincipal

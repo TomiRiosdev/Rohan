@@ -1,0 +1,17 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace BLL.Enum
+{
+    public enum TipoMovimientoEnum
+    {
+        IngresoManual = 1,
+        IngresoPorCompra = 2,
+        EgresoPorVenta = 3,
+        EgresoPorMerma = 4,
+        Transferencia = 5
+    }
+}

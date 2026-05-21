@@ -1,4 +1,14 @@
-﻿using DAO.Interface;
+﻿using DAO.Implementations.SQLServer.GestionCompra;
+using DAO.Implementations.SQLServer.GestionProducto;
+using DAO.Implementations.SQLServer.GestionProveedor;
+using DAO.Implementations.SQLServer.GestionStock;
+using DAO.Implementations.SQLServer.GestionSucursal;
+using DAO.Interface;
+using DAO.Interface.GestionCompra;
+using DAO.Interface.GestionProducto;
+using DAO.Interface.GestionProveedor;
+using DAO.Interface.GestionStock;
+using DAO.Interface.GestionSucursal;
 
 namespace DAO.Implementations.SQLServer
 {
@@ -13,11 +23,15 @@ namespace DAO.Implementations.SQLServer
         public IUnidadMedidaRepository UnidadMedidaRepository { get; private set; }
         public ISucursalRepository SucursalRepository { get; private set; }
         public ITipoSucursalRepository TipoSucursalRepository { get; private set; }
-        public IStockPorSucursalRepository StockPorSucursalRepository { get; private set; }
+        public IStocklRepository StockPorSucursalRepository { get; private set; }
         public IProductoProveedorRepository ProductoProveedorRepository { get; private set; }
+        public ISolicitudPedidoRepository SolicitudPedidoRepository { get; private set; }
+        public IMovimientosStockRepository MovimientosStockRepository { get; private set; }
+        public ILoteRepository LoteRepository { get; private set; }
+        public ITipoMovimientoRepository TipoMovimientoRepository { get; private set; }
 
 
-        // SOLUCIÓN: Recibe el contexto único administrado por el ServiceProvider
+        // Recibe el contexto único administrado por el ServiceProvider
         public UnitOfWork(RohanContext dbContext)
         {
             _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
@@ -29,8 +43,12 @@ namespace DAO.Implementations.SQLServer
             UnidadMedidaRepository = new UnidadMedidaRepository(_dbContext);
             SucursalRepository = new SucursalRepository(_dbContext);
             TipoSucursalRepository = new TipoSucursalRepository(_dbContext);
-            StockPorSucursalRepository = new StockPorSucursalRepository(_dbContext);
+            StockPorSucursalRepository = new StockRepository(_dbContext);
             ProductoProveedorRepository = new ProductoProveedorRepository(_dbContext);
+            SolicitudPedidoRepository = new SolicitudPedidoRepository(_dbContext);
+            MovimientosStockRepository = new MovimientosStockRepository(_dbContext);
+            LoteRepository = new LoteRepository(_dbContext);
+            TipoMovimientoRepository = new TipoMovimientoRepository(_dbContext);
 
         }
 

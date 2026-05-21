@@ -2,6 +2,7 @@
 using Service.Facade;
 using UI.GestiónProducto;
 using UI.GestiónProveedor;
+using UI.GestiónStock;
 using UI.GestiónSucursal;
 using UI.GestionUsuario;
 
@@ -35,13 +36,13 @@ namespace UI
 
         private void btnGestionProveedor_Click(object sender, EventArgs e)
         {
-           AbrirFormularioEnContenedor<fmsGestionProveedor>();
+            AbrirFormularioEnContenedor<fmsGestionProveedor>();
         }
 
         private void btnGestionSucursal_Click(object sender, EventArgs e)
         {
             AbrirFormularioEnContenedor<fmsGestionSucursal>();
-            
+
         }
 
         private void btnGestionUsuario_Click(object sender, EventArgs e)
@@ -87,6 +88,12 @@ namespace UI
                 // acá deberías llamar a sus métodos de actualización para que filtren por el nuevo ID.
             }
         }
+
+        private void btnGestionStock_Click(object sender, EventArgs e)
+        {
+            AbrirFormularioEnContenedor<fmsGestionStock>();
+        }
+
         private void AbrirFormularioEnContenedor<T>() where T : Form
         {
             // 1. Si ya hay un formulario abierto, lo cerramos para liberar memoria RAM
@@ -108,13 +115,13 @@ namespace UI
             panelContenedor.Controls.Add(formularioHijo);
 
             // 4. Lógica de centrado dinámico usando el tamaño de tu panel
-          //  formularioHijo.Location = new Point(
-          //      (panelContenedor.Width - formularioHijo.Width) / 2,
-          //      (panelContenedor.Height - formularioHijo.Height) / 2
-          //  );
+            //  formularioHijo.Location = new Point(
+            //      (panelContenedor.Width - formularioHijo.Width) / 2,
+            //      (panelContenedor.Height - formularioHijo.Height) / 2
+            //  );
 
             // 5. Evitamos que se estire feo si se maximiza la pantalla principal
-         //   formularioHijo.Anchor = AnchorStyles.None;
+            //   formularioHijo.Anchor = AnchorStyles.None;
 
             formularioHijo.BringToFront(); // En C# es BringToFront(), ojo con el tipeo de la imagen
             formularioHijo.Show();
