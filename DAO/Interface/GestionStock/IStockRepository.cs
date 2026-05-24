@@ -3,7 +3,7 @@
 
 namespace DAO.Interface.GestionStock
 {
-    public interface IStocklRepository
+    public interface IStockRepository
     {
         StockPorSucursal GetByIds(Guid idSucursal, Guid idProducto);
         IEnumerable<StockPorSucursal> GetConsolidadoBySucursal(Guid idSucursal);

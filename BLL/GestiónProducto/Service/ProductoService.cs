@@ -20,8 +20,7 @@ namespace BLL.GestiónProducto.Service
             IUnitOfWork uow,
             IValidator<ProductoDTO> validator 
             // IBitacoraService bitacora)
-         )
-
+        )
         {
             _uow = uow ?? throw new ArgumentNullException(nameof(uow));
             _validator = validator ?? throw new ArgumentNullException(nameof(validator));

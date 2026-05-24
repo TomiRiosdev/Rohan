@@ -47,6 +47,7 @@ namespace UI
                     {
                         // Flujo Admin: Debe elegir sucursal obligatoriamente
                         var fmsSelector = _serviceProvider.GetRequiredService<fmsSeleccionarSucursal>();
+                        fmsSelector.StartPosition = FormStartPosition.CenterParent;
 
                         if (fmsSelector.ShowDialog() == DialogResult.OK)
                         {

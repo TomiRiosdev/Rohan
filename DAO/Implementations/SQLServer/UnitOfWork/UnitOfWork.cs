@@ -23,7 +23,7 @@ namespace DAO.Implementations.SQLServer
         public IUnidadMedidaRepository UnidadMedidaRepository { get; private set; }
         public ISucursalRepository SucursalRepository { get; private set; }
         public ITipoSucursalRepository TipoSucursalRepository { get; private set; }
-        public IStocklRepository StockPorSucursalRepository { get; private set; }
+        public IStockRepository StockPorSucursalRepository { get; private set; }
         public IProductoProveedorRepository ProductoProveedorRepository { get; private set; }
         public ISolicitudPedidoRepository SolicitudPedidoRepository { get; private set; }
         public IMovimientosStockRepository MovimientosStockRepository { get; private set; }

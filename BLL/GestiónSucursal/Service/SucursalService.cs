@@ -9,11 +9,11 @@ using FluentValidation.Results;
 
 namespace BLL.GestiónSucursal.Service
 {
-    public class SucursalSerice : ISucursalService
+    public class SucursalService : ISucursalService
     {
         private readonly IUnitOfWork _uow;
         private readonly IValidator<SucursalDTO> _validator;
-        public SucursalSerice
+        public SucursalService
         (
             IValidator<SucursalDTO> validator,
             IUnitOfWork uow

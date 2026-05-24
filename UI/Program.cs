@@ -30,7 +30,7 @@ namespace UI
 
             // 4. Obtener y ejecutar el Login como punto de entrada
             var loginForm = serviceProvider.GetRequiredService<Login>();
-
+            loginForm.StartPosition = FormStartPosition.CenterScreen;
             Application.Run(loginForm);
 
         }
@@ -67,6 +67,12 @@ namespace UI
 
             // Formularios de Gestión de Stock
              services.AddTransient<fmsGestionStock>();
+             services.AddTransient<fmsInventario>();
+             services.AddTransient<fmsAgregarStockManual>();
+             services.AddTransient<fmsAgregarStockPorOC>();
+             services.AddTransient<fmsSolicitudPedido>();
+             services.AddTransient<fmsMermaAlerta>();
+             services.AddTransient<fmsListarProductosPopUp>();
             
         }
     }

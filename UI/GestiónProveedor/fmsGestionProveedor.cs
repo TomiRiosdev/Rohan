@@ -43,6 +43,7 @@ namespace UI.GestiónProveedor
         private void btnAgregar_Click(object sender, EventArgs e)
         {
             var fmsCrear = _serviceProvider.GetRequiredService<fmsCrearProveedor>();
+            fmsCrear.StartPosition = FormStartPosition.CenterParent;
             fmsCrear.ShowDialog();
             CargarProveedor();
         }
@@ -61,6 +62,8 @@ namespace UI.GestiónProveedor
             // Abrimos el form 
             using (var frmModificar = new fmsModificarProveedor(_proveedorFacade, proveedorSeleccionado))
             {
+                frmModificar.StartPosition = FormStartPosition.CenterParent;
+
                 if (frmModificar.ShowDialog() == DialogResult.OK)
                 {
                     CargarProveedor(); // Refrescamos la grilla

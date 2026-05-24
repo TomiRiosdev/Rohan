@@ -51,7 +51,7 @@ namespace UI.GestiónProducto
             dgvProductos.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgvProductos.Location = new Point(12, 204);
             dgvProductos.Name = "dgvProductos";
-            dgvProductos.Size = new Size(1086, 444);
+            dgvProductos.Size = new Size(1151, 422);
             dgvProductos.TabIndex = 0;
             dgvProductos.CellContentClick += dgvProductos_CellContentClick;
             // 
@@ -203,7 +203,7 @@ namespace UI.GestiónProducto
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.AliceBlue;
-            ClientSize = new Size(1111, 700);
+            ClientSize = new Size(1175, 638);
             Controls.Add(label2);
             Controls.Add(btnLimpiar);
             Controls.Add(cboFiltroMaestro);

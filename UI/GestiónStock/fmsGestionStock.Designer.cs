@@ -31,9 +31,9 @@
             btnAgregarManual = new Button();
             btnAgregarPorOC = new Button();
             btnSolicitudPedido = new Button();
-            btnParametros = new Button();
-            btnActualizar = new Button();
-            button5 = new Button();
+            btnMermaAlerta = new Button();
+            btnHistorial = new Button();
+            btnVerInventario = new Button();
             label1 = new Label();
             panelContenedor = new Panel();
             SuspendLayout();
@@ -42,67 +42,73 @@
             // 
             btnAgregarManual.BackColor = Color.Azure;
             btnAgregarManual.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold);
-            btnAgregarManual.Location = new Point(12, 52);
+            btnAgregarManual.Location = new Point(122, 52);
             btnAgregarManual.Name = "btnAgregarManual";
             btnAgregarManual.Size = new Size(104, 49);
             btnAgregarManual.TabIndex = 14;
             btnAgregarManual.Text = "Agregar manual";
             btnAgregarManual.UseVisualStyleBackColor = false;
+            btnAgregarManual.Click += btnAgregarManual_Click;
             // 
             // btnAgregarPorOC
             // 
             btnAgregarPorOC.BackColor = Color.Azure;
             btnAgregarPorOC.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold);
-            btnAgregarPorOC.Location = new Point(122, 52);
+            btnAgregarPorOC.Location = new Point(232, 52);
             btnAgregarPorOC.Name = "btnAgregarPorOC";
             btnAgregarPorOC.Size = new Size(104, 49);
             btnAgregarPorOC.TabIndex = 15;
             btnAgregarPorOC.Text = " Agregar por OC";
             btnAgregarPorOC.UseVisualStyleBackColor = false;
+            btnAgregarPorOC.Click += btnAgregarPorOC_Click;
             // 
             // btnSolicitudPedido
             // 
             btnSolicitudPedido.BackColor = Color.Azure;
             btnSolicitudPedido.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold);
-            btnSolicitudPedido.Location = new Point(232, 52);
+            btnSolicitudPedido.Location = new Point(342, 52);
             btnSolicitudPedido.Name = "btnSolicitudPedido";
             btnSolicitudPedido.Size = new Size(104, 49);
             btnSolicitudPedido.TabIndex = 16;
             btnSolicitudPedido.Text = "Solicitud de pedido";
             btnSolicitudPedido.UseVisualStyleBackColor = false;
+            btnSolicitudPedido.Click += btnSolicitudPedido_Click;
             // 
-            // btnParametros
+            // btnMermaAlerta
             // 
-            btnParametros.BackColor = Color.Azure;
-            btnParametros.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold);
-            btnParametros.Location = new Point(342, 52);
-            btnParametros.Name = "btnParametros";
-            btnParametros.Size = new Size(104, 49);
-            btnParametros.TabIndex = 17;
-            btnParametros.Text = "Parametros";
-            btnParametros.UseVisualStyleBackColor = false;
+            btnMermaAlerta.BackColor = Color.Azure;
+            btnMermaAlerta.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold);
+            btnMermaAlerta.Location = new Point(452, 52);
+            btnMermaAlerta.Name = "btnMermaAlerta";
+            btnMermaAlerta.Size = new Size(104, 49);
+            btnMermaAlerta.TabIndex = 17;
+            btnMermaAlerta.Text = "Merma \r\nAlerta";
+            btnMermaAlerta.UseVisualStyleBackColor = false;
+            btnMermaAlerta.Click += btnMermaAlerta_Click;
             // 
-            // btnActualizar
+            // btnHistorial
             // 
-            btnActualizar.BackColor = Color.Azure;
-            btnActualizar.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold);
-            btnActualizar.Location = new Point(562, 52);
-            btnActualizar.Name = "btnActualizar";
-            btnActualizar.Size = new Size(104, 49);
-            btnActualizar.TabIndex = 18;
-            btnActualizar.Text = "Actualizar";
-            btnActualizar.UseVisualStyleBackColor = false;
+            btnHistorial.BackColor = Color.Azure;
+            btnHistorial.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold);
+            btnHistorial.Location = new Point(562, 52);
+            btnHistorial.Name = "btnHistorial";
+            btnHistorial.Size = new Size(104, 49);
+            btnHistorial.TabIndex = 18;
+            btnHistorial.Text = "Historial";
+            btnHistorial.UseVisualStyleBackColor = false;
+            btnHistorial.Click += btnHistorial_Click;
             // 
-            // button5
+            // btnVerInventario
             // 
-            button5.BackColor = Color.Azure;
-            button5.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold);
-            button5.Location = new Point(452, 52);
-            button5.Name = "button5";
-            button5.Size = new Size(104, 49);
-            button5.TabIndex = 19;
-            button5.Text = "Agregar ";
-            button5.UseVisualStyleBackColor = false;
+            btnVerInventario.BackColor = Color.Azure;
+            btnVerInventario.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold);
+            btnVerInventario.Location = new Point(12, 52);
+            btnVerInventario.Name = "btnVerInventario";
+            btnVerInventario.Size = new Size(104, 49);
+            btnVerInventario.TabIndex = 19;
+            btnVerInventario.Text = "Ver inventario";
+            btnVerInventario.UseVisualStyleBackColor = false;
+            btnVerInventario.Click += btnVerInventario_Click;
             // 
             // label1
             // 
@@ -118,7 +124,7 @@
             // 
             panelContenedor.Location = new Point(1, 107);
             panelContenedor.Name = "panelContenedor";
-            panelContenedor.Size = new Size(1108, 589);
+            panelContenedor.Size = new Size(1162, 519);
             panelContenedor.TabIndex = 21;
             // 
             // fmsGestionStock
@@ -126,17 +132,18 @@
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.AliceBlue;
-            ClientSize = new Size(1111, 700);
+            ClientSize = new Size(1175, 638);
             Controls.Add(panelContenedor);
             Controls.Add(label1);
-            Controls.Add(button5);
-            Controls.Add(btnActualizar);
-            Controls.Add(btnParametros);
+            Controls.Add(btnVerInventario);
+            Controls.Add(btnHistorial);
+            Controls.Add(btnMermaAlerta);
             Controls.Add(btnSolicitudPedido);
             Controls.Add(btnAgregarPorOC);
             Controls.Add(btnAgregarManual);
             Name = "fmsGestionStock";
             Text = "Gestion Stock";
+            Load += fmsGestionStock_Load;
             ResumeLayout(false);
             PerformLayout();
         }
@@ -146,9 +153,9 @@
         private Button btnAgregarManual;
         private Button btnAgregarPorOC;
         private Button btnSolicitudPedido;
-        private Button btnParametros;
-        private Button btnActualizar;
-        private Button button5;
+        private Button btnMermaAlerta;
+        private Button btnHistorial;
+        private Button btnVerInventario;
         private Label label1;
         private Panel panelContenedor;
     }

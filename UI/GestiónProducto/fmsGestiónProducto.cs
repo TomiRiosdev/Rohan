@@ -160,6 +160,7 @@ namespace UI.GestiónProducto
         private void btnAgregar_Click(object sender, EventArgs e)
         {
             var frmCreate = _serviceProvider.GetRequiredService<fmsCrearProducto>();
+            frmCreate.StartPosition = FormStartPosition.CenterParent;
             frmCreate.ShowDialog();
 
             CargarProductos();       // Refrescar la lista después de cerrar el formulario de creación
@@ -179,6 +180,8 @@ namespace UI.GestiónProducto
             // Abrimos el form pasando el producto
             using (var frmModificar = new fmsModificarProducto(_productoFacade, _categoriaFacade, _unidadMedidaFacade, productoSeleccionado))
             {
+                frmModificar.StartPosition = FormStartPosition.CenterParent;
+
                 if (frmModificar.ShowDialog() == DialogResult.OK)
                 {
                     CargarProductos(); // Refrescamos la grilla
@@ -220,6 +223,7 @@ namespace UI.GestiónProducto
         private void btnAgregarCatUnMed_Click(object sender, EventArgs e)
         {
             var frmCrudCatUMed = _serviceProvider.GetRequiredService<fmsCrudCatUMed>();
+            frmCrudCatUMed.StartPosition = FormStartPosition.CenterParent;
             frmCrudCatUMed.ShowDialog();
         }
 

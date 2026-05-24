@@ -95,7 +95,7 @@ namespace UI.GestionUsuario
         private void btnAgregar_Click(object sender, EventArgs e)
         {
             var fmsAgregarUsuario = _serviceProvider.GetRequiredService<fmsAgregarUsuario>();
-          
+            fmsAgregarUsuario.StartPosition = FormStartPosition.CenterParent;
             fmsAgregarUsuario.ShowDialog();
 
         }
@@ -103,6 +103,7 @@ namespace UI.GestionUsuario
         private void btnGestionPermiso_Click(object sender, EventArgs e)
         {
             var fmsAgregarPermisos = _serviceProvider.GetRequiredService<fmsAgregarPermisos>();
+            fmsAgregarPermisos.StartPosition = FormStartPosition.CenterParent;
             fmsAgregarPermisos.Show();
         }
 

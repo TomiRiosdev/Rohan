@@ -40,6 +40,7 @@ namespace UI.GestiónSucursal
         private void btnAgregar_Click(object sender, EventArgs e)
         {
             var frmCrear = _serviceProvider.GetRequiredService<fmsCrearSucursal>();
+            frmCrear.StartPosition = FormStartPosition.CenterParent;
             frmCrear.ShowDialog();
         }
 
@@ -54,6 +55,8 @@ namespace UI.GestiónSucursal
 
             using (var fmsModificar = new fmsModificarSucursal(_sucursalFacade, _tipoSucursalFacade, sucursalSeleccionada))
             {
+                fmsModificar.StartPosition = FormStartPosition.CenterParent;
+
                 if (fmsModificar.ShowDialog() == DialogResult.OK)
                 {
                     CargarSucursales(); // Recarga las su
@@ -189,6 +192,8 @@ namespace UI.GestiónSucursal
         private void btnAgregarTipoSucursal_Click(object sender, EventArgs e)
         {
             var frmCrearTipoSucursal = _serviceProvider.GetRequiredService<fmsCrearTipoSucursal>();
+            frmCrearTipoSucursal.StartPosition = FormStartPosition.CenterParent;
+
             frmCrearTipoSucursal.ShowDialog();
 
         }

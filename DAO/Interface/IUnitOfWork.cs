@@ -16,7 +16,7 @@ namespace DAO.Interface
         IUnidadMedidaRepository UnidadMedidaRepository { get; }
         ISucursalRepository SucursalRepository { get; }
         ITipoSucursalRepository TipoSucursalRepository { get; }
-        IStocklRepository StockPorSucursalRepository { get; }
+        IStockRepository StockPorSucursalRepository { get; }
         IProductoProveedorRepository ProductoProveedorRepository { get; }
         ISolicitudPedidoRepository SolicitudPedidoRepository { get; }
         IMovimientosStockRepository MovimientosStockRepository { get; }

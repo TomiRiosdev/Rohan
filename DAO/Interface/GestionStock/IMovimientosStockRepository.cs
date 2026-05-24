@@ -9,7 +9,7 @@ namespace DAO.Interface.GestionStock
 {
     public interface IMovimientosStockRepository
     {
-        // Registro atómico sin SaveChanges (Principio de la UOW)
+        // Registro atómico 
         void Add(MovimientosStock entity);
 
         // Consulta para el historial del Kardex filtrado por sucursal y fechas

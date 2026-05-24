@@ -59,7 +59,7 @@ namespace BLL.GestiónStock.Service
                     // Si no la tenés, simulamos el vencimiento a partir de la FechaIngreso para proteger el control de mermas.
                     if (!lote.FechaIngreso.HasValue) continue;
 
-                    DateTime fechaVence = lote.FechaIngreso.Value.AddMonths(6).Date; // Simulación profesional de contingencia
+                    DateTime fechaVence = lote.FechaIngreso.Value.AddMonths(6).Date; 
                     int cantidad = lote.CantidadActual ?? 0;
 
                     if (fechaVence < hoy)

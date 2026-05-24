@@ -1,11 +1,11 @@
 ﻿using DAO.Interface.GestionStock;
 using Models;
-using System.Data.Entity;
+using Microsoft.EntityFrameworkCore;
 
 
 namespace DAO.Implementations.SQLServer.GestionStock
 {
-    public class StockRepository : IStocklRepository
+    public class StockRepository : IStockRepository
     {
         private readonly RohanContext _dbContext;
 
@@ -34,14 +34,19 @@ namespace DAO.Implementations.SQLServer.GestionStock
         {
             try
             {
-                // .Include(s => s.IdProductoNavigation) es OBLIGATORIO. 
-                // Si no lo ponés, EF no hace el INNER JOIN con la tabla Producto,
-                // y cuando quieras mostrar el "Nombre del Producto" en la grilla, te va a tirar NullReferenceException.
                 return _dbContext.StockPorSucursal
-                    .Include(s => s.IdProductoNavigation)
-                    .Where(s => s.IdSucursal == idSucursal)
-                    .AsNoTracking() // Optimiza la velocidad de lectura ya que estos datos solo se van a mostrar
-                    .ToList();
+            // 1. Primera cadena: Stock -> Producto -> Categoría
+            .Include(s => s.IdProductoNavigation)
+                .ThenInclude(p => p.IdCategoriaNavigation)
+
+            // 2. Segunda cadena: Vuelve a arrancar desde Stock -> Producto -> Unidad de Medida
+            .Include(s => s.IdProductoNavigation)
+                .ThenInclude(p => p.IdUnidadMedidaNavigation)
+
+            // 3. Filtros y materialización
+            .Where(s => s.IdSucursal == idSucursal)
+            .ToList();
+
             }
             catch (Exception ex)
             {
