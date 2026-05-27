@@ -54,13 +54,13 @@ namespace UI.GestiónStock
             dgvInventario.Columns.Add(new DataGridViewTextBoxColumn { Name = "CodigoSku", DataPropertyName = "CodigoSku", HeaderText = "Código SKU", FillWeight = 80 });
             dgvInventario.Columns.Add(new DataGridViewTextBoxColumn { Name = "ProductoNombre", DataPropertyName = "ProductoNombre", HeaderText = "Producto", FillWeight = 150 });
             dgvInventario.Columns.Add(new DataGridViewTextBoxColumn { Name = "CategoriaNombre", DataPropertyName = "CategoriaNombre", HeaderText = "Categoría", FillWeight = 90 });
-            dgvInventario.Columns.Add(new DataGridViewTextBoxColumn { Name = "UnidadMedidaNombre", DataPropertyName = "UnidadMedidaNombre", HeaderText = "U. Medida", FillWeight = 70 });
-            dgvInventario.Columns.Add(new DataGridViewTextBoxColumn { Name = "CantidadTotal", DataPropertyName = "CantidadTotal", HeaderText = "Stock Actual", FillWeight = 70 });
+            dgvInventario.Columns.Add(new DataGridViewTextBoxColumn { Name = "EnvasesEnteros", DataPropertyName = "EnvasesEnteros", HeaderText = "Envases/Bultos", FillWeight = 80 });   
+            dgvInventario.Columns.Add(new DataGridViewTextBoxColumn { Name = "StockDetalladoVisual", DataPropertyName = "StockDetalladoVisual", HeaderText = "Estado de Stock", FillWeight = 140 });
             dgvInventario.Columns.Add(new DataGridViewTextBoxColumn { Name = "StockMinimo", DataPropertyName = "StockMinimo", HeaderText = "Stock Mínimo", FillWeight = 70 });
             dgvInventario.Columns.Add(new DataGridViewTextBoxColumn { Name = "StockMaximo", DataPropertyName = "StockMaximo", HeaderText = "Techo Máx.", FillWeight = 70 });
 
             // Alineamos las columnas numéricas a la derecha para una lectura contable limpia
-            dgvInventario.Columns["CantidadTotal"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+          
             dgvInventario.Columns["StockMinimo"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
             dgvInventario.Columns["StockMaximo"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
         }

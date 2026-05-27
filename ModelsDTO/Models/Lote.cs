@@ -33,5 +33,5 @@ public partial class Lote
 
     public virtual Sucursal? IdSucursalNavigation { get; set; }
 
-    public virtual ICollection<MovimientosStock> MovimientosStocks { get; set; } = new List<MovimientosStock>();
+    public virtual ICollection<MovimientosStock> MovimientosStock { get; set; } = new List<MovimientosStock>();
 }

@@ -1,5 +1,5 @@
-﻿using Models;
-
+﻿using System;
+using System.Collections.Generic;
 
 namespace Models;
 
@@ -11,7 +11,7 @@ public partial class OrdenCompra
 
     public Guid? IdUsuario { get; set; }
 
-    public Guid? IdEstadoOc { get; set; }
+    public int? IdEstadoOc { get; set; }
 
     public int? NroSolicitud { get; set; }
 
@@ -19,7 +19,7 @@ public partial class OrdenCompra
 
     public decimal? CostoTotal { get; set; }
 
-    public virtual EstadoSolicitud? IdEstadoOcNavigation { get; set; }
-
     public virtual Proveedor? IdProveedorNavigation { get; set; }
+    public virtual EstadoSolicitud? IdEstadoOcNavigation { get; set; }
+    public virtual ICollection<OrdenCompraDetalle> OrdenCompraDetalle { get; set; } = new List<OrdenCompraDetalle>();
 }

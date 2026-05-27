@@ -32,49 +32,39 @@ namespace BLL.GestiónCompra.Service
         {
             try
             {
-                // 1. Validaciones sintácticas (FluentValidation)
                 ValidarDto(dto);
 
-                // 2. Validaciones de contexto sobre los datos que ya vienen inyectados en el DTO desde la UI
-                if (dto.IdSucursal == Guid.Empty)
+                if (dto.IdSucursal == null || dto.IdSucursal == Guid.Empty)
                     throw new SolicitudPedidoServiceException("Error: La solicitud debe incluir una sucursal de origen válida.");
-                if (dto.IdUsuario == Guid.Empty)
+                if (dto.IdUsuario == null || dto.IdUsuario == Guid.Empty)
                     throw new SolicitudPedidoServiceException("Error: La solicitud debe incluir el usuario emisor.");
 
-                // 3. Resolución automática del Estado Inicial (Enum)
-                string estadoInicialStr = EstadoSolicitudEnum.Pendiente.ToString();
-                var estadoDb = _uow.SolicitudPedidoRepository.Estados.GetByDescripcion(estadoInicialStr);
+                int idEstadoInicial = (int)EstadoSolicitudEnum.Pendiente;
 
-                if (estadoDb == null)
-                    throw new SolicitudPedidoServiceException("Error de configuración: El estado inicial 'Pendiente' no existe.");
-
-                // 4. Mapeo del DTO hacia la Entidad
-                var entity = dto.ToEntity();
-
-                // 5. Asignamos los datos validados
+                var entity = dto.ToEntity();  
                 entity.IdSolicitudPedido = Guid.NewGuid();
                 entity.FechaSolicitud = DateTime.Now;
-                entity.IdEstadoSolicitud = estadoDb.IdEstadoSolicitud;
+                entity.IdEstadoSolicitud = idEstadoInicial; 
 
-                // 6. Asignación secuencial de los Renglones de los detalles...
+       
                 int contadorRenglon = 1;
-                foreach (var detalle in entity.SolicitudPedidoDetalles)
+                foreach (var detalle in entity.SolicitudPedidoDetalle)
                 {
                     detalle.IdSolicitudPedido = entity.IdSolicitudPedido;
                     detalle.Renglon = contadorRenglon;
-                    contadorRenglon++;
-
-                    var prodDb = _uow.ProductoRepository.GetById(detalle.IdProducto ?? Guid.Empty);
-                    if (prodDb == null || prodDb.Habilitado == false)
-                        throw new SolicitudPedidoServiceException($"El producto en el renglón {detalle.Renglon} no es válido.");
+                    contadorRenglon++;                 
                 }
 
                 _uow.SolicitudPedidoRepository.Add(entity);
                 _uow.SaveChanges();
             }
+            catch (SolicitudPedidoServiceException)
+            {
+                throw;
+            }
             catch (Exception ex)
             {
-                throw new SolicitudPedidoServiceException("Error interno al intentar registrar la Solicitud de Pedido.", ex);
+                throw new Exception("Error interno al intentar registrar la Solicitud de Pedido.", ex);
             }
         }
 
@@ -102,21 +92,22 @@ namespace BLL.GestiónCompra.Service
         {
             try
             {
-                // Validación de contexto sobre el parámetro que viene desde la UI
                 if (idSucursal == Guid.Empty)
                     throw new SolicitudPedidoServiceException("No se puede cargar el historial: El identificador de la sucursal es inválido.");
 
-                // Consumimos la DAL pasando directamente nuestro parámetro
+                // Consumimos la DAL
                 var historial = _uow.SolicitudPedidoRepository.GetBySucursal(idSucursal);
-                return historial.ToDTOList();
+
+                // Convertimos la lista de entidades a DTOs usando LINQ directo sobre tu Mapper
+                return historial.Select(s => s.ToDTO()).ToList();
             }
             catch (SolicitudPedidoServiceException)
             {
-                throw; // Re-lanzamos el error controlado de negocio
+                throw;
             }
             catch (Exception ex)
             {
-                throw new SolicitudPedidoServiceException("Error crítico al recuperar el listado histórico de solicitudes.", ex);
+                throw new Exception("Error crítico al recuperar el listado histórico de solicitudes.", ex);
             }
         }
 

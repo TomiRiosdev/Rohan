@@ -42,7 +42,7 @@
             dgvProductos.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgvProductos.Location = new Point(12, 65);
             dgvProductos.Name = "dgvProductos";
-            dgvProductos.Size = new Size(643, 176);
+            dgvProductos.Size = new Size(643, 233);
             dgvProductos.TabIndex = 0;
             dgvProductos.CellDoubleClick += dgvProductos_CellDoubleClick;
             // 
@@ -83,24 +83,26 @@
             btnBuscar.TabIndex = 21;
             btnBuscar.Text = "Buscar ";
             btnBuscar.UseVisualStyleBackColor = false;
+            btnBuscar.Click += btnBuscar_Click_1;
             // 
             // btnCerrar
             // 
             btnCerrar.BackColor = Color.Azure;
             btnCerrar.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnCerrar.Location = new Point(571, 266);
+            btnCerrar.Location = new Point(578, 330);
             btnCerrar.Name = "btnCerrar";
             btnCerrar.Size = new Size(84, 29);
             btnCerrar.TabIndex = 25;
             btnCerrar.Text = "Cerrar";
             btnCerrar.UseVisualStyleBackColor = false;
+            btnCerrar.Click += btnCerrar_Click;
             // 
             // fmsListarProductosPopUp
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.AliceBlue;
-            ClientSize = new Size(663, 307);
+            ClientSize = new Size(674, 371);
             Controls.Add(btnCerrar);
             Controls.Add(label2);
             Controls.Add(txtBusqueda);
@@ -108,7 +110,7 @@
             Controls.Add(btnBuscar);
             Controls.Add(dgvProductos);
             Name = "fmsListarProductosPopUp";
-            Text = "fmsListarProductosPopUp";
+            Text = "Buscar producto";
             Load += fmsListarProductosPopUp_Load;
             ((System.ComponentModel.ISupportInitialize)dgvProductos).EndInit();
             ResumeLayout(false);

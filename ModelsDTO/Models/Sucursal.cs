@@ -17,7 +17,7 @@ public partial class Sucursal
 
     public int? Telefono { get; set; }
 
-    public Guid? IdTipoSucursal { get; set; }
+    public Guid? IdTipoSucursal { get; set; } = Guid.Empty;
 
     public string? Localidad { get; set; }
 
@@ -25,7 +25,7 @@ public partial class Sucursal
 
     public virtual TipoSucursal? IdTipoSucursalNavigation { get; set; }
 
-    public virtual ICollection<Lote> Lotes { get; set; } = new List<Lote>();
+    public virtual ICollection<Lote> Lote { get; set; } = new List<Lote>();
 
     public virtual ICollection<MovimientosStock> MovimientosStockIdSucursalDestinoNavigations { get; set; } = new List<MovimientosStock>();
 
@@ -33,7 +33,7 @@ public partial class Sucursal
 
     public virtual ICollection<MovimientosStock> MovimientosStockIdSucursalOrigenNavigations { get; set; } = new List<MovimientosStock>();
 
-    public virtual ICollection<SolicitudPedido> SolicitudPedidos { get; set; } = new List<SolicitudPedido>();
+    public virtual ICollection<SolicitudPedido> SolicitudPedido { get; set; } = new List<SolicitudPedido>();
 
-    public virtual ICollection<StockPorSucursal> StockPorSucursals { get; set; } = new List<StockPorSucursal>();
+    public virtual ICollection<StockPorSucursal> StockPorSucursal { get; set; } = new List<StockPorSucursal>();
 }

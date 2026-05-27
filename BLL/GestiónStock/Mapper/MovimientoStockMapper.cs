@@ -16,7 +16,7 @@ namespace BLL.GestiónStock.Mapper
                 IdSucursal = entity.IdSucursal ?? Guid.Empty,
                 IdLote = entity.IdLote ?? Guid.Empty,
                 NumeroLote = entity.IdLoteNavigation?.NumeroLote ?? "Sin Lote",
-                IdTipoMovimiento = entity.IdTipoMovimiento ?? Guid.Empty,
+           
 
                 // Mapeamos la descripción del tipo (ej: "Ingreso Manual", "Venta")
                 TipoMovimientoTexto = entity.IdTipoMovimientoNavigation?.Descripcion ?? "Desconocido",
@@ -41,7 +41,7 @@ namespace BLL.GestiónStock.Mapper
                 IdMovimiento = dto.IdMovimiento,
                 IdSucursal = dto.IdSucursal == Guid.Empty ? (Guid?)null : dto.IdSucursal,
                 IdLote = dto.IdLote == Guid.Empty ? (Guid?)null : dto.IdLote,
-                IdTipoMovimiento = dto.IdTipoMovimiento == Guid.Empty ? (Guid?)null : dto.IdTipoMovimiento,
+             
                 Cantidad = dto.Cantidad,
                 FechaMovimiento = dto.FechaMovimiento,
                 Observaciones = dto.Observaciones

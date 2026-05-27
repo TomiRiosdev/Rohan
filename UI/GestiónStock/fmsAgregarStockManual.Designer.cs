@@ -36,11 +36,11 @@
             btnAgregar = new Button();
             btnBuscar = new Button();
             groupBox1 = new GroupBox();
+            cxbTipoMovimiento = new ComboBox();
+            lblTipoMoviemnto = new Label();
             txtProducto = new TextBox();
             label1 = new Label();
             btnCerrar = new Button();
-            lblTipoMoviemnto = new Label();
-            cxbTipoMovimiento = new ComboBox();
             ((System.ComponentModel.ISupportInitialize)nupCantidad).BeginInit();
             groupBox1.SuspendLayout();
             SuspendLayout();
@@ -54,10 +54,11 @@
             // 
             // txtObservacion
             // 
-            txtObservacion.Location = new Point(145, 192);
+            txtObservacion.Location = new Point(148, 196);
             txtObservacion.Name = "txtObservacion";
             txtObservacion.Size = new Size(223, 23);
             txtObservacion.TabIndex = 2;
+            txtObservacion.TextChanged += txtObservacion_TextChanged;
             // 
             // lblProducto
             // 
@@ -131,6 +132,24 @@
             groupBox1.TabIndex = 12;
             groupBox1.TabStop = false;
             // 
+            // cxbTipoMovimiento
+            // 
+            cxbTipoMovimiento.FormattingEnabled = true;
+            cxbTipoMovimiento.Location = new Point(148, 135);
+            cxbTipoMovimiento.Name = "cxbTipoMovimiento";
+            cxbTipoMovimiento.Size = new Size(223, 23);
+            cxbTipoMovimiento.TabIndex = 14;
+            // 
+            // lblTipoMoviemnto
+            // 
+            lblTipoMoviemnto.AutoSize = true;
+            lblTipoMoviemnto.Font = new Font("Segoe UI Semibold", 11.25F, FontStyle.Bold);
+            lblTipoMoviemnto.Location = new Point(6, 138);
+            lblTipoMoviemnto.Name = "lblTipoMoviemnto";
+            lblTipoMoviemnto.Size = new Size(92, 20);
+            lblTipoMoviemnto.TabIndex = 13;
+            lblTipoMoviemnto.Text = "Movimiento";
+            // 
             // txtProducto
             // 
             txtProducto.Location = new Point(148, 36);
@@ -159,24 +178,6 @@
             btnCerrar.Text = "Cerrar";
             btnCerrar.UseVisualStyleBackColor = false;
             btnCerrar.Click += btnCerrar_Click;
-            // 
-            // lblTipoMoviemnto
-            // 
-            lblTipoMoviemnto.AutoSize = true;
-            lblTipoMoviemnto.Font = new Font("Segoe UI Semibold", 11.25F, FontStyle.Bold);
-            lblTipoMoviemnto.Location = new Point(6, 138);
-            lblTipoMoviemnto.Name = "lblTipoMoviemnto";
-            lblTipoMoviemnto.Size = new Size(92, 20);
-            lblTipoMoviemnto.TabIndex = 13;
-            lblTipoMoviemnto.Text = "Movimiento";
-            // 
-            // cxbTipoMovimiento
-            // 
-            cxbTipoMovimiento.FormattingEnabled = true;
-            cxbTipoMovimiento.Location = new Point(148, 135);
-            cxbTipoMovimiento.Name = "cxbTipoMovimiento";
-            cxbTipoMovimiento.Size = new Size(223, 23);
-            cxbTipoMovimiento.TabIndex = 14;
             // 
             // fmsAgregarStockManual
             // 

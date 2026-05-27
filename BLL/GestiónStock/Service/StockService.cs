@@ -36,7 +36,7 @@ namespace BLL.GestiónStock.Service
             {
                 ValidarDto(stockDto);
 
-                // 1. Validación Sintáctica con tu nueva excepción tipada
+                // 1. Validación Sintáctica con FluentValidation
                 var validacion = _validator.Validate(stockDto);
                 if (!validacion.IsValid)
                 {
@@ -46,27 +46,42 @@ namespace BLL.GestiónStock.Service
 
                 if (idSucursal == Guid.Empty)
                     throw new StockDomainException("El contexto de la sucursal provisto es inválido.");
+ 
+                TipoMovimientoEnum tipoMovimiento = (TipoMovimientoEnum)stockDto.IdTipoMovimiento;
 
-                // 2. Control de Regla de Negocio usando la excepción de Techo Operativo
-                if (stockDto.CantidadTotal > stockDto.StockMaximo)
-                    throw new TechoOperativoException(stockDto.StockMaximo | 0, stockDto.CantidadTotal);
+                // Determinar el impacto matemático en el stock consolidado de la sucursal
+                // Si es merma, egreso, o venta, resta. Si es ingreso, suma.
+                int factorImpacto = 1;
+                if (tipoMovimiento == TipoMovimientoEnum.EgresoPorMerma)
+                {
+                    factorImpacto = -1;
+                }
+
+                int cantidadFisicaNueva = stockDto.CantidadTotal;
+                int impactoStockConsolidado = cantidadFisicaNueva * factorImpacto;
+
+                // 2. Control de Regla de Negocio (Techo Operativo) - Corregido el operador pipe |
+                if (tipoMovimiento == TipoMovimientoEnum.IngresoManual && stockDto.CantidadTotal > stockDto.StockMaximo)
+                    throw new TechoOperativoException(stockDto.StockMaximo, stockDto.CantidadTotal);
 
                 // 3. Persistencia del Consolidado
                 var stockDb = _uow.StockPorSucursalRepository.GetByIds(idSucursal, stockDto.IdProducto);
-                int cantidadFisicaNueva = stockDto.CantidadTotal;
 
                 if (stockDb == null)
                 {
                     var nuevaEntity = stockDto.ToEntity();
                     nuevaEntity.IdSucursal = idSucursal;
+                    // Si arranca de cero y es una merma, permitimos que quede en negativo o tirás excepción según tu negocio
+                    nuevaEntity.CantidadTotal = impactoStockConsolidado;
                     _uow.StockPorSucursalRepository.Add(nuevaEntity);
                 }
                 else
                 {
-                    stockDb.CantidadTotal += cantidadFisicaNueva;
+                    // Sólido: Suma si es ingreso, resta si es egreso/merma
+                    stockDb.CantidadTotal += impactoStockConsolidado;
                 }
 
-                // 4. Creación del Lote usando su repositorio específico formalizado de la DAL
+                // 4. Creación del Lote formalizado
                 var nuevoLote = new Lote
                 {
                     IdLote = Guid.NewGuid(),
@@ -74,27 +89,34 @@ namespace BLL.GestiónStock.Service
                     IdSucursal = idSucursal,
                     CantidadInicial = cantidadFisicaNueva,
                     CantidadActual = cantidadFisicaNueva,
-                    CostoUnitario = 0,
+                    CostoUnitario = stockDto.CostoUnitario, // Aprovechamos el campo real del DTO si lo tiene
                     FechaIngreso = DateTime.Now,
-                    NumeroLote = $"MAN-{DateTime.Now:yyyyMMddHHmmss}"
+                    NumeroLote = string.IsNullOrEmpty(stockDto.NumeroLote)
+                        ? $"MAN-{DateTime.Now:yyyyMMddHHmmss}"
+                        : stockDto.NumeroLote
                 };
                 _uow.LoteRepository.Add(nuevoLote);
 
-                // 5. Auditoría en el Kardex (Mantenemos SRP de Servicios)
+                // 5. Auditoría en el Kardex dinámica (Corregida con datos de la UI)
+                // Pasamos el Enum de forma limpia, o el entero, según espere tu método RegistrarMovimiento
+                string comentarioFinal = string.IsNullOrEmpty(stockDto.Observaciones)
+                    ? $"Ajuste manual de stock ({tipoMovimiento}). Lote: {nuevoLote.NumeroLote}"
+                    : stockDto.Observaciones;
+
                 _kardex.RegistrarMovimiento(
                     idSucursal,
                     nuevoLote.IdLote,
-                    TipoMovimientoEnum.IngresoManual,
+                    tipoMovimiento, // <-- Dinámico según el combo
                     cantidadFisicaNueva,
-                    $"Ajuste manual de stock. Lote: {nuevoLote.NumeroLote}"
+                    comentarioFinal // <-- Captura el texto de la caja de comentarios
                 );
 
-                // Transaccionalidad Atómica
+                // Transaccionalidad Atómica en SQL Server
                 _uow.SaveChanges();
             }
             catch (StockDomainException)
             {
-                throw; 
+                throw;
             }
             catch (Exception ex)
             {

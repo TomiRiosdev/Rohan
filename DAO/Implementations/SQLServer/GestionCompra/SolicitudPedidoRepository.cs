@@ -35,11 +35,15 @@ namespace DAO.Implementations.SQLServer.GestionCompra
             {
                 if (idSolicitud == Guid.Empty) throw new ArgumentException("ID de solicitud inválido.");
 
-                // Agrupamos primero la relación Maestro-Detalle-Subdetalle completa para no marear a EF
                 return _dbContext.SolicitudPedido
-                    .Include(s => s.SolicitudPedidoDetalles)      // 1. Cargamos los renglones (Colección)
-                        .ThenInclude(d => d.IdProductoNavigation) // 2. De esos renglones, cargamos el producto (Sub-propiedad)
-                    .Include(s => s.IdEstadoSolicitudNavigation) // 3. Cargamos el estado de la cabecera
+                    // 1. Cargamos los renglones usando la nueva propiedad directa generada por EF
+                    .Include(s => s.SolicitudPedidoDetalle)
+                        // 2. De esos renglones, navegamos al producto asociado
+                        .ThenInclude(d => d.IdProductoNavigation)
+
+                    // 3. Cargamos la navegación del Estado (Revisá si EF lo nombró sin el "Id" adelante)
+                    .Include(s => s.IdEstadoSolicitudNavigation)
+
                     .FirstOrDefault(s => s.IdSolicitudPedido == idSolicitud);
             }
             catch (Exception ex)
@@ -48,7 +52,6 @@ namespace DAO.Implementations.SQLServer.GestionCompra
             }
         }
 
-        // 3. RECUPERAR EL HISTORIAL DEL LOCAL ACTUAL (Para la grilla principal de solicitudes)
         public IEnumerable<SolicitudPedido> GetBySucursal(Guid idSucursal)
         {
             try
@@ -56,9 +59,10 @@ namespace DAO.Implementations.SQLServer.GestionCompra
                 if (idSucursal == Guid.Empty) throw new ArgumentException("ID de sucursal inválido.");
 
                 return _dbContext.SolicitudPedido
+                    // Incluimos el estado para que la grilla principal pueda mostrar "Pendiente", "Aprobada", etc.
                     .Include(s => s.IdEstadoSolicitudNavigation)
                     .Where(s => s.IdSucursal == idSucursal)
-                    .AsNoTracking() // Optimiza velocidad de lectura para listados pesados
+                    .AsNoTracking()
                     .ToList();
             }
             catch (Exception ex)

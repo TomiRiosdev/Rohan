@@ -1,5 +1,4 @@
-﻿using Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace Models;
@@ -16,11 +15,11 @@ public partial class SolicitudPedido
 
     public DateTime? FechaSolicitud { get; set; }
 
-    public Guid? IdEstadoSolicitud { get; set; }
-
-    public virtual EstadoSolicitud? IdEstadoSolicitudNavigation { get; set; }
+    public int? IdEstadoSolicitud { get; set; }
 
     public virtual Sucursal? IdSucursalNavigation { get; set; }
 
-    public virtual ICollection<SolicitudPedidoDetalle> SolicitudPedidoDetalles { get; set; } = new List<SolicitudPedidoDetalle>();
+    public virtual EstadoSolicitud? IdEstadoSolicitudNavigation { get; set; }
+
+    public virtual ICollection<SolicitudPedidoDetalle> SolicitudPedidoDetalle { get; set; } = new List<SolicitudPedidoDetalle>();
 }

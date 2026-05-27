@@ -1,5 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Models;
+﻿using Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace DAO;
 
@@ -14,7 +14,7 @@ public partial class RohanContext : DbContext
     {
     }
 
-    public virtual DbSet<Bitacora> Bitacora { get; set; }
+    public virtual DbSet<Bitacora> Bitacoras { get; set; }
 
     public virtual DbSet<Categoria> Categoria { get; set; }
 
@@ -23,8 +23,8 @@ public partial class RohanContext : DbContext
     public virtual DbSet<Lote> Lote { get; set; }
 
     public virtual DbSet<MovimientosStock> MovimientosStock { get; set; }
-
     public virtual DbSet<OrdenCompra> OrdenCompra { get; set; }
+
     public virtual DbSet<OrdenCompraDetalle> OrdenCompraDetalle { get; set; }
 
     public virtual DbSet<Producto> Producto { get; set; }
@@ -40,14 +40,12 @@ public partial class RohanContext : DbContext
     public virtual DbSet<Sucursal> Sucursal { get; set; }
 
     public virtual DbSet<TipoMovimiento> TipoMovimiento { get; set; }
-    public virtual DbSet<TipoSucursal> TipoSucursal { get; set; }
 
-    public virtual DbSet<TipoUsuario> TipoUsuario { get; set; }
+    public virtual DbSet<TipoSucursal> TipoSucursal { get; set; }
 
     public virtual DbSet<UnidadMedida> UnidadMedida { get; set; }
 
-    public virtual DbSet<VinculoSolicitudOc> VinculoSolicitudOc  { get; set; }
-
+    public virtual DbSet<VinculoSolicitudOc> VinculoSolicitudOc { get; set; }
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
         => optionsBuilder.UseSqlServer("Server=DESKTOP-0PHAJEN\\MSSQLSERVER04;Database=RohanNegocio;Trusted_Connection=True;TrustServerCertificate=True");
@@ -81,7 +79,7 @@ public partial class RohanContext : DbContext
 
         modelBuilder.Entity<EstadoSolicitud>(entity =>
         {
-            entity.HasKey(e => e.IdEstadoSolicitud);
+            entity.HasKey(e => e.IdEstadoSolicitud).HasName("PK_EstadoSolicitud_1");
 
             entity.ToTable("EstadoSolicitud");
 
@@ -104,19 +102,19 @@ public partial class RohanContext : DbContext
                 .HasMaxLength(50)
                 .IsUnicode(false);
 
-            entity.HasOne(d => d.IdOrdenCompraDetalleNavigation).WithMany(p => p.Lotes)
+            entity.HasOne(d => d.IdOrdenCompraDetalleNavigation).WithMany(p => p.Lote)
                 .HasForeignKey(d => d.IdOrdenCompraDetalle)
                 .HasConstraintName("FK_Lote_OrdenCompraDetalle");
 
-            entity.HasOne(d => d.IdProductoNavigation).WithMany(p => p.Lotes)
+            entity.HasOne(d => d.IdProductoNavigation).WithMany(p => p.Lote)
                 .HasForeignKey(d => d.IdProducto)
                 .HasConstraintName("FK_Lote_Producto");
 
-            entity.HasOne(d => d.IdProveedorNavigation).WithMany(p => p.Lotes)
+            entity.HasOne(d => d.IdProveedorNavigation).WithMany(p => p.Lote)
                 .HasForeignKey(d => d.IdProveedor)
                 .HasConstraintName("FK_Lote_Proveedor");
 
-            entity.HasOne(d => d.IdSucursalNavigation).WithMany(p => p.Lotes)
+            entity.HasOne(d => d.IdSucursalNavigation).WithMany(p => p.Lote)
                 .HasForeignKey(d => d.IdSucursal)
                 .HasConstraintName("FK_Lote_Sucursal");
         });
@@ -133,7 +131,7 @@ public partial class RohanContext : DbContext
                 .HasMaxLength(100)
                 .IsUnicode(false);
 
-            entity.HasOne(d => d.IdLoteNavigation).WithMany(p => p.MovimientosStocks)
+            entity.HasOne(d => d.IdLoteNavigation).WithMany(p => p.MovimientosStock)
                 .HasForeignKey(d => d.IdLote)
                 .HasConstraintName("FK_MovimientosStock_Lote");
 
@@ -149,7 +147,7 @@ public partial class RohanContext : DbContext
                 .HasForeignKey(d => d.IdSucursalOrigen)
                 .HasConstraintName("FK_MovimientosStock_Sucursal2");
 
-            entity.HasOne(d => d.IdTipoMovimientoNavigation).WithMany(p => p.MovimientosStocks)
+            entity.HasOne(d => d.IdTipoMovimientoNavigation).WithMany(p => p.MovimientosStock)
                 .HasForeignKey(d => d.IdTipoMovimiento)
                 .HasConstraintName("FK_MovimientosStock_TipoMovimiento");
         });
@@ -167,13 +165,13 @@ public partial class RohanContext : DbContext
                 .HasColumnName("FechaOC");
             entity.Property(e => e.IdEstadoOc).HasColumnName("IdEstadoOC");
 
-            entity.HasOne(d => d.IdEstadoOcNavigation).WithMany(p => p.OrdenCompras)
-                .HasForeignKey(d => d.IdEstadoOc)
-                .HasConstraintName("FK_OrdenCompra_EstadoSolicitud");
-
-            entity.HasOne(d => d.IdProveedorNavigation).WithMany(p => p.OrdenCompras)
+            entity.HasOne(d => d.IdProveedorNavigation).WithMany(p => p.OrdenCompra)
                 .HasForeignKey(d => d.IdProveedor)
                 .HasConstraintName("FK_OrdenCompra_Proveedor");
+            entity.HasOne(d => d.IdEstadoOcNavigation)
+                 .WithMany(p => p.OrdenCompra) // Machea con la colección que agregamos en EstadoSolicitud
+                 .HasForeignKey(d => d.IdEstadoOc)
+                 .HasConstraintName("FK_OrdenCompra_EstadoSolicitud");
         });
 
         modelBuilder.Entity<OrdenCompraDetalle>(entity =>
@@ -184,6 +182,10 @@ public partial class RohanContext : DbContext
 
             entity.Property(e => e.IdOrdenCompraDetalle).ValueGeneratedNever();
             entity.Property(e => e.PrecioPactado).HasColumnType("decimal(10, 2)");
+            entity.HasOne(d => d.IdOrdenCompraNavigation)
+                  .WithMany(p => p.OrdenCompraDetalle)
+                  .HasForeignKey(d => d.IdOrdenCompra)
+                  .HasConstraintName("FK_OrdenCompraDetalle_OrdenCompra");
         });
 
         modelBuilder.Entity<Producto>(entity =>
@@ -202,11 +204,11 @@ public partial class RohanContext : DbContext
                 .HasMaxLength(50)
                 .IsUnicode(false);
 
-            entity.HasOne(d => d.IdCategoriaNavigation).WithMany(p => p.Productos)
+            entity.HasOne(d => d.IdCategoriaNavigation).WithMany(p => p.Producto)
                 .HasForeignKey(d => d.IdCategoria)
                 .HasConstraintName("FK_Producto_Categoria");
 
-            entity.HasOne(d => d.IdUnidadMedidaNavigation).WithMany(p => p.Productos)
+            entity.HasOne(d => d.IdUnidadMedidaNavigation).WithMany(p => p.Producto)
                 .HasForeignKey(d => d.IdUnidadMedida)
                 .HasConstraintName("FK_Producto_UnidadMedida");
         });
@@ -220,11 +222,11 @@ public partial class RohanContext : DbContext
             entity.Property(e => e.IdProductoProveedor).ValueGeneratedNever();
             entity.Property(e => e.UltimoPrecioCompra).HasColumnType("decimal(10, 2)");
 
-            entity.HasOne(d => d.IdProductoNavigation).WithMany(p => p.ProductoProveedors)
+            entity.HasOne(d => d.IdProductoNavigation).WithMany(p => p.ProductoProveedor)
                 .HasForeignKey(d => d.IdProducto)
                 .HasConstraintName("FK_ProductoProveedor_Producto");
 
-            entity.HasOne(d => d.IdProveedorNavigation).WithMany(p => p.ProductoProveedors)
+            entity.HasOne(d => d.IdProveedorNavigation).WithMany(p => p.ProductoProveedor)
                 .HasForeignKey(d => d.IdProveedor)
                 .HasConstraintName("FK_ProductoProveedor_Proveedor");
         });
@@ -263,13 +265,25 @@ public partial class RohanContext : DbContext
             entity.Property(e => e.IdSolicitudPedido).ValueGeneratedNever();
             entity.Property(e => e.FechaSolicitud).HasColumnType("datetime");
 
-            entity.HasOne(d => d.IdEstadoSolicitudNavigation).WithMany(p => p.SolicitudPedidos)
+            
+            entity.HasOne(d => d.IdSucursalNavigation)
+                .WithMany(p => p.SolicitudPedido)
+                .HasForeignKey(d => d.IdSucursal)
+                .HasConstraintName("FK_SolicitudPedido_Sucursal");
+
+           
+            entity.HasOne(d => d.IdEstadoSolicitudNavigation)
+                .WithMany(p => p.SolicitudPedido) 
                 .HasForeignKey(d => d.IdEstadoSolicitud)
                 .HasConstraintName("FK_SolicitudPedido_EstadoSolicitud");
 
-            entity.HasOne(d => d.IdSucursalNavigation).WithMany(p => p.SolicitudPedidos)
-                .HasForeignKey(d => d.IdSucursal)
-                .HasConstraintName("FK_SolicitudPedido_Sucursal");
+            
+            entity.HasMany(d => d.SolicitudPedidoDetalle)
+                .WithOne(p => p.IdSolicitudPedidoNavigation) 
+                .HasForeignKey(d => d.IdSolicitudPedido)
+                .HasConstraintName("FK_SolicitudPedidoDetalle_SolicitudPedido");
+
+
         });
 
         modelBuilder.Entity<SolicitudPedidoDetalle>(entity =>
@@ -280,12 +294,12 @@ public partial class RohanContext : DbContext
 
             entity.Property(e => e.IdSolicitudPedido).ValueGeneratedNever();
 
-            entity.HasOne(d => d.IdProductoNavigation).WithMany(p => p.SolicitudPedidoDetalles)
+            entity.HasOne(d => d.IdProductoNavigation).WithMany(p => p.SolicitudPedidoDetalle)
                 .HasForeignKey(d => d.IdProducto)
                 .HasConstraintName("FK_SolicitudPedidoDetalle_Producto");
 
-            entity.HasOne(d => d.IdSolicitudNavigation).WithMany(p => p.SolicitudPedidoDetalles)
-                .HasForeignKey(d => d.IdSolicitud)
+            entity.HasOne(d => d.IdSolicitudPedidoNavigation).WithMany(p => p.SolicitudPedidoDetalle)
+                .HasForeignKey(d => d.IdSolicitudPedido)
                 .HasConstraintName("FK_SolicitudPedidoDetalle_SolicitudPedido");
         });
 
@@ -297,12 +311,12 @@ public partial class RohanContext : DbContext
 
             entity.Property(e => e.IdStockPorSucursal).ValueGeneratedNever();
 
-            entity.HasOne(d => d.IdProductoNavigation).WithMany(p => p.StockPorSucursals)
+            entity.HasOne(d => d.IdProductoNavigation).WithMany(p => p.StockPorSucursal)
                 .HasForeignKey(d => d.IdProducto)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_StockPorSucursal_Producto");
 
-            entity.HasOne(d => d.IdSucursalNavigation).WithMany(p => p.StockPorSucursals)
+            entity.HasOne(d => d.IdSucursalNavigation).WithMany(p => p.StockPorSucursal)
                 .HasForeignKey(d => d.IdSucursal)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_StockPorSucursal_Sucursal");
@@ -328,7 +342,7 @@ public partial class RohanContext : DbContext
                 .HasMaxLength(100)
                 .IsUnicode(false);
 
-            entity.HasOne(d => d.IdTipoSucursalNavigation).WithMany(p => p.Sucursals)
+            entity.HasOne(d => d.IdTipoSucursalNavigation).WithMany(p => p.Sucursal)
                 .HasForeignKey(d => d.IdTipoSucursal)
                 .HasConstraintName("FK_Sucursal_TipoSucursal");
         });
@@ -352,18 +366,6 @@ public partial class RohanContext : DbContext
             entity.ToTable("TipoSucursal");
 
             entity.Property(e => e.IdTipoSucursal).ValueGeneratedNever();
-            entity.Property(e => e.Descripcion)
-                .HasMaxLength(50)
-                .IsUnicode(false);
-        });
-
-        modelBuilder.Entity<TipoUsuario>(entity =>
-        {
-            entity.HasKey(e => e.IdTipoUsuario);
-
-            entity.ToTable("TipoUsuario");
-
-            entity.Property(e => e.IdTipoUsuario).ValueGeneratedNever();
             entity.Property(e => e.Descripcion)
                 .HasMaxLength(50)
                 .IsUnicode(false);

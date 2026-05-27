@@ -1,5 +1,4 @@
-﻿using Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace Models;
@@ -20,7 +19,10 @@ public partial class OrdenCompraDetalle
 
     public int? Renglon { get; set; }
 
-    public virtual ICollection<Lote> Lotes { get; set; } = new List<Lote>();
+    public virtual ICollection<Lote> Lote { get; set; } = new List<Lote>();
+    public virtual OrdenCompra? IdOrdenCompraNavigation { get; set; }
+
+    public virtual Producto? IdProductoNavigation { get; set; }
 
     public virtual ICollection<VinculoSolicitudOc> VinculoSolicitudOcs { get; set; } = new List<VinculoSolicitudOc>();
 }

@@ -9,7 +9,7 @@ public partial class MovimientosStock
 
     public Guid? IdSucursal { get; set; }
 
-    public Guid? IdTipoMovimiento { get; set; }
+    public int? IdTipoMovimiento { get; set; }
 
     public Guid? IdLote { get; set; }
 

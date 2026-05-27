@@ -9,5 +9,5 @@ public partial class TipoSucursal
 
     public string? Descripcion { get; set; }
 
-    public virtual ICollection<Sucursal> Sucursals { get; set; } = new List<Sucursal>();
+    public virtual ICollection<Sucursal> Sucursal { get; set; } = new List<Sucursal>();
 }

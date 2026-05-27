@@ -27,11 +27,11 @@ public partial class Producto
 
     public virtual UnidadMedida? IdUnidadMedidaNavigation { get; set; }
 
-    public virtual ICollection<Lote> Lotes { get; set; } = new List<Lote>();
+    public virtual ICollection<Lote> Lote { get; set; } = new List<Lote>();
 
-    public virtual ICollection<ProductoProveedor> ProductoProveedors { get; set; } = new List<ProductoProveedor>();
+    public virtual ICollection<ProductoProveedor> ProductoProveedor { get; set; } = new List<ProductoProveedor>();
 
-    public virtual ICollection<SolicitudPedidoDetalle> SolicitudPedidoDetalles { get; set; } = new List<SolicitudPedidoDetalle>();
+    public virtual ICollection<SolicitudPedidoDetalle> SolicitudPedidoDetalle { get; set; } = new List<SolicitudPedidoDetalle>();
 
-    public virtual ICollection<StockPorSucursal> StockPorSucursals { get; set; } = new List<StockPorSucursal>();
+    public virtual ICollection<StockPorSucursal> StockPorSucursal { get; set; } = new List<StockPorSucursal>();
 }

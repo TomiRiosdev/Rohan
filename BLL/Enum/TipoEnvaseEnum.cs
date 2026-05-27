@@ -6,11 +6,12 @@ using System.Threading.Tasks;
 
 namespace BLL.Enum
 {
-    public enum TipoAlertaEnum
+    public enum TipoEnvaseEnum
     {
-        StockBajo,
-        ProximoAVencer,
-        StockCritico,
-        Vencido
+        Unidad = 1,
+        Caja = 2,
+        Pack = 3,
+        Bolsa = 4,
+        Balde = 5
     }
 }

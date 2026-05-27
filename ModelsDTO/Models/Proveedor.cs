@@ -19,9 +19,9 @@ public partial class Proveedor
 
     public bool? Habilitado { get; set; }
 
-    public virtual ICollection<Lote> Lotes { get; set; } = new List<Lote>();
+    public virtual ICollection<Lote> Lote { get; set; } = new List<Lote>();
 
-    public virtual ICollection<OrdenCompra> OrdenCompras { get; set; } = new List<OrdenCompra>();
+    public virtual ICollection<OrdenCompra> OrdenCompra{ get; set; } = new List<OrdenCompra>();
 
-    public virtual ICollection<ProductoProveedor> ProductoProveedors { get; set; } = new List<ProductoProveedor>();
+    public virtual ICollection<ProductoProveedor> ProductoProveedor { get; set; } = new List<ProductoProveedor>();
 }

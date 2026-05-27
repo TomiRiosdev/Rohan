@@ -8,7 +8,7 @@ namespace UI.GestiónStock
     public partial class fmsListarProductosPopUp : Form
     {
         private readonly ProductoFacade _productoFacade;
-        private List<ProductoDTO> _productosCache = new();
+        private List<ProductoDTO> _productosDto = new();
         public ProductoDTO ProductoSeleccionado { get; private set; }
 
         public fmsListarProductosPopUp
@@ -19,11 +19,10 @@ namespace UI.GestiónStock
             InitializeComponent();
             _productoFacade = productoFacade ?? throw new ArgumentNullException(nameof(productoFacade));
 
-            // Forzamos propiedades de ventana emergente limpia por código
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
-            this.ShowInTaskbar = false; // No genera un ícono extra en la barra de tareas de Windows
+            this.ShowInTaskbar = false;
             this.StartPosition = FormStartPosition.CenterParent;
         }
 
@@ -38,7 +37,7 @@ namespace UI.GestiónStock
             cboBuscarPor.Items.Clear();
             cboBuscarPor.Items.Add("Nombre");
             cboBuscarPor.Items.Add("SKU");
-            cboBuscarPor.SelectedIndex = 0; // "Nombre" por defecto
+            cboBuscarPor.SelectedIndex = 0;
         }
 
         #region Configuración y Carga
@@ -55,7 +54,6 @@ namespace UI.GestiónStock
             dgvProductos.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
 
             dgvProductos.Columns.Clear();
-            // Agregamos Name obligatoriamente para evitar errores de indexación
             dgvProductos.Columns.Add(new DataGridViewTextBoxColumn { Name = "CodigoSku", DataPropertyName = "CodigoSku", HeaderText = "Código SKU", FillWeight = 70 });
             dgvProductos.Columns.Add(new DataGridViewTextBoxColumn { Name = "Nombre", DataPropertyName = "Nombre", HeaderText = "Producto", FillWeight = 160 });
             dgvProductos.Columns.Add(new DataGridViewTextBoxColumn { Name = "CategoriaNombre", DataPropertyName = "CategoriaNombre", HeaderText = "Categoría", FillWeight = 100 });
@@ -64,12 +62,10 @@ namespace UI.GestiónStock
         {
             try
             {
-                // Traemos los productos del maestro activo y los guardamos en memoria local
                 var lista = _productoFacade.ListarProductosActivos();
-                _productosCache = lista.ToList();
+                _productosDto = lista.ToList();
 
-                // Mostramos todo al arrancar
-                dgvProductos.DataSource = _productosCache;
+                dgvProductos.DataSource = _productosDto;
             }
             catch (Exception ex)
             {
@@ -83,42 +79,47 @@ namespace UI.GestiónStock
 
         private void FiltrarProductos()
         {
-            string criterio = cboBuscarPor.Text;
-            string textoBusqueda = txtBusqueda.Text.Trim().ToLower();
-
-            // Si el cuadro está vacío, reestablecemos la grilla completa con el caché
-            if (string.IsNullOrEmpty(textoBusqueda))
+            try
             {
-                dgvProductos.DataSource = _productosCache;
-                return;
+
+                var todos = _productoFacade.ListarProductosActivos().ToList();
+                string criterio = cboBuscarPor.Text;
+                IEnumerable<ProductoDTO> resultados;
+
+
+                switch (criterio)
+                {
+                    case "Nombre":
+                        resultados = todos.Where(p => p.Nombre.ToLower().Contains(txtBusqueda.Text.ToLower()));
+                        break;
+                    case "SKU":
+                        resultados = todos.Where(p => p.CodigoSku.ToString().Contains(txtBusqueda.Text));
+                        break;
+
+                    default:
+                        resultados = _productosDto;
+                        break;
+                }
+
+                dgvProductos.DataSource = resultados.ToList();
             }
-
-            IEnumerable<ProductoDTO> resultados;
-
-            // Switch simétrico al que usás en tu ERP
-            switch (criterio)
+            catch (Exception ex)
             {
-                case "Nombre":
-                    resultados = _productosCache.Where(p => p.Nombre != null
-                        && p.Nombre.ToLower().Contains(textoBusqueda));
-                    break;
-
-                case "SKU":
-                    resultados = _productosCache.Where(p => p.CodigoSku != null
-                        && p.CodigoSku.ToString().Contains(textoBusqueda));
-                    break;
-
-                default:
-                    resultados = _productosCache;
-                    break;
+                MessageBox.Show("Error al filtrar: " + ex.Message);
             }
-
-            dgvProductos.DataSource = resultados.ToList();
         }
 
-        private void btnBuscar_Click(object sender, EventArgs e)
+
+
+        private void cboBuscarPor_SelectedIndexChanged(object sender, EventArgs e)
         {
-            FiltrarProductos();
+            txtBusqueda.Clear();
+            txtBusqueda.Focus();
+
+            if (cboBuscarPor.Text == "Nombre")
+                txtBusqueda.PlaceholderText = "Escriba el nombre del panificado...";
+            else
+                txtBusqueda.PlaceholderText = "Escriba el código SKU...";
         }
 
         #endregion
@@ -126,27 +127,25 @@ namespace UI.GestiónStock
         #region Evento de Confirmación y Cierre
         private void dgvProductos_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
-            // Validamos que el doble clic sea sobre una fila con datos real y no sobre el encabezado
             if (e.RowIndex >= 0 && dgvProductos.CurrentRow?.DataBoundItem is ProductoDTO prod)
             {
-                ProductoSeleccionado = prod;         // Guardamos el elegido en la propiedad pública
-                this.DialogResult = DialogResult.OK; // Seteamos el estado de éxito para el formulario padre
-                this.Close();                        // Cerramos el Pop-up automáticamente
+                ProductoSeleccionado = prod;
+                this.DialogResult = DialogResult.OK;
+                this.Close();
             }
         }
 
         #endregion
 
-        private void cboBuscarPor_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            txtBusqueda.Clear();
-            txtBusqueda.Focus();
 
-            // Actualizamos dinámicamente la ayuda visual del Placeholder
-            if (cboBuscarPor.Text == "Nombre")
-                txtBusqueda.PlaceholderText = "Escriba el nombre del panificado...";
-            else
-                txtBusqueda.PlaceholderText = "Escriba el código SKU...";
+        private void btnBuscar_Click_1(object sender, EventArgs e)
+        {
+            FiltrarProductos();
+        }
+
+        private void btnCerrar_Click(object sender, EventArgs e)
+        {
+            this.Close();
         }
     }
 }

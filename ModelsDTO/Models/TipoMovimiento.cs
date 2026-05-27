@@ -5,9 +5,9 @@ namespace Models;
 
 public partial class TipoMovimiento
 {
-    public Guid IdTipoMovimiento { get; set; }
+    public int IdTipoMovimiento { get; set; }
 
     public string? Descripcion { get; set; }
 
-    public virtual ICollection<MovimientosStock> MovimientosStocks { get; set; } = new List<MovimientosStock>();
+    public virtual ICollection<MovimientosStock> MovimientosStock { get; set; } = new List<MovimientosStock>();
 }
