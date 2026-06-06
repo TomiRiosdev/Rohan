@@ -56,7 +56,7 @@ namespace UI.GestiónStock
 
         private void btnHistorial_Click(object sender, EventArgs e)
         {
-
+            AbrirFormInPanel(new fmsHistorial(_stockFacade));
         }
         #endregion
 

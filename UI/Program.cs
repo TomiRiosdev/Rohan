@@ -73,7 +73,8 @@ namespace UI
              services.AddTransient<fmsSolicitudPedido>();
              services.AddTransient<fmsMermaAlerta>();
              services.AddTransient<fmsListarProductosPopUp>();
-            
+             services.AddTransient<fmsHistorial>();
+
         }
     }
 }

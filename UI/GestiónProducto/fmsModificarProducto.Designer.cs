@@ -44,14 +44,19 @@
             txtDescripcion = new TextBox();
             label5 = new Label();
             groupBox1 = new GroupBox();
+            nudCantidadPorEnvase = new NumericUpDown();
+            label8 = new Label();
+            cbxTipoEnvase = new ComboBox();
+            label9 = new Label();
             groupBox1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)nudCantidadPorEnvase).BeginInit();
             SuspendLayout();
             // 
             // btnModificar
             // 
             btnModificar.BackColor = Color.Azure;
             btnModificar.Font = new Font("Segoe UI Semibold", 11.25F, FontStyle.Bold);
-            btnModificar.Location = new Point(172, 358);
+            btnModificar.Location = new Point(184, 469);
             btnModificar.Name = "btnModificar";
             btnModificar.Size = new Size(88, 38);
             btnModificar.TabIndex = 0;
@@ -63,7 +68,7 @@
             // 
             btnAtras.BackColor = Color.Azure;
             btnAtras.Font = new Font("Segoe UI Semibold", 11.25F, FontStyle.Bold);
-            btnAtras.Location = new Point(381, 470);
+            btnAtras.Location = new Point(381, 596);
             btnAtras.Name = "btnAtras";
             btnAtras.Size = new Size(80, 28);
             btnAtras.TabIndex = 1;
@@ -162,7 +167,7 @@
             // 
             label6.AutoSize = true;
             label6.Font = new Font("Segoe UI Semibold", 11.25F, FontStyle.Bold);
-            label6.Location = new Point(142, 9);
+            label6.Location = new Point(168, 9);
             label6.Name = "label6";
             label6.Size = new Size(142, 20);
             label6.TabIndex = 14;
@@ -187,6 +192,10 @@
             // 
             // groupBox1
             // 
+            groupBox1.Controls.Add(nudCantidadPorEnvase);
+            groupBox1.Controls.Add(label8);
+            groupBox1.Controls.Add(cbxTipoEnvase);
+            groupBox1.Controls.Add(label9);
             groupBox1.Controls.Add(txtNombre);
             groupBox1.Controls.Add(btnModificar);
             groupBox1.Controls.Add(label5);
@@ -203,25 +212,61 @@
             groupBox1.Font = new Font("Segoe UI Semibold", 11.25F, FontStyle.Bold);
             groupBox1.Location = new Point(12, 50);
             groupBox1.Name = "groupBox1";
-            groupBox1.Size = new Size(449, 402);
+            groupBox1.Size = new Size(449, 524);
             groupBox1.TabIndex = 15;
             groupBox1.TabStop = false;
             groupBox1.Text = "Datos del producto";
+            // 
+            // nudCantidadPorEnvase
+            // 
+            nudCantidadPorEnvase.Location = new Point(172, 408);
+            nudCantidadPorEnvase.Name = "nudCantidadPorEnvase";
+            nudCantidadPorEnvase.Size = new Size(266, 27);
+            nudCantidadPorEnvase.TabIndex = 24;
+            // 
+            // label8
+            // 
+            label8.AutoSize = true;
+            label8.Font = new Font("Segoe UI Semibold", 11.25F, FontStyle.Bold);
+            label8.Location = new Point(6, 415);
+            label8.Name = "label8";
+            label8.Size = new Size(74, 20);
+            label8.TabIndex = 23;
+            label8.Text = "Cantidad ";
+            // 
+            // cbxTipoEnvase
+            // 
+            cbxTipoEnvase.FormattingEnabled = true;
+            cbxTipoEnvase.Location = new Point(172, 353);
+            cbxTipoEnvase.Name = "cbxTipoEnvase";
+            cbxTipoEnvase.Size = new Size(266, 28);
+            cbxTipoEnvase.TabIndex = 22;
+            // 
+            // label9
+            // 
+            label9.AutoSize = true;
+            label9.Font = new Font("Segoe UI Semibold", 11.25F, FontStyle.Bold);
+            label9.Location = new Point(6, 361);
+            label9.Name = "label9";
+            label9.Size = new Size(106, 20);
+            label9.TabIndex = 21;
+            label9.Text = "Envase / Bulto";
             // 
             // fmsModificarProducto
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.AliceBlue;
-            ClientSize = new Size(475, 525);
+            ClientSize = new Size(469, 635);
             Controls.Add(groupBox1);
             Controls.Add(label6);
             Controls.Add(btnAtras);
             Name = "fmsModificarProducto";
-            Text = "ModificarProducto";
+            Text = "Modificar Producto";
             Load += ModificarProducto_Load;
             groupBox1.ResumeLayout(false);
             groupBox1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)nudCantidadPorEnvase).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -244,5 +289,9 @@
         private TextBox txtDescripcion;
         private Label label5;
         private GroupBox groupBox1;
+        private NumericUpDown nudCantidadPorEnvase;
+        private Label label8;
+        private ComboBox cbxTipoEnvase;
+        private Label label9;
     }
 }

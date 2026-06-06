@@ -1,4 +1,5 @@
 ﻿using BLL.DomainDtos;
+using BLL.Enum;
 using FluentValidation;
 
 namespace BLL.GestiónProducto.Validator
@@ -32,7 +33,7 @@ namespace BLL.GestiónProducto.Validator
             .Must(codigo => !codigo.HasValue || codigo.Value > 0)
             .WithMessage("El código SKU debe ser un número positivo mayor a 0.");
 
-            // Contenido por Venta (Opcional pero positivo)
+            // Contenido por Venta 
             RuleFor(x => x.ContenidoPorVenta)
                 .GreaterThan(0).When(x => x.ContenidoPorVenta.HasValue)
                 .WithMessage("El contenido por venta debe ser mayor a 0.");
@@ -41,6 +42,13 @@ namespace BLL.GestiónProducto.Validator
             RuleFor(x => x.Descripcion)
                 .MaximumLength(500).WithMessage("La descripción no puede superar los 500 caracteres.")
                 .When(x => !string.IsNullOrWhiteSpace(x.Descripcion));
+
+            RuleFor(p => p.CantidadPorBulto)
+                  .GreaterThan(0).WithMessage("La cantidad por bulto/caja debe ser mayor a cero.");
+
+            RuleFor(p => p.IdTipoEnvase)
+                .Must(id => System.Enum.IsDefined(typeof(TipoEnvaseEnum), id))
+                .WithMessage("Debe seleccionar un tipo de envase válido.");
 
             #endregion
 

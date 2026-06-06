@@ -35,7 +35,7 @@ namespace DAO.Implementations.SQLServer.GestionStock
             try
             {
                 return _dbContext.Lote
-                    .Include(l => l.IdProductoNavigation) // Include explícito para mapear los nombres en los DTOs de la BLL
+                    .Include(l => l.IdProductoNavigation) 
                     .Where(l => l.IdSucursal == idSucursal && l.CantidadActual > 0)
                     .ToList();
             }

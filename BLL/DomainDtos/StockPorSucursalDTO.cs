@@ -8,73 +8,146 @@ namespace BLL.DomainDtos
 {
     public class StockPorSucursalDTO
     {
+        // ==== CLAVES DE PERSISTENCIA Y ENTIDAD ====
         public Guid IdStockPorSucursal { get; set; }
         public Guid IdSucursal { get; set; }
         public Guid IdProducto { get; set; }
 
+        /// <summary>
+        /// IMPORTANTE: Guarda siempre la cantidad física en UNIDADES/PAQUETES SUELTOS (ej: 14 latas o 2 bolsas).
+        /// Toda la matemática de la Base de Datos se consolida acá.
+        /// </summary>
         public int CantidadTotal { get; set; }
         public int StockMinimo { get; set; }
         public int StockMaximo { get; set; }
         public bool Habilitado { get; set; }
 
-        // Datos requeridos para la creación del Lote asociado en cargas manuales
+        // ==== DATOS REQUERIDOS PARA LA CREACIÓN DEL LOTE (HISTORIAL) ====
         public decimal CostoUnitario { get; set; }
         public string? NumeroLote { get; set; }
 
-        // ==== PROPIEDADES ENRIQUECIDAS PARA FILTRADO EN UI ===
-
+        // ==== PROPIEDADES ENRIQUECIDAS (VIENEN DEL JOIN CON PRODUCTO) ====
         public string? ProductoNombre { get; set; }
         public int? CodigoSku { get; set; }
+        public string CategoriaNombre { get; set; } = string.Empty;
+        public string UnidadMedidaNombre { get; set; } = string.Empty; // Ej: "Gramo", "Kilogramo", "ML"
 
-        //para la VISTA(DataGridView)
-        public string CategoriaNombre { get; set; }
-        public string UnidadMedidaNombre { get; set; }
-
-        // Para la LÓGICA (Validar y Guardar)
         public Guid IdCategoria { get; set; }
         public Guid IdUnidadMedida { get; set; }
 
+        // ==== COEFICIENTES LOGÍSTICOS DEL MAESTRO DE PRODUCTOS ====
+        public int CantidadPorBulto { get; set; } // Ej: 6 (si viene en caja de 6) o 1 (si es una bolsa de harina suelta)
+        public decimal ContenidoPorVenta { get; set; } // Lo que pesa cada unidad individual (ej: 500 gramos o 900 ml)
+        public int IdTipoEnvase { get; set; } // El entero del Enum (Caja, Pack, Bolsa)
+        public string TipoEnvaseNombre { get; set; } = "Unidad"; // Ej: "Caja", "Pack" (Masticado desde el Enum en el mapper)
+
+        // ==== PROPIEDADES OPERATIVAS PARA TRANSACCIONES MANUALES ====
         public int IdTipoMovimiento { get; set; }
         public string Observaciones { get; set; } = string.Empty;
+        public bool EsIngresoPorBulto { get; set; } // True: El usuario digitó bultos cerrados. False: Unidades sueltas.
 
-        // ==== PROPIEDADES CALCULADAS INTELIGENTES PARA LA GRILLA ====
-        public decimal ContenidoPorVenta { get; set; } // Lo que configuraste en el ABM (ej: 900 ml o 1 kg)
+        //PROPIEDADES CALCULADAS INTELIGENTES PARA EL "EFECTO EXCEL" EN TU DGV
+        /// <summary>
+        /// Divide la CantidadTotal por lo que trae el bulto. Ej: 14 latas / 6 = 2 Cajas enteras.
+        /// </summary>
+        public int BultosCerrados => CantidadPorBulto > 0 ? CantidadTotal / CantidadPorBulto : 0;
 
-        // Nos dice cuántos bultos/envases enteros e impecables hay en estantería
-        public int EnvasesEnteros
+        /// <summary>
+        /// El residuo matemático. Ej: 14 latas % 6 = 2 latas sueltas en estantería.
+        /// </summary>
+        public int UnidadesSueltas => CantidadPorBulto > 0 ? CantidadTotal % CantidadPorBulto : 0;
+
+        /// <summary>
+        /// Multiplica el stock físico por el peso/volumen unitario. Ej: 14 latas * 250g = 3500 gramos netos de materia prima.
+        /// </summary>
+        public decimal ContenidoNetoTotal => CantidadTotal * ContenidoPorVenta;
+
+        /// <summary>
+        // "Envases / Bultos"
+        /// Muestra limpiamente cuántas cajas/packs cerrados representa el stock técnico.
+        /// </summary>
+        public string BultosVisual
         {
             get
             {
-                if (ContenidoPorVenta <= 0) return 0;
-                return (int)(CantidadTotal / ContenidoPorVenta);
+                if (CantidadPorBulto <= 1 || string.IsNullOrWhiteSpace(TipoEnvaseNombre) || TipoEnvaseNombre == "Sin especificar")
+                    return "-";
+
+                return $"{BultosCerrados} {TipoEnvaseNombre}(s)";
+            }
+        }
+        /// <summary>
+        /// Muestra ÚNICAMENTE el desglose interno de lo que quedó suelto o abierto. Ej: "(1 cajas + 4 u. sueltas)"
+        /// </summary>
+        public string RemanenteSueltoVisual
+        {
+            get
+            {
+                if (CantidadPorBulto <= 1 || string.IsNullOrWhiteSpace(TipoEnvaseNombre) || TipoEnvaseNombre == "Sin especificar")
+                    return "-";
+
+                return $"({BultosCerrados} {TipoEnvaseNombre.ToLower()}(s) + {UnidadesSueltas} u. sueltas)";
             }
         }
 
-        // Nos dice el remanente suelto (lo que quedó en un envase abierto en producción)
-        public int CantidadSuelta
-        {
-            get
-            {
-                if (ContenidoPorVenta <= 0) return 0;
-                return (int)(CantidadTotal % ContenidoPorVenta);
-            }
-        }
 
-        // Una hermosa cadena de texto formateada para que el panadero entienda al toque
-        public string StockDetalladoVisual
+        /// <summary>
+        /// Muestra el volumen neto real convertido a Kg o Lts si pasa los 1000. Ej: "16.00 Kg" o "50.00 Kg de 1 Kg"
+        /// </summary>
+        public string CantidadTotalVisual
         {
             get
             {
-                if (ContenidoPorVenta <= 1)
+                string textoNeto = "";
+                string unidadMinuscula = (UnidadMedidaNombre ?? "").ToLower().Trim();
+
+                // Conversión de Gramos a Kilogramos
+                if (unidadMinuscula.Contains("gramo") || unidadMinuscula == "gr" || unidadMinuscula == "g")
                 {
-                    // Si el producto se vende de a 1 kg o 1 unidad, no hace falta desglosar
-                    return $"{CantidadTotal} {UnidadMedidaNombre}";
+                    if (ContenidoNetoTotal >= 1000)
+                    {
+                        double enKilogramos = (double)ContenidoNetoTotal / 1000.0;
+                        textoNeto = $"{enKilogramos:N2} Kg";
+                    }
+                    else
+                    {
+                        textoNeto = $"{ContenidoNetoTotal} {UnidadMedidaNombre}";
+                    }
+                }
+                // Conversión de Cc/Ml a Litros
+                else if (unidadMinuscula == "cc" || unidadMinuscula.Contains("ml") || unidadMinuscula.Contains("mili") || unidadMinuscula.Contains("litro"))
+                {
+                    if (ContenidoNetoTotal >= 1000 || unidadMinuscula.Contains("litro"))
+                    {
+                        double enLitros = (double)ContenidoNetoTotal / 1000.0;
+                        textoNeto = $"{enLitros:N2} Lts";
+                    }
+                    else
+                    {
+                        textoNeto = $"{ContenidoNetoTotal} {UnidadMedidaNombre}";
+                    }
+                }
+                //  Unidades físicas fijas (ej: moldes, envases)
+                else
+                {
+                    textoNeto = $"{ContenidoNetoTotal} {UnidadMedidaNombre}";
                 }
 
-                return $"{EnvasesEnteros} u. cerradas (+ {CantidadSuelta} {UnidadMedidaNombre} sueltos)";
+                // Le concatenamos la aclaración del empaque base para que el operario sepa la equivalencia
+                // Ej: "16.00 Kg (unidades de 1 Kg)"
+                if (ContenidoPorVenta > 0)
+                {
+                    // Para no repetir "1000 Gramos", usamos la unidad base si es menor a 1000, o su equivalente simplificado
+                    string pesoUnitarioTexto = ContenidoPorVenta >= 1000 && (unidadMinuscula.Contains("gramo") || unidadMinuscula == "gr")
+                        ? $"{((double)ContenidoPorVenta / 1000.0):N0} Kg"
+                        : $"{ContenidoPorVenta} {UnidadMedidaNombre}";
+
+                    return $"{textoNeto} de {pesoUnitarioTexto}";
+                }
+
+                return textoNeto;
             }
         }
-
-
     }
 }
+

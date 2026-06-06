@@ -46,19 +46,17 @@ namespace BLL.GestiónProducto.Service
                 if (_uow.ProductoRepository.ExistsByName(productoDto.Nombre))
                     throw new ProductoServiceException("Ya existe un producto registrado con ese nombre.");
 
-                // 4. Validar duplicados por Código SKU (si se ingresó)
+                // 4. Validar duplicados por Código SKU 
                 if (productoDto.CodigoSku.HasValue &&
                     _uow.ProductoRepository.ExistsByCodigoSku(productoDto.CodigoSku.Value))
                     throw new ProductoServiceException("Ya existe un producto con ese Código SKU.");
 
                 // 4. Mapeo y persistencia
                 var entity = ProductoMapper.ToEntity(productoDto);
-
                 entity.IdProducto = Guid.NewGuid();
                 entity.FechaCreacion = DateTime.Now;
                 entity.Habilitado = true;
-                // entity.UsuarioCreacion = "UsuarioActual"; // 
-
+              
                 // 5. Impacto en DB
                 _uow.ProductoRepository.Add(entity);
                 _uow.SaveChanges();
@@ -68,7 +66,7 @@ namespace BLL.GestiónProducto.Service
             }
             catch (ProductoServiceException ex)
             {        
-                throw;   // Re-lanzamos para que llegue al formulario
+                throw;  
             }
             catch (Exception ex)
             {   
@@ -155,9 +153,9 @@ namespace BLL.GestiónProducto.Service
                 entity.IdUnidadMedida = productoDto.IdUnidadMedida;
                 entity.CodigoSku = productoDto.CodigoSku;
                 entity.Descripcion = productoDto.Descripcion;
-                // entity.FechaModificacion = DateTime.UtcNow;
-                // entity.UsuarioModificacion = "UsuarioActual";
-
+                entity.ContenidoPorVenta = productoDto.ContenidoPorVenta;
+                entity.IdTipoEnvase = productoDto.IdTipoEnvase;
+                entity.CantidadPorBulto = productoDto.CantidadPorBulto;
                 _uow.ProductoRepository.Update(entity);
                 _uow.SaveChanges();
 
@@ -166,7 +164,7 @@ namespace BLL.GestiónProducto.Service
             }
             catch (ProductoServiceException)
             {
-                throw;   // Re-lanzamos para que llegue al formulario
+                throw;
             }
             catch (Exception ex)
             {

@@ -1,4 +1,5 @@
 ﻿using BLL.DomainDtos;
+using BLL.Enum;
 using Models;
 
 
@@ -26,7 +27,16 @@ namespace BLL.GestiónStock.Mapper
                 IdUnidadMedida = stock.IdProductoNavigation?.IdUnidadMedida ?? Guid.Empty,
 
                 CategoriaNombre = stock.IdProductoNavigation?.IdCategoriaNavigation?.Descripcion ?? "Sin categoría",
-                UnidadMedidaNombre = stock.IdProductoNavigation?.IdUnidadMedidaNavigation?.Descripcion ?? "Sin unidad"
+                UnidadMedidaNombre = stock.IdProductoNavigation?.IdUnidadMedidaNavigation?.Descripcion ?? "Sin unidad",
+
+                // 🚀 CRUCIAL: Mapeamos los factores logísticos del producto hacia el DTO de stock
+                CantidadPorBulto = stock.IdProductoNavigation?.CantidadPorBulto ?? 1,
+                ContenidoPorVenta = stock.IdProductoNavigation?.ContenidoPorVenta ?? 1,
+                IdTipoEnvase = stock.IdProductoNavigation?.IdTipoEnvase ?? 0,
+                TipoEnvaseNombre = stock.IdProductoNavigation?.IdTipoEnvase <= 0 ? "Sin especificar" :
+                (System.Enum.IsDefined(typeof(TipoEnvaseEnum), stock.IdProductoNavigation.IdTipoEnvase)
+                ? ((TipoEnvaseEnum)stock.IdProductoNavigation.IdTipoEnvase).ToString()
+                : "Desconocido")
 
             };
         }

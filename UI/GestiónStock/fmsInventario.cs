@@ -38,31 +38,87 @@ namespace UI.GestiónStock
 
         private void ConfigurarDgv()
         {
-            // 1. Configuraciones de comportamiento profesional
-            dgvInventario.AutoGenerateColumns = false; // Desactivamos el auto-generado para controlar el orden nosotros
+            dgvInventario.AutoGenerateColumns = false;
             dgvInventario.AllowUserToAddRows = false;
             dgvInventario.AllowUserToDeleteRows = false;
             dgvInventario.ReadOnly = true;
             dgvInventario.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             dgvInventario.MultiSelect = false;
             dgvInventario.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            dgvInventario.RowHeadersVisible = false; // Vuela la columna vacía de la izquierda
+            dgvInventario.RowHeadersVisible = false;
 
-            // 2. Limpieza y creación manual y simétrica de columnas mapeadas al DTO
             dgvInventario.Columns.Clear();
 
-            dgvInventario.Columns.Add(new DataGridViewTextBoxColumn { Name = "CodigoSku", DataPropertyName = "CodigoSku", HeaderText = "Código SKU", FillWeight = 80 });
-            dgvInventario.Columns.Add(new DataGridViewTextBoxColumn { Name = "ProductoNombre", DataPropertyName = "ProductoNombre", HeaderText = "Producto", FillWeight = 150 });
-            dgvInventario.Columns.Add(new DataGridViewTextBoxColumn { Name = "CategoriaNombre", DataPropertyName = "CategoriaNombre", HeaderText = "Categoría", FillWeight = 90 });
-            dgvInventario.Columns.Add(new DataGridViewTextBoxColumn { Name = "EnvasesEnteros", DataPropertyName = "EnvasesEnteros", HeaderText = "Envases/Bultos", FillWeight = 80 });   
-            dgvInventario.Columns.Add(new DataGridViewTextBoxColumn { Name = "StockDetalladoVisual", DataPropertyName = "StockDetalladoVisual", HeaderText = "Estado de Stock", FillWeight = 140 });
-            dgvInventario.Columns.Add(new DataGridViewTextBoxColumn { Name = "StockMinimo", DataPropertyName = "StockMinimo", HeaderText = "Stock Mínimo", FillWeight = 70 });
-            dgvInventario.Columns.Add(new DataGridViewTextBoxColumn { Name = "StockMaximo", DataPropertyName = "StockMaximo", HeaderText = "Techo Máx.", FillWeight = 70 });
+            // Claves de Identificación
+            dgvInventario.Columns.Add(new DataGridViewTextBoxColumn 
+            {
+                Name = "CodigoSku", 
+                DataPropertyName = "CodigoSku", 
+                HeaderText = "Código SKU",
+                FillWeight = 70 
+            });
 
-            // Alineamos las columnas numéricas a la derecha para una lectura contable limpia
-          
+            dgvInventario.Columns.Add(new DataGridViewTextBoxColumn 
+            {
+                Name = "ProductoNombre", 
+                DataPropertyName = "ProductoNombre", 
+                HeaderText = "Producto",
+                FillWeight = 150 
+            });
+
+            dgvInventario.Columns.Add(new DataGridViewTextBoxColumn 
+            { 
+                Name = "CategoriaNombre",
+                DataPropertyName = "CategoriaNombre", 
+                HeaderText = "Categoría",
+                FillWeight = 120
+            });
+           
+            // El paréntesis puro de remanentes sueltos
+            dgvInventario.Columns.Add(new DataGridViewTextBoxColumn 
+            { Name = "BultosVisual",
+                DataPropertyName = "BultosVisual", 
+                HeaderText = "Bultos Cerrados",
+                FillWeight = 85
+            });
+
+            dgvInventario.Columns.Add(new DataGridViewTextBoxColumn 
+            { Name = "RemanenteSueltoVisual",
+                DataPropertyName = "RemanenteSueltoVisual", 
+                HeaderText = "Remanente Neto / Suelto", 
+                FillWeight = 145 
+            });
+
+            // Cantidad Total con el multiplicador analítico
+            dgvInventario.Columns.Add(new DataGridViewTextBoxColumn 
+            { Name = "CantidadTotalVisual", 
+                DataPropertyName = "CantidadTotalVisual",
+                HeaderText = "Cantidad Total", 
+                FillWeight = 110
+            });
+
+            // Parámetros operativos
+            dgvInventario.Columns.Add(new DataGridViewTextBoxColumn 
+            { Name = "StockMinimo", 
+                DataPropertyName = "StockMinimo",
+                HeaderText = "Límite Mínimo (Und)",
+                FillWeight = 70 
+            });
+
+            dgvInventario.Columns.Add(new DataGridViewTextBoxColumn 
+            { Name = "StockMaximo", 
+                DataPropertyName = 
+                "StockMaximo",
+                HeaderText = "Techo Máximo (Und)",
+                FillWeight = 70
+                
+            });
+
+            // Alineaciones visuales
             dgvInventario.Columns["StockMinimo"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
             dgvInventario.Columns["StockMaximo"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+            dgvInventario.Columns["BultosVisual"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+            dgvInventario.Columns["RemanenteSueltoVisual"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
         }
 
         #endregion
@@ -180,20 +236,34 @@ namespace UI.GestiónStock
         // IMPORTANTE: Vinculá este método al evento CellFormatting de tu dgvInventario desde el diseñador
         private void dgvInventario_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
-            if (dgvInventario.Rows[e.RowIndex].DataBoundItem is StockPorSucursalDTO dto)
+            // Verificamos que sea una fila válida y que el objeto sea el DTO correcto
+            if (e.RowIndex >= 0 && dgvInventario.Rows[e.RowIndex].DataBoundItem is StockPorSucursalDTO dto)
             {
-                // Regla analítica de negocio en UI: Stock crítico
+                // CRÍTICO / BAJO STOCK (Cantidad actual es menor o igual al mínimo)
                 if (dto.CantidadTotal <= dto.StockMinimo)
                 {
-                    // Coral/Rojo claro pastel para el fondo, texto bordó oscuro para conservar el contraste
-                    dgvInventario.Rows[e.RowIndex].DefaultCellStyle.BackColor = Color.FromArgb(255, 218, 218);
+                    dgvInventario.Rows[e.RowIndex].DefaultCellStyle.BackColor = Color.FromArgb(255, 214, 207); // Coral pastel
                     dgvInventario.Rows[e.RowIndex].DefaultCellStyle.ForeColor = Color.DarkRed;
-
-                    // Opcional: Poner la fuente de la fila en Negrita para resaltar la urgencia
                     dgvInventario.Rows[e.RowIndex].DefaultCellStyle.Font = new Font(dgvInventario.Font, FontStyle.Bold);
+                }
+                // OBRE STOCK (Supera el techo máximo y el máximo está parametrizado)
+                else if (dto.StockMaximo > 0 && dto.CantidadTotal >= dto.StockMaximo)
+                {
+                    dgvInventario.Rows[e.RowIndex].DefaultCellStyle.BackColor = Color.FromArgb(207, 255, 209); // Verde pastel
+                    dgvInventario.Rows[e.RowIndex].DefaultCellStyle.ForeColor = Color.DarkGreen;
+                    dgvInventario.Rows[e.RowIndex].DefaultCellStyle.Font = new Font(dgvInventario.Font, FontStyle.Regular);
+                }
+                // ESTADO NORMAL: Limpiamos formatos por si la fila se recicla al filtrar
+                else
+                {
+                    dgvInventario.Rows[e.RowIndex].DefaultCellStyle.BackColor = dgvInventario.DefaultCellStyle.BackColor;
+                    dgvInventario.Rows[e.RowIndex].DefaultCellStyle.ForeColor = dgvInventario.DefaultCellStyle.ForeColor;
+                    dgvInventario.Rows[e.RowIndex].DefaultCellStyle.Font = new Font(dgvInventario.Font, FontStyle.Regular);
                 }
             }
         }
+
+        
 
         #endregion
     }

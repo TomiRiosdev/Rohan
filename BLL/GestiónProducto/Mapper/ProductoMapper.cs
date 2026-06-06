@@ -1,4 +1,5 @@
 ﻿using BLL.DomainDtos;
+using BLL.Enum;
 using Models;
 
 namespace BLL.GestiónProducto.Mapper
@@ -19,12 +20,12 @@ namespace BLL.GestiónProducto.Mapper
                 ContenidoPorVenta = entity.ContenidoPorVenta,
                 IdCategoria = entity.IdCategoria ?? Guid.Empty,
                 IdUnidadMedida = entity.IdUnidadMedida ?? Guid.Empty,
-
-                // Corrección aquí:
+                IdTipoEnvase = entity.IdTipoEnvase ?? 0,
+                CantidadPorBulto = (int)(entity.CantidadPorBulto ?? 0),
                 CategoriaNombre = entity.IdCategoriaNavigation?.Descripcion ?? "Sin categoría",
                 UnidadMedidaNombre = entity.IdUnidadMedidaNavigation?.Descripcion?? "Sin unidad",   // ← Cambia si tu propiedad es Descripcion
-
                 
+
             };
         }
 
@@ -41,7 +42,9 @@ namespace BLL.GestiónProducto.Mapper
                 IdUnidadMedida = dto.IdUnidadMedida,
                 CodigoSku = dto.CodigoSku ?? 0,
                 ContenidoPorVenta = dto.ContenidoPorVenta ?? 0,
-                Descripcion = dto.Descripcion
+                Descripcion = dto.Descripcion,
+                IdTipoEnvase = dto.IdTipoEnvase,
+                CantidadPorBulto = dto.CantidadPorBulto
 
             };
         }
@@ -62,7 +65,9 @@ namespace BLL.GestiónProducto.Mapper
             entity.ContenidoPorVenta = dto.ContenidoPorVenta ?? 0;
             entity.IdCategoria = dto.IdCategoria;
             entity.IdUnidadMedida = dto.IdUnidadMedida;
-        
+            entity.IdTipoEnvase = dto.IdTipoEnvase;
+            entity.CantidadPorBulto = dto.CantidadPorBulto;
+
         }
     }
 } 

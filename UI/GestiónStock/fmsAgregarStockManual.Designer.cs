@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            components = new System.ComponentModel.Container();
             nupCantidad = new NumericUpDown();
             txtObservacion = new TextBox();
             lblProducto = new Label();
@@ -36,25 +37,29 @@
             btnAgregar = new Button();
             btnBuscar = new Button();
             groupBox1 = new GroupBox();
+            lblAyudaLogistica = new Label();
+            label2 = new Label();
+            cxmFormatoIngreso = new ComboBox();
             cxbTipoMovimiento = new ComboBox();
             lblTipoMoviemnto = new Label();
             txtProducto = new TextBox();
             label1 = new Label();
             btnCerrar = new Button();
+            contextMenuStrip1 = new ContextMenuStrip(components);
             ((System.ComponentModel.ISupportInitialize)nupCantidad).BeginInit();
             groupBox1.SuspendLayout();
             SuspendLayout();
             // 
             // nupCantidad
             // 
-            nupCantidad.Location = new Point(216, 84);
+            nupCantidad.Location = new Point(148, 190);
             nupCantidad.Name = "nupCantidad";
-            nupCantidad.Size = new Size(152, 23);
+            nupCantidad.Size = new Size(223, 23);
             nupCantidad.TabIndex = 0;
             // 
             // txtObservacion
             // 
-            txtObservacion.Location = new Point(148, 196);
+            txtObservacion.Location = new Point(148, 305);
             txtObservacion.Name = "txtObservacion";
             txtObservacion.Size = new Size(223, 23);
             txtObservacion.TabIndex = 2;
@@ -74,7 +79,7 @@
             // 
             lblCantidad.AutoSize = true;
             lblCantidad.Font = new Font("Segoe UI Semibold", 11.25F, FontStyle.Bold);
-            lblCantidad.Location = new Point(5, 87);
+            lblCantidad.Location = new Point(6, 188);
             lblCantidad.Name = "lblCantidad";
             lblCantidad.Size = new Size(70, 20);
             lblCantidad.TabIndex = 8;
@@ -84,7 +89,7 @@
             // 
             lblObservaciones.AutoSize = true;
             lblObservaciones.Font = new Font("Segoe UI Semibold", 11.25F, FontStyle.Bold);
-            lblObservaciones.Location = new Point(5, 195);
+            lblObservaciones.Location = new Point(6, 308);
             lblObservaciones.Name = "lblObservaciones";
             lblObservaciones.Size = new Size(109, 20);
             lblObservaciones.TabIndex = 9;
@@ -94,7 +99,7 @@
             // 
             btnAgregar.BackColor = Color.Azure;
             btnAgregar.Font = new Font("Segoe UI Semibold", 11.25F, FontStyle.Bold);
-            btnAgregar.Location = new Point(187, 240);
+            btnAgregar.Location = new Point(185, 366);
             btnAgregar.Name = "btnAgregar";
             btnAgregar.Size = new Size(92, 38);
             btnAgregar.TabIndex = 10;
@@ -116,10 +121,13 @@
             // 
             // groupBox1
             // 
+            groupBox1.Controls.Add(lblAyudaLogistica);
+            groupBox1.Controls.Add(label2);
+            groupBox1.Controls.Add(cxmFormatoIngreso);
             groupBox1.Controls.Add(cxbTipoMovimiento);
+            groupBox1.Controls.Add(btnAgregar);
             groupBox1.Controls.Add(lblTipoMoviemnto);
             groupBox1.Controls.Add(txtProducto);
-            groupBox1.Controls.Add(btnAgregar);
             groupBox1.Controls.Add(btnBuscar);
             groupBox1.Controls.Add(nupCantidad);
             groupBox1.Controls.Add(lblObservaciones);
@@ -128,14 +136,42 @@
             groupBox1.Controls.Add(lblProducto);
             groupBox1.Location = new Point(12, 32);
             groupBox1.Name = "groupBox1";
-            groupBox1.Size = new Size(491, 284);
+            groupBox1.Size = new Size(491, 422);
             groupBox1.TabIndex = 12;
             groupBox1.TabStop = false;
+            // 
+            // lblAyudaLogistica
+            // 
+            lblAyudaLogistica.AutoSize = true;
+            lblAyudaLogistica.Font = new Font("Segoe UI Semibold", 11.25F, FontStyle.Bold);
+            lblAyudaLogistica.Location = new Point(6, 88);
+            lblAyudaLogistica.Name = "lblAyudaLogistica";
+            lblAyudaLogistica.Size = new Size(134, 20);
+            lblAyudaLogistica.TabIndex = 17;
+            lblAyudaLogistica.Text = "Formato producto";
+            // 
+            // label2
+            // 
+            label2.AutoSize = true;
+            label2.Font = new Font("Segoe UI Semibold", 11.25F, FontStyle.Bold);
+            label2.Location = new Point(6, 136);
+            label2.Name = "label2";
+            label2.Size = new Size(81, 20);
+            label2.TabIndex = 16;
+            label2.Text = "Ingreso de";
+            // 
+            // cxmFormatoIngreso
+            // 
+            cxmFormatoIngreso.FormattingEnabled = true;
+            cxmFormatoIngreso.Location = new Point(148, 133);
+            cxmFormatoIngreso.Name = "cxmFormatoIngreso";
+            cxmFormatoIngreso.Size = new Size(223, 23);
+            cxmFormatoIngreso.TabIndex = 15;
             // 
             // cxbTipoMovimiento
             // 
             cxbTipoMovimiento.FormattingEnabled = true;
-            cxbTipoMovimiento.Location = new Point(148, 135);
+            cxbTipoMovimiento.Location = new Point(148, 245);
             cxbTipoMovimiento.Name = "cxbTipoMovimiento";
             cxbTipoMovimiento.Size = new Size(223, 23);
             cxbTipoMovimiento.TabIndex = 14;
@@ -144,7 +180,7 @@
             // 
             lblTipoMoviemnto.AutoSize = true;
             lblTipoMoviemnto.Font = new Font("Segoe UI Semibold", 11.25F, FontStyle.Bold);
-            lblTipoMoviemnto.Location = new Point(6, 138);
+            lblTipoMoviemnto.Location = new Point(6, 244);
             lblTipoMoviemnto.Name = "lblTipoMoviemnto";
             lblTipoMoviemnto.Size = new Size(92, 20);
             lblTipoMoviemnto.TabIndex = 13;
@@ -171,7 +207,7 @@
             // 
             btnCerrar.BackColor = Color.Azure;
             btnCerrar.Font = new Font("Segoe UI Semibold", 11.25F, FontStyle.Bold);
-            btnCerrar.Location = new Point(411, 322);
+            btnCerrar.Location = new Point(411, 471);
             btnCerrar.Name = "btnCerrar";
             btnCerrar.Size = new Size(92, 38);
             btnCerrar.TabIndex = 13;
@@ -179,12 +215,17 @@
             btnCerrar.UseVisualStyleBackColor = false;
             btnCerrar.Click += btnCerrar_Click;
             // 
+            // contextMenuStrip1
+            // 
+            contextMenuStrip1.Name = "contextMenuStrip1";
+            contextMenuStrip1.Size = new Size(181, 26);
+            // 
             // fmsAgregarStockManual
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.AliceBlue;
-            ClientSize = new Size(515, 372);
+            ClientSize = new Size(515, 526);
             Controls.Add(btnCerrar);
             Controls.Add(label1);
             Controls.Add(groupBox1);
@@ -213,5 +254,9 @@
         private TextBox txtProducto;
         private ComboBox cxbTipoMovimiento;
         private Label lblTipoMoviemnto;
+        private Label label2;
+        private ComboBox cxmFormatoIngreso;
+        private Label lblAyudaLogistica;
+        private ContextMenuStrip contextMenuStrip1;
     }
 }

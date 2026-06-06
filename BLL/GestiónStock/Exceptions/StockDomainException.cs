@@ -1,29 +1,36 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BLL.GestiónStock.Exceptions
 {
-    // Excepción Base para todo el dominio de Inventario
-    public class StockDomainException : Exception
+    // Excepción Base del Módulo
+    public class RohanStockException : Exception
     {
-        public StockDomainException(string message) : base(message) { }
-        public StockDomainException(string message, Exception innerException) : base(message, innerException) { }
+        public RohanStockException(string mensaje, Exception? inner = null) : base(mensaje, inner) { }
     }
 
-    // Error cuando fallan las validaciones sintácticas de FluentValidation
-    public class StockValidationException : StockDomainException
+    // Errores de validación sintáctica (FluentValidation o datos nulos)
+    public class StockValidationException : RohanStockException
     {
-        public StockValidationException(string message) : base(message) { }
+        public StockValidationException(string mensaje) : base(mensaje) { }
     }
 
-    // Error específico de Negocio: Se superó el Stock Máximo configurado
-    public class TechoOperativoException : StockDomainException
+    // Violaciones de reglas de negocio en frío (Techos operativos, mermas inválidas)
+    public class TechoOperativoException : RohanStockException
     {
-        public TechoOperativoException(int maximoPermitido, int cantidadIntentada)
-            : base($"Operación inválida: La cantidad intentada ({cantidadIntentada}) supera el techo operativo máximo permitido ({maximoPermitido}) para esta sucursal.") { }
+        public int LimiteMaximo { get; }
+        public int CantidadIntentada { get; }
+
+        public TechoOperativoException(int limiteMaximo, int cantidadIntentada)
+            : base($"Techo operativo excedido: Intentó ingresar {cantidadIntentada} u. pero el límite máximo configurado es {limiteMaximo} u.")
+        {
+            LimiteMaximo = limiteMaximo;
+            CantidadIntentada = cantidadIntentada;
+        }
+    }
+
+    // Caídas de infraestructura, base de datos, o inconsistencias relacionales
+    public class StockDomainException : RohanStockException
+    {
+        public StockDomainException(string mensaje, Exception? inner = null) : base(mensaje, inner) { }
     }
 }
-

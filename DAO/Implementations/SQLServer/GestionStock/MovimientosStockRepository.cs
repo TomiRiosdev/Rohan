@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Models;
 
 
+
 namespace DAO.Implementations.SQLServer.GestionStock
 {
     public class MovimientosStockRepository : IMovimientosStockRepository
@@ -17,7 +18,6 @@ namespace DAO.Implementations.SQLServer.GestionStock
         public void Add(MovimientosStock entity)
         {
             if (entity == null) throw new ArgumentNullException(nameof(entity));
-
             _dbContext.MovimientosStock.Add(entity);
         }
 

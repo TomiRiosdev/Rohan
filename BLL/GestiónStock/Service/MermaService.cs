@@ -1,10 +1,11 @@
 ﻿using BLL.DomainDtos;
 using BLL.Enum;
+using BLL.GestiónStock.Exceptions;
 using BLL.GestiónStock.Interface;
 using DAO.Interface;
 
 
-namespace BLL.GestiónStock.Service
+namespace BLL.GestiónStock
 {
     public class MermaService : IMermaService
     {
@@ -15,17 +16,25 @@ namespace BLL.GestiónStock.Service
             _uow = uow ?? throw new ArgumentNullException(nameof(uow));
         }
 
+        /// <summary>
+        /// Recorre analíticamente los inventarios consolidados y los lotes activos de una sucursal para compilar 
+        /// el Tablero de Alertas Tempranas de Depósito, aislando quiebres de stock crítico y mermas preventivas por vencimiento.
+        /// </summary>
+        /// <param name="idSucursal">Guid de la sucursal bajo análisis.</param>
+        /// <returns>Colección de DTOs de Alerta listos para activar los colores del semáforo visual de la UI.</returns>
+        /// <exception cref="StockDomainException">Lanzada si falla el procesamiento predictivo o las consultas SQL Server.</exception>
         public IEnumerable<InventarioAlertaDTO> ObtenerAlertasInventario(Guid idSucursal)
         {
             try
             {
-                if (idSucursal == Guid.Empty) throw new ArgumentException("Sucursal no especificada.");
+                if (idSucursal == Guid.Empty)
+                    throw new StockValidationException("No se puede computar el tablero analítico sin una sucursal de contexto válida.");
 
                 var alertas = new List<InventarioAlertaDTO>();
                 DateTime hoy = DateTime.Today;
-                DateTime limiteProximoVencer = hoy.AddDays(15); // Margen preventivo de 15 días
+                DateTime limiteProximoVencer = hoy.AddDays(15); // Margen preventivo de resguardo de 15 días
 
-                // 1. REGLA CRÍTICA: STOCK BAJO (Cruza la entidad StockPorSucursal)
+                // REGLA 1: QUIEBRE DE STOCK MÍNIMO (Análisis del Consolidado)
                 var stockConsolidado = _uow.StockPorSucursalRepository.GetConsolidadoBySucursal(idSucursal);
 
                 foreach (var item in stockConsolidado)
@@ -40,51 +49,50 @@ namespace BLL.GestiónStock.Service
                             IdProducto = item.IdProducto,
                             ProductoNombre = item.IdProductoNavigation?.Nombre ?? "Producto Desconocido",
                             TipoAlerta = TipoAlertaEnum.StockBajo.ToString().ToUpper(),
-                            DetalleMensaje = $"Alerta de reposición: Stock actual ({total}) es igual o menor al mínimo ({minimo}).",
+                            DetalleMensaje = $"Alerta de reposición: El volumen físico disponible ({total} u.) perforó el límite de resguardo ({minimo} u.).",
                             CantidadAfectada = total
                         });
                     }
                 }
 
-                // 2. REGLA CRÍTICA: VENCIDOS Y PRÓXIMOS A VENCER (Cruza la entidad Lote con stock disponible)
-                // Usamos _uow.LoteRepository directamente para consultar los lotes con su producto asociado
+                // REGLA 2: CONTROL DE FRESCURA Y ROTACIÓN (Análisis de Lotes con Stock Disponible)
                 var lotesActivos = _uow.LoteRepository.GetLotesActivosPorSucursal(idSucursal)
-                    .Where(l => l.IdSucursal == idSucursal && l.CantidadActual > 0)
+                    .Where(l => l.CantidadActual > 0)
                     .ToList();
 
                 foreach (var lote in lotesActivos)
                 {
-                    // Nota: Si en tu script de DB no pusiste FechaVencimiento, usamos FechaIngreso.AddMonths(6) de forma ficticia,
-                    // pero lo correcto es que usemos una propiedad de fecha de vencimiento. 
-                    // Si no la tenés, simulamos el vencimiento a partir de la FechaIngreso para proteger el control de mermas.
                     if (!lote.FechaIngreso.HasValue) continue;
 
-                    DateTime fechaVence = lote.FechaIngreso.Value.AddMonths(6).Date; 
-                    int cantidad = lote.CantidadActual ?? 0;
+                    // 💡 Nota Logística: Al agregar FechaVencimiento en tu Lote, reemplazar esta simulación por 'lote.FechaVencimiento.Value'
+                    DateTime fechaVence = lote.FechaIngreso.Value.AddMonths(6).Date;
+                    int cantidadLote = lote.CantidadActual ?? 0;
 
+                    // Caso A: El lote ya caducó adentro del depósito (Merma Crítica irreversible)
                     if (fechaVence < hoy)
                     {
                         alertas.Add(new InventarioAlertaDTO
                         {
                             IdProducto = lote.IdProducto ?? Guid.Empty,
-                            ProductoNombre = lote.IdProductoNavigation?.Nombre ?? "Producto Desconocido",
+                            ProductoNombre = lote.IdProductoNavigation?.Nombre ?? "Materia Prima No Identificada",
                             TipoAlerta = TipoAlertaEnum.Vencido.ToString().ToUpper(),
-                            DetalleMensaje = $"¡MERMA CRÍTICA! El lote [{lote.NumeroLote}] superó su vida útil el {fechaVence:dd/MM/yyyy}.",
-                            CantidadAfectada = cantidad,
+                            DetalleMensaje = $"¡MERMA CRÍTICA DE DESECHO! El lote [{lote.NumeroLote}] expiró su vida útil el {fechaVence:dd/MM/yyyy}.",
+                            CantidadAfectada = cantidadLote,
                             NumeroLote = lote.NumeroLote,
                             FechaVencimiento = fechaVence
                         });
                     }
+                    // Caso B: Ventana preventiva (El lote va a vencer dentro de los próximos 15 días)
                     else if (fechaVence >= hoy && fechaVence <= limiteProximoVencer)
                     {
                         int diasRestantes = (fechaVence - hoy).Days;
                         alertas.Add(new InventarioAlertaDTO
                         {
                             IdProducto = lote.IdProducto ?? Guid.Empty,
-                            ProductoNombre = lote.IdProductoNavigation?.Nombre ?? "Producto Desconocido",
+                            ProductoNombre = lote.IdProductoNavigation?.Nombre ?? "Materia Prima No Identificada",
                             TipoAlerta = TipoAlertaEnum.ProximoAVencer.ToString().ToUpper(),
-                            DetalleMensaje = $"Merma Preventiva: Lote [{lote.NumeroLote}] vencerá en {diasRestantes} días.",
-                            CantidadAfectada = cantidad,
+                            DetalleMensaje = $"Merma Preventiva (Acelerar Rotación): Lote [{lote.NumeroLote}] caducará en {diasRestantes} días.",
+                            CantidadAfectada = cantidadLote,
                             NumeroLote = lote.NumeroLote,
                             FechaVencimiento = fechaVence
                         });
@@ -93,9 +101,13 @@ namespace BLL.GestiónStock.Service
 
                 return alertas;
             }
+            catch (RohanStockException)
+            {
+                throw;
+            }
             catch (Exception ex)
             {
-                throw new Exception("Error analítico al procesar el tablero de control de mermas.", ex);
+                throw new StockDomainException("Error de cómputo algorítmico al intentar consolidar el reporte de mermas preventivas.", ex);
             }
         }
     }

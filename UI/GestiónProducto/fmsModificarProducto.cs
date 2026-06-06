@@ -1,4 +1,5 @@
 ﻿using BLL.DomainDtos;
+using BLL.Enum;
 using BLL.GestiónProducto.Exceptions;
 using BLL.GestiónProducto.Facade;
 
@@ -51,6 +52,13 @@ namespace UI.GestiónProducto
                 cbxUnidadMedida.DisplayMember = "Descripcion";
                 cbxUnidadMedida.ValueMember = "Id";
                 cbxUnidadMedida.SelectedIndex = -1;
+
+                cbxTipoEnvase.DataSource = Enum.GetValues(typeof(TipoEnvaseEnum));
+                cbxTipoEnvase.SelectedIndex = -1;
+
+                // Configuración de límites del control numérico
+                nudCantidadPorEnvase.Minimum = 1;
+                nudCantidadPorEnvase.Maximum = 10000;
             }
             catch (Exception ex)
             {
@@ -64,10 +72,11 @@ namespace UI.GestiónProducto
             txtCodigoSku.Text = _productoOriginal.CodigoSku.ToString();
             txtDescripcion.Text = _productoOriginal.Descripcion;
             txtContenidoVenta.Text = _productoOriginal.ContenidoPorVenta.ToString();
-
-            // Seteamos los Combos por el ID (Guid)
             cbxCategoria.SelectedValue = _productoOriginal.IdCategoria;
             cbxUnidadMedida.SelectedValue = _productoOriginal.IdUnidadMedida;
+            cbxTipoEnvase.SelectedItem = (TipoEnvaseEnum)_productoOriginal.IdTipoEnvase;
+            nudCantidadPorEnvase.Value = (decimal)(_productoOriginal.CantidadPorBulto > 0
+                                         ? _productoOriginal.CantidadPorBulto : 1);
         }
         private void btnAtras_Click(object sender, EventArgs e)
         {
@@ -83,6 +92,8 @@ namespace UI.GestiónProducto
                 _productoOriginal.ContenidoPorVenta = int.Parse(txtContenidoVenta.Text);
                 _productoOriginal.IdCategoria = (Guid)cbxCategoria.SelectedValue;
                 _productoOriginal.IdUnidadMedida = (Guid)cbxUnidadMedida.SelectedValue;
+                _productoOriginal.IdTipoEnvase = (int)(TipoEnvaseEnum)cbxTipoEnvase.SelectedItem;
+                _productoOriginal.CantidadPorBulto = (int)nudCantidadPorEnvase.Value;
 
                 // 2. Llamamos a la Facade para que persista en DB
                 _productoFacade.ModificarProducto(_productoOriginal);

@@ -22,6 +22,10 @@ public partial class Producto
     public int? ContenidoPorVenta { get; set; }
 
     public bool? Habilitado { get; set; }
+   
+    public int? IdTipoEnvase { get; set; }
+   
+    public int? CantidadPorBulto { get; set; }
 
     public virtual Categoria? IdCategoriaNavigation { get; set; }
 

@@ -1,7 +1,6 @@
 ﻿using DAO.Interface.GestionStock;
-using Models;
 using Microsoft.EntityFrameworkCore;
-
+using Models;
 
 namespace DAO.Implementations.SQLServer.GestionStock
 {
@@ -21,7 +20,7 @@ namespace DAO.Implementations.SQLServer.GestionStock
             {
                 // Busca la primera fila que coincida con ambos IDs. Si no hay nada, devuelve null.
                 return _dbContext.StockPorSucursal
-                    .FirstOrDefault(s => s.IdSucursal == idSucursal && s.IdProducto == idProducto);
+                        .FirstOrDefault(s => s.IdSucursal == idSucursal && s.IdProducto == idProducto);
             }
             catch (Exception ex)
             {
@@ -35,17 +34,13 @@ namespace DAO.Implementations.SQLServer.GestionStock
             try
             {
                 return _dbContext.StockPorSucursal
-            // 1. Primera cadena: Stock -> Producto -> Categoría
-            .Include(s => s.IdProductoNavigation)
+     
+                .Include(s => s.IdProductoNavigation)
                 .ThenInclude(p => p.IdCategoriaNavigation)
-
-            // 2. Segunda cadena: Vuelve a arrancar desde Stock -> Producto -> Unidad de Medida
-            .Include(s => s.IdProductoNavigation)
+                .Include(s => s.IdProductoNavigation)
                 .ThenInclude(p => p.IdUnidadMedidaNavigation)
-
-            // 3. Filtros y materialización
-            .Where(s => s.IdSucursal == idSucursal)
-            .ToList();
+                .Where(s => s.IdSucursal == idSucursal)
+                .ToList();
 
             }
             catch (Exception ex)
@@ -54,22 +49,27 @@ namespace DAO.Implementations.SQLServer.GestionStock
             }
         }
 
-        // 3. AGREGAR REGISTRO DE STOCK (Si el producto nunca tuvo stock en esa sucursal)
         public void Add(StockPorSucursal entity)
         {
             if (entity == null) throw new ArgumentNullException(nameof(entity));
-
-            // Solo lo ponemos en la cola de espera de la RAM. No impacta la DB todavía.
             _dbContext.StockPorSucursal.Add(entity);
         }
 
-        // 4. AGREGAR LOTE (Para la trazabilidad física del ingreso)
         public void AddLote(Lote entity)
         {
             if (entity == null) throw new ArgumentNullException(nameof(entity));
-
-            // Solo lo ponemos en la cola de espera de la RAM. No impacta la DB todavía.
             _dbContext.Lote.Add(entity);
+        }
+
+        public void Update(StockPorSucursal entity)
+        {
+            if (entity == null) throw new ArgumentNullException(nameof(entity));
+            _dbContext.StockPorSucursal.Update(entity);
+        }
+
+        public IQueryable<StockPorSucursal> GetAll()
+        {
+            return _dbContext.StockPorSucursal.AsQueryable();
         }
     }
 }

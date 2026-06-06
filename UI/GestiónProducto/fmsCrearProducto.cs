@@ -1,6 +1,8 @@
 ﻿using BLL.DomainDtos;
+using BLL.Enum;
 using BLL.GestiónProducto.Exceptions;
 using BLL.GestiónProducto.Facade;
+
 
 
 namespace UI.GestiónProducto
@@ -50,6 +52,14 @@ namespace UI.GestiónProducto
                         return;
                     }
                 }
+                // Validación de tipo de envase comercial
+                if (CbxTipoEnvase.SelectedItem == null)
+                {
+                    MessageBox.Show("Debe seleccionar un tipo de envase comercial.", "Validación",
+                                   MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    CbxTipoEnvase.Focus();
+                    return;
+                }
 
                 // Crear el DTO
                 var productoDto = new ProductoDTO
@@ -59,7 +69,9 @@ namespace UI.GestiónProducto
                     CodigoSku = string.IsNullOrWhiteSpace(TxtCodigoSku.Text) ? null : int.Parse(TxtCodigoSku.Text),
                     ContenidoPorVenta = string.IsNullOrWhiteSpace(TxtContVenta.Text) ? null : int.Parse(TxtContVenta.Text),
                     IdCategoria = (Guid)CbxCategoria.SelectedValue,
-                    IdUnidadMedida = (Guid)CbxUnidadMedida.SelectedValue
+                    IdUnidadMedida = (Guid)CbxUnidadMedida.SelectedValue,
+                    IdTipoEnvase = (int)(TipoEnvaseEnum)CbxTipoEnvase.SelectedItem, 
+                    CantidadPorBulto = (int)nudCantidadPorEnvase.Value 
                 };
 
                 _productoFacade.AgregarProducto(productoDto);
@@ -94,6 +106,8 @@ namespace UI.GestiónProducto
             TxtContVenta.Clear();
             CbxCategoria.SelectedIndex = -1;
             CbxUnidadMedida.SelectedIndex = -1;
+            CbxTipoEnvase.SelectedIndex = -1;
+            nudCantidadPorEnvase.Value = 1;
             TxtNombre.Focus();
         }
         private void label7_Click(object sender, EventArgs e)
@@ -117,6 +131,13 @@ namespace UI.GestiónProducto
                 CbxUnidadMedida.DisplayMember = "Descripcion";
                 CbxUnidadMedida.ValueMember = "Id";
                 CbxUnidadMedida.SelectedIndex = -1;
+
+                CbxTipoEnvase.DataSource = Enum.GetValues(typeof(TipoEnvaseEnum));
+                CbxTipoEnvase.SelectedIndex = -1;
+
+                nudCantidadPorEnvase.Minimum = 1;
+                nudCantidadPorEnvase.Maximum = 10000;
+                nudCantidadPorEnvase.Value = 1;
             }
             catch (Exception ex)
             {

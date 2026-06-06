@@ -1,4 +1,5 @@
 ﻿using BLL.DomainDtos;
+using BLL.Enum;
 using BLL.GestiónProducto.Facade;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -36,6 +37,7 @@ namespace UI.GestiónProducto
             btnHabilitar.Enabled = false;
             txtBusquedaLibre.Enabled = false;
             cboFiltroMaestro.Enabled = false;
+          
         }
 
         #region Eventos del Formulario
@@ -57,6 +59,17 @@ namespace UI.GestiónProducto
             // Limpiar columnas previas (por si acaso)
             dgvProductos.Columns.Clear();
 
+          
+
+            dgvProductos.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                Name = "CodigoSku",
+                HeaderText = "Codigo SKU",
+                DataPropertyName = "CodigoSku",
+                Width = 100,
+                DefaultCellStyle = new DataGridViewCellStyle { Alignment = DataGridViewContentAlignment.MiddleCenter }
+            });
+
             dgvProductos.Columns.Add(new DataGridViewTextBoxColumn
             {
                 Name = "NombreProducto",
@@ -68,46 +81,56 @@ namespace UI.GestiónProducto
 
             dgvProductos.Columns.Add(new DataGridViewTextBoxColumn
             {
-                Name = "CodigoSku",
-                HeaderText = "Codigo SKU",
-                DataPropertyName = "CodigoSku",
+                Name = "CategoriaNombre",
+                HeaderText = "Categoría",
+                DataPropertyName = "CategoriaNombre",
+                Width = 190
+            });
+
+            dgvProductos.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                Name = "TipoEnvaseNombre",
+                HeaderText = "Presentación",
+                DataPropertyName = "TipoEnvaseNombre", 
                 Width = 100,
                 DefaultCellStyle = new DataGridViewCellStyle { Alignment = DataGridViewContentAlignment.MiddleCenter }
             });
 
-
             dgvProductos.Columns.Add(new DataGridViewTextBoxColumn
             {
-                Name = "CategoriaNombre",
-                HeaderText = "Categoría",
-                DataPropertyName = "CategoriaNombre",
-                Width = 198
+                Name = "CantidadPorBulto",
+                HeaderText = "Unidades por Envase",
+                DataPropertyName = "CantidadPorBulto", 
+                Width = 110,
+                DefaultCellStyle = new DataGridViewCellStyle { Alignment = DataGridViewContentAlignment.MiddleCenter }
+            });
+
+          
+            dgvProductos.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                Name = "ContenidoPorVenta",
+                HeaderText = "Contenido Unitario",
+                DataPropertyName = "ContenidoPorVenta",
+                Width = 110,
+                DefaultCellStyle = new DataGridViewCellStyle { Alignment = DataGridViewContentAlignment.MiddleCenter }
             });
 
             dgvProductos.Columns.Add(new DataGridViewTextBoxColumn
             {
                 Name = "UnidadMedidaNombre",
-                HeaderText = "Unidad de Medida",
+                HeaderText = "U. Medida Base",
                 DataPropertyName = "UnidadMedidaNombre",
-                Width = 180
+                Width = 105,
+                DefaultCellStyle = new DataGridViewCellStyle { Alignment = DataGridViewContentAlignment.MiddleCenter }
             });
 
             dgvProductos.Columns.Add(new DataGridViewTextBoxColumn
             {
                 Name = "Descripcion",
-                HeaderText = "Descripción",
+                HeaderText = "Explicación Logística Real",
                 DataPropertyName = "Descripcion",
-                Width = 300,
+                Width = 250,
                 DefaultCellStyle = new DataGridViewCellStyle { WrapMode = DataGridViewTriState.True }
-            });
-
-            dgvProductos.Columns.Add(new DataGridViewTextBoxColumn
-            {
-                Name = "ContenidoPorVenta",
-                HeaderText = "Contenido por Venta",
-                DataPropertyName = "ContenidoPorVenta",
-                Width = 125,
-                DefaultCellStyle = new DataGridViewCellStyle { Alignment = DataGridViewContentAlignment.MiddleCenter }
             });
         }
 

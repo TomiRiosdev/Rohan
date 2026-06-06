@@ -28,6 +28,7 @@ namespace UI.GestiónStock
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
+            this.lblAyudaLogistica.Text = "Utilice el botón Buscar para seleccionar un producto.";
         }
 
         #region Eventos de Controles
@@ -35,6 +36,8 @@ namespace UI.GestiónStock
         private void fmsAgregarStockManual_Load(object sender, EventArgs e)
         {
             cxbTipoMovimiento.DataSource = Enum.GetValues(typeof(TipoMovimientoEnum));
+            cxmFormatoIngreso.Items.Clear();
+            cxmFormatoIngreso.Enabled = false;
         }
 
         private void btnBuscar_Click(object sender, EventArgs e)
@@ -46,6 +49,20 @@ namespace UI.GestiónStock
                 {
                     _productoElegido = popUp.ProductoSeleccionado;
                     txtProducto.Text = _productoElegido.Nombre;
+                    cxmFormatoIngreso.Items.Clear();
+                    cxmFormatoIngreso.Enabled = true;
+
+                    if (_productoElegido.CantidadPorBulto > 1)
+                    {
+                        cxmFormatoIngreso.Items.Add($"{_productoElegido.TipoEnvaseNombre} Cerrado/a ({_productoElegido.CantidadPorBulto} u.)");
+                        cxmFormatoIngreso.Items.Add($"Unidades Sueltas ({_productoElegido.UnidadMedidaNombre})");
+                    }
+                    else
+                    {
+                        cxmFormatoIngreso.Items.Add($"{_productoElegido.TipoEnvaseNombre} Directo ({_productoElegido.ContenidoPorVenta} {_productoElegido.UnidadMedidaNombre})");
+                    }
+
+                    cxmFormatoIngreso.SelectedIndex = 0;
                 }
             }
         }
@@ -58,12 +75,18 @@ namespace UI.GestiónStock
         private void btnAgregar_Click(object sender, EventArgs e)
         {
             try
-            { 
+            {
                 if (_productoElegido == null)
                     throw new Exception("Por favor, utilice el botón Buscar para seleccionar un producto.");
 
-                if (cxbTipoMovimiento.SelectedValue == null)
+                if (cxbTipoMovimiento.SelectedItem == null)
                     throw new Exception("Debe seleccionar un tipo de movimiento válido.");
+
+                if (cxmFormatoIngreso.SelectedItem == null)
+                    throw new Exception("Debe seleccionar el formato de ingreso de la mercadería.");
+
+                if (nupCantidad.Value <= 0)
+                    throw new Exception("La cantidad debe ser mayor a cero.");
 
                 Guid sucursalId = SessionManager.Current.IdSucursalActual
                     ?? throw new Exception("No se detectó una sucursal activa en la sesión.");
@@ -72,13 +95,30 @@ namespace UI.GestiónStock
                 TipoMovimientoEnum tipoEnum = (TipoMovimientoEnum)cxbTipoMovimiento.SelectedItem;
                 int idTipoMovimientoInt = (int)tipoEnum;
 
+                string UsuarioLogueado = "Desconocido";
+                if (SessionManager.Current.UsuarioLogueado != null)
+                {
+                    // Ej: "Gerente de Sucursal - Juan" o el rol que recuperes de tu Session
+                    UsuarioLogueado = $"{SessionManager.Current.UsuarioLogueado.Patentes} ({SessionManager.Current.UsuarioLogueado.Nombre})";
+                }
+
                 var stockDto = new StockPorSucursalDTO
                 {
                     IdProducto = _productoElegido.Id,
                     CantidadTotal = (int)nupCantidad.Value,
-                    IdTipoMovimiento = idTipoMovimientoInt,
-                    Observaciones = txtObservacion.Text.Trim(),
-                    StockMaximo = 1000
+                    IdTipoMovimiento = (int)(TipoMovimientoEnum)cxbTipoMovimiento.SelectedItem,
+                   
+                    Observaciones = $"[{UsuarioLogueado}] {txtObservacion.Text.Trim()}",
+
+                    // PASAMOS LOS FACTORES LOGÍSTICOS DEL MAESTRO AL SERVICIO
+                    CantidadPorBulto = _productoElegido.CantidadPorBulto , 
+                    ContenidoPorVenta = _productoElegido.ContenidoPorVenta ?? 1,
+
+                    // Si seleccionó el índice 0, significa que ingresa el bulto cerrado entero
+                    EsIngresoPorBulto = (cxmFormatoIngreso.SelectedIndex == 0 && _productoElegido.CantidadPorBulto > 1),
+
+                    StockMinimo = 5, // Valores base por defecto o los mapeás si tenés el control
+                    StockMaximo = 100
                 };
 
                 _stockFacade.RegistrarStockManual(stockDto, sucursalId);

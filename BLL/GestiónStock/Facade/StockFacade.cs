@@ -25,7 +25,7 @@ namespace BLL.GestiónStock.Facade
 
         public void RegistrarStockManual(StockPorSucursalDTO stockDto, Guid idSucursal)
         {
-            _stockService.RegistrarStockManual(stockDto, idSucursal);
+             _stockService.RegistrarStockManual(stockDto, idSucursal);
         }
 
         public IEnumerable<StockPorSucursalDTO> ObtenerConsolidadoPorSucursal(Guid idSucursal)
