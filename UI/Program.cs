@@ -66,14 +66,16 @@ namespace UI
             services.AddTransient<fmsSeleccionarSucursal>();
 
             // Formularios de Gestión de Stock
-             services.AddTransient<fmsGestionStock>();
-             services.AddTransient<fmsInventario>();
-             services.AddTransient<fmsAgregarStockManual>();
-             services.AddTransient<fmsAgregarStockPorOC>();
-             services.AddTransient<fmsSolicitudPedido>();
-             services.AddTransient<fmsMermaAlerta>();
-             services.AddTransient<fmsListarProductosPopUp>();
-             services.AddTransient<fmsHistorial>();
+            services.AddTransient<fmsGestionStock>();
+            services.AddTransient<fmsInventario>();
+            services.AddTransient<fmsAgregarStockManual>();
+            services.AddTransient<fmsAgregarStockPorOC>();
+            services.AddTransient<fmsSolicitudPedido>();
+            services.AddTransient<fmsMermaAlerta>();
+            services.AddTransient<fmsListarProductosPopUp>();
+            services.AddTransient<fmsHistorial>();
+            services.AddTransient<fmsVencimientosProducto>();
+          
 
         }
     }

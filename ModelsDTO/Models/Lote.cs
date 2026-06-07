@@ -24,6 +24,8 @@ public partial class Lote
     public string? NumeroLote { get; set; }
 
     public Guid? IdOrdenCompraDetalle { get; set; }
+   
+    public DateTime? FechaVencimiento { get; set; }
 
     public virtual OrdenCompraDetalle? IdOrdenCompraDetalleNavigation { get; set; }
 

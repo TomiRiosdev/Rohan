@@ -130,7 +130,7 @@ namespace BLL.GestiónStock
                     IdProducto = idProducto,
                     CantidadTotal = cambioNetoFisico < 0 ? 0 : cambioNetoFisico,
                     StockMinimo = 0,    // Nace libre para parametrización individual en tu pop-up
-                    StockMaximo = 1000, // Techo estándar base
+                    StockMaximo = 10, // Techo estándar base
                     
                 };
 

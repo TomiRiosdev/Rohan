@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
             label2 = new Label();
             txtBusquedaLibre = new TextBox();
             cboBuscarPor = new ComboBox();
@@ -92,10 +93,19 @@
             // dgvInventario
             // 
             dgvInventario.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridViewCellStyle1.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle1.BackColor = SystemColors.Window;
+            dataGridViewCellStyle1.Font = new Font("Segoe UI", 9F);
+            dataGridViewCellStyle1.ForeColor = SystemColors.ControlText;
+            dataGridViewCellStyle1.SelectionBackColor = Color.PowderBlue;
+            dataGridViewCellStyle1.SelectionForeColor = SystemColors.Desktop;
+            dataGridViewCellStyle1.WrapMode = DataGridViewTriState.False;
+            dgvInventario.DefaultCellStyle = dataGridViewCellStyle1;
             dgvInventario.Location = new Point(12, 64);
             dgvInventario.Name = "dgvInventario";
             dgvInventario.Size = new Size(1122, 404);
             dgvInventario.TabIndex = 22;
+            dgvInventario.CellDoubleClick += dgvInventario_CellDoubleClick;
             dgvInventario.CellFormatting += dgvInventario_CellFormatting;
             // 
             // fmsInventario
@@ -111,7 +121,7 @@
             Controls.Add(cboBuscarPor);
             Controls.Add(btnBuscar);
             Name = "fmsInventario";
-            Text = "fmsInventario";
+            Text = "Inventario";
             Load += fmsInventario_Load;
             ((System.ComponentModel.ISupportInitialize)dgvInventario).EndInit();
             ResumeLayout(false);

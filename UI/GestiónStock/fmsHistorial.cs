@@ -2,6 +2,7 @@
 using BLL.GestiónStock.Interface;
 using Service.Facade;
 using System.Data;
+using System.Drawing;
 
 
 namespace UI.GestiónStock
@@ -20,7 +21,7 @@ namespace UI.GestiónStock
             ConfigurarFiltrosIniciales();
         }
 
-      
+
 
         private void fmsHistorial_Load(object sender, EventArgs e)
         {
@@ -53,8 +54,11 @@ namespace UI.GestiónStock
             dgvHistorial.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             dgvHistorial.MultiSelect = false;
             dgvHistorial.RowHeadersVisible = false;
-            //   dgvHistorial.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            dgvHistorial.ScrollBars = ScrollBars.Both; // Forzamos ambas barras
+          
+          
+
+            dgvHistorial.Columns.Clear();
+
 
             // 2. Definición Asimétrica de Columnas
             dgvHistorial.Columns.Clear();
@@ -79,8 +83,8 @@ namespace UI.GestiónStock
             {
                 Name = "Usuario",
                 DataPropertyName = "UsuarioNombre",
-                HeaderText = "Usuario",
-                FillWeight = 85
+                HeaderText = "Operario / Rol",
+                FillWeight = 150
             });
 
             dgvHistorial.Columns.Add(new DataGridViewTextBoxColumn
@@ -88,7 +92,7 @@ namespace UI.GestiónStock
                 Name = "Sku",
                 DataPropertyName = "CodigoSku",
                 HeaderText = "SKU",
-                FillWeight = 60
+                FillWeight = 50
             });
 
             dgvHistorial.Columns.Add(new DataGridViewTextBoxColumn
@@ -96,7 +100,7 @@ namespace UI.GestiónStock
                 Name = "Producto",
                 DataPropertyName = "ProductoNombre",
                 HeaderText = "Materia Prima / Producto",
-                FillWeight = 150
+                FillWeight = 130
             });
 
             dgvHistorial.Columns.Add(new DataGridViewTextBoxColumn
@@ -104,7 +108,7 @@ namespace UI.GestiónStock
                 Name = "Tipo",
                 DataPropertyName = "TipoMovimientoTexto",
                 HeaderText = "Movimiento",
-                FillWeight = 110
+                FillWeight = 90
             });
 
             dgvHistorial.Columns.Add(new DataGridViewTextBoxColumn
@@ -119,7 +123,7 @@ namespace UI.GestiónStock
                 Name = "Referencia",
                 DataPropertyName = "DocumentoReferencia",
                 HeaderText = "Doc. Ref (OC)",
-                FillWeight = 95
+                FillWeight = 60
             });
             dgvHistorial.Columns.Add(new DataGridViewTextBoxColumn
             {
@@ -191,34 +195,9 @@ namespace UI.GestiónStock
             AplicarFiltrosGrilla();
         }
 
-    
-
-        #endregion
-
-        #region Formateo Estético de Auditoría (Opcional)
-
-        // Vinculá este evento si querés diferenciar visualmente las entradas de las salidas de stock
-        private void dgvHistorial_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
-        {
-            if (e.RowIndex >= 0 && dgvHistorial.Columns[e.ColumnIndex].Name == "Cantidad" && dgvHistorial.Rows[e.RowIndex].DataBoundItem is MovimientoStockDTO dto)
-            {
-                // Si el movimiento es un egreso (puedes identificarlo por tipo o si la cantidad es negativa)
-                if (dto.TipoMovimientoTexto.ToLower().Contains("egreso") || dto.TipoMovimientoTexto.ToLower().Contains("merma"))
-                {
-                    e.CellStyle.ForeColor = Color.DarkRed; // Texto oscuro para conservar el contraste normativo
-                }
-                else if (dto.TipoMovimientoTexto.ToLower().Contains("ingreso") || dto.TipoMovimientoTexto.ToLower().Contains("oc"))
-                {
-                    e.CellStyle.ForeColor = Color.DarkGreen;
-                }
-            }
-        }
-
-        #endregion
-
         private void btnActualizar_Click_1(object sender, EventArgs e)
         {
-           
+
             cbxTipoMovimiento.SelectedIndex = 0;
             CargarHistorialCompleto();
         }
@@ -228,12 +207,34 @@ namespace UI.GestiónStock
             AplicarFiltrosGrilla();
         }
 
-        private void dgvHistorial_CellFormatting(object sender, DataGridViewCellEventArgs e)
+        private void dgvHistorial_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
-           
-            
+            if (e.RowIndex >= 0 && dgvHistorial.Columns[e.ColumnIndex].Name == "Cantidad"
+                  && dgvHistorial.Rows[e.RowIndex].DataBoundItem is MovimientoStockDTO dto)
+            {
+                if (dto.TipoMovimientoTexto != null)
+                {
+                    string texto = dto.TipoMovimientoTexto.ToLower();
+
+                    // 🔴 Si es una salida de stock (Egreso/Merma), pintamos el número de rojo oscuro
+                    if (texto.Contains("egreso") || texto.Contains("merma") || texto.Contains("rotura"))
+                    {
+                        e.CellStyle.ForeColor = Color.DarkRed;
+                    }
+                    // 🟢 Si es una entrada (Ingreso/OC), lo pintamos de verde oscuro
+                    else if (texto.Contains("ingreso") || texto.Contains("oc"))
+                    {
+                        e.CellStyle.ForeColor = Color.DarkGreen;
+                    }
+                }
+            }
         }
-      
+
+        #endregion
+
+
+
+
     }
 
 }

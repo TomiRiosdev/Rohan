@@ -1,5 +1,4 @@
 ﻿using BLL.DomainDtos;
-using BLL.Enum;
 using Models;
 
 namespace BLL.GestiónProducto.Mapper
@@ -24,8 +23,6 @@ namespace BLL.GestiónProducto.Mapper
                 CantidadPorBulto = (int)(entity.CantidadPorBulto ?? 0),
                 CategoriaNombre = entity.IdCategoriaNavigation?.Descripcion ?? "Sin categoría",
                 UnidadMedidaNombre = entity.IdUnidadMedidaNavigation?.Descripcion?? "Sin unidad",   // ← Cambia si tu propiedad es Descripcion
-                
-
             };
         }
 
@@ -44,8 +41,7 @@ namespace BLL.GestiónProducto.Mapper
                 ContenidoPorVenta = dto.ContenidoPorVenta ?? 0,
                 Descripcion = dto.Descripcion,
                 IdTipoEnvase = dto.IdTipoEnvase,
-                CantidadPorBulto = dto.CantidadPorBulto
-
+                CantidadPorBulto = dto.CantidadPorBulto,
             };
         }
 

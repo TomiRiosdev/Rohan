@@ -98,6 +98,7 @@ public partial class RohanContext : DbContext
             entity.Property(e => e.IdLote).ValueGeneratedNever();
             entity.Property(e => e.CostoUnitario).HasColumnType("decimal(10, 2)");
             entity.Property(e => e.FechaIngreso).HasColumnType("datetime");
+            entity.Property(e => e.FechaVencimiento).HasColumnType("datetime");
             entity.Property(e => e.NumeroLote)
                 .HasMaxLength(50)
                 .IsUnicode(false);

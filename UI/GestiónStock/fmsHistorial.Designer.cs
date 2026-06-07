@@ -43,7 +43,7 @@
             dgvHistorial.Name = "dgvHistorial";
             dgvHistorial.Size = new Size(1122, 406);
             dgvHistorial.TabIndex = 0;
-            dgvHistorial.CellContentClick += dgvHistorial_CellFormatting;
+            dgvHistorial.CellFormatting += dgvHistorial_CellFormatting;
             // 
             // btnActualizar
             // 

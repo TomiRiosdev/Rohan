@@ -9,6 +9,7 @@ namespace UI.GestiónStock
     {
         private readonly IStockFacade _stockFacade;
         private List<StockPorSucursalDTO> _inventarioCompleto = new();
+        public event EventHandler<StockPorSucursalDTO> OnSolicitarConfiguracionMermas;
 
         public fmsInventario
         (
@@ -50,68 +51,80 @@ namespace UI.GestiónStock
             dgvInventario.Columns.Clear();
 
             // Claves de Identificación
-            dgvInventario.Columns.Add(new DataGridViewTextBoxColumn 
+            dgvInventario.Columns.Add(new DataGridViewTextBoxColumn
             {
-                Name = "CodigoSku", 
-                DataPropertyName = "CodigoSku", 
+                Name = "CodigoSku",
+                DataPropertyName = "CodigoSku",
                 HeaderText = "Código SKU",
-                FillWeight = 70 
+                FillWeight = 70
             });
 
-            dgvInventario.Columns.Add(new DataGridViewTextBoxColumn 
+            dgvInventario.Columns.Add(new DataGridViewTextBoxColumn
             {
-                Name = "ProductoNombre", 
-                DataPropertyName = "ProductoNombre", 
+                Name = "ProductoNombre",
+                DataPropertyName = "ProductoNombre",
                 HeaderText = "Producto",
-                FillWeight = 150 
+                FillWeight = 150
             });
 
-            dgvInventario.Columns.Add(new DataGridViewTextBoxColumn 
-            { 
+            dgvInventario.Columns.Add(new DataGridViewTextBoxColumn
+            {
                 Name = "CategoriaNombre",
-                DataPropertyName = "CategoriaNombre", 
+                DataPropertyName = "CategoriaNombre",
                 HeaderText = "Categoría",
                 FillWeight = 120
             });
-           
+
             // El paréntesis puro de remanentes sueltos
-            dgvInventario.Columns.Add(new DataGridViewTextBoxColumn 
-            { Name = "BultosVisual",
-                DataPropertyName = "BultosVisual", 
+            dgvInventario.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                Name = "BultosVisual",
+                DataPropertyName = "BultosVisual",
                 HeaderText = "Bultos Cerrados",
                 FillWeight = 85
             });
 
-            dgvInventario.Columns.Add(new DataGridViewTextBoxColumn 
-            { Name = "RemanenteSueltoVisual",
-                DataPropertyName = "RemanenteSueltoVisual", 
-                HeaderText = "Remanente Neto / Suelto", 
-                FillWeight = 145 
+            dgvInventario.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                Name = "RemanenteSueltoVisual",
+                DataPropertyName = "RemanenteSueltoVisual",
+                HeaderText = "Remanente Suelto",
+                FillWeight = 90
+            });
+
+            dgvInventario.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                Name = "TotalStockUnidadesVisual",
+                DataPropertyName = "TotalStockUnidadesVisual",
+                HeaderText = "Total Stock Und",
+                FillWeight = 85
             });
 
             // Cantidad Total con el multiplicador analítico
-            dgvInventario.Columns.Add(new DataGridViewTextBoxColumn 
-            { Name = "CantidadTotalVisual", 
+            dgvInventario.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                Name = "CantidadTotalVisual",
                 DataPropertyName = "CantidadTotalVisual",
-                HeaderText = "Cantidad Total", 
+                HeaderText = "Cantidad Total",
                 FillWeight = 110
             });
 
             // Parámetros operativos
-            dgvInventario.Columns.Add(new DataGridViewTextBoxColumn 
-            { Name = "StockMinimo", 
+            dgvInventario.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                Name = "StockMinimo",
                 DataPropertyName = "StockMinimo",
                 HeaderText = "Límite Mínimo (Und)",
-                FillWeight = 70 
+                FillWeight = 70
             });
 
-            dgvInventario.Columns.Add(new DataGridViewTextBoxColumn 
-            { Name = "StockMaximo", 
-                DataPropertyName = 
-                "StockMaximo",
+            dgvInventario.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                Name = "StockMaximo",
+                DataPropertyName = "StockMaximo",
                 HeaderText = "Techo Máximo (Und)",
                 FillWeight = 70
-                
+
             });
 
             // Alineaciones visuales
@@ -157,7 +170,7 @@ namespace UI.GestiónStock
         {
             try
             {
-               string criterio = cboBuscarPor.Text;
+                string criterio = cboBuscarPor.Text;
                 IEnumerable<StockPorSucursalDTO> resultados;
                 switch (criterio)
                 {
@@ -233,7 +246,6 @@ namespace UI.GestiónStock
 
         #region Formateo Visual Exigido (Semáforo de Stock)
 
-        // IMPORTANTE: Vinculá este método al evento CellFormatting de tu dgvInventario desde el diseñador
         private void dgvInventario_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
             // Verificamos que sea una fila válida y que el objeto sea el DTO correcto
@@ -263,11 +275,43 @@ namespace UI.GestiónStock
             }
         }
 
-        
+        private void dgvInventario_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex >= 0 && dgvInventario.Rows[e.RowIndex].DataBoundItem is StockPorSucursalDTO dto)
+            {
+                // Le disparamos el objeto completo al padre
+                OnSolicitarConfiguracionMermas?.Invoke(this, dto);
+            }
+
+        }
 
         #endregion
+
+
+
+        /// <summary>
+        /// Propiedad pública que le permite al padre saber qué fila está seleccionada,
+        /// </summary>
+        public StockPorSucursalDTO ProductoSeleccionadoActual
+        {
+            get
+            {
+                 if (dgvInventario.CurrentRow != null && dgvInventario.CurrentRow.DataBoundItem is StockPorSucursalDTO dto)
+                 {
+                    return dto;
+                 }
+                 return null;
+            }
+        }
+
+        /// <summary>
+        /// Método público que actúa como puente para que el padre pueda ordenar 
+        /// </summary>
+        public void ForzarRefrescoInventario()
+        {
+            // Llama internamente a tu método privado original
+            CargarInventarioCompleto();
+        }
     }
-
-
 }
 

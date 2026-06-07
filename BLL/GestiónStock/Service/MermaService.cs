@@ -11,7 +11,10 @@ namespace BLL.GestiónStock
     {
         private readonly IUnitOfWork _uow;
 
-        public MermaService(IUnitOfWork uow)
+        public MermaService
+        (
+            IUnitOfWork uow
+        )
         {
             _uow = uow ?? throw new ArgumentNullException(nameof(uow));
         }
@@ -108,6 +111,61 @@ namespace BLL.GestiónStock
             catch (Exception ex)
             {
                 throw new StockDomainException("Error de cómputo algorítmico al intentar consolidar el reporte de mermas preventivas.", ex);
+            }
+        }
+
+        public ConfiguracionAlertasDTO ObtenerAlertasPorProducto(Guid idProducto)
+        {
+            // Buscamos el producto en las tablas maestras
+            var p = _uow.ProductoRepository.GetById(idProducto)
+                ?? throw new StockDomainException("El producto seleccionado no existe en el sistema.");
+
+            // Buscamos si ya tiene un registro base en StockPorSucursal para leer sus máximos/mínimos.
+            var stockCon = _uow.StockPorSucursalRepository.GetAll()
+                .FirstOrDefault(s => s.IdProducto == idProducto);
+
+            return new ConfiguracionAlertasDTO
+            {
+                IdProducto = p.IdProducto,
+                CodigoSku = p.CodigoSku ?? 0,
+                ProductoNombre = p.Nombre ?? "Desconocido",
+                // Si no tiene stock registrado aún, sugerimos valores por defecto
+                StockMinimo = stockCon?.StockMinimo ?? 10,
+                StockMaximo = stockCon?.StockMaximo ?? 10,
+
+                DiasVidaUtil = p.DiasVidaUtil,
+                DiasAlertaVencimiento = p.DiasAlertaVencimiento
+            };
+        }
+        public void GuardarConfiguracionAlertas(ConfiguracionAlertasDTO dto)
+        {
+            try
+            {
+                // 1. Actualizamos la plantilla de vencimientos en el maestro de Productos
+                var p = _uow.ProductoRepository.GetById(dto.IdProducto)
+                    ?? throw new StockDomainException("Producto inexistente.");
+
+                p.DiasVidaUtil = dto.DiasVidaUtil > 0 ? dto.DiasVidaUtil : null;
+                p.DiasAlertaVencimiento = dto.DiasAlertaVencimiento > 0 ? dto.DiasAlertaVencimiento : null;
+                _uow.ProductoRepository.Update(p);
+
+                // 2. Actualizamos los límites operativos de máximos y mínimos en la tabla StockPorSucursal
+                var stockCon = _uow.StockPorSucursalRepository.GetAll()
+                    .FirstOrDefault(s => s.IdProducto == dto.IdProducto);
+
+                if (stockCon != null)
+                {
+                    stockCon.StockMinimo = dto.StockMinimo;
+                    stockCon.StockMaximo = dto.StockMaximo;
+                    _uow.StockPorSucursalRepository.Update(stockCon);
+                }
+
+                // 3. Confirmación Atómica en SQL Server
+                _uow.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                throw new StockDomainException("Error crítico al intentar guardar los parámetros de control de inventario.", ex);
             }
         }
     }

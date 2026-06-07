@@ -81,8 +81,8 @@ namespace BLL.GestiónStock
                     CostoUnitario = stockDto.CostoUnitario,
                     FechaIngreso = DateTime.Now,
                     NumeroLote = string.IsNullOrEmpty(stockDto.NumeroLote)
-                        ? $"MAN-{DateTime.Now:yyyyMMddHHmmss}"
-                        : stockDto.NumeroLote
+                                 ? $"MAN-{DateTime.Now:yyyyMMddHHmmss}"
+                        :        stockDto.NumeroLote
                 };
                 _uow.LoteRepository.Add(nuevoLote);
 

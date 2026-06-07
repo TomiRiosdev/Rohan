@@ -20,23 +20,21 @@ namespace BLL.GestiónStock.Mapper
                 CantidadTotal = stock.CantidadTotal ?? 0,
                 StockMinimo = stock.StockMinimo ?? 0,
                 StockMaximo = stock.StockMaximo ?? 0,
-
                 ProductoNombre = stock.IdProductoNavigation?.Nombre ?? "Producto no identificado",
                 CodigoSku = (int?)stock.IdProductoNavigation?.CodigoSku,
                 IdCategoria = stock.IdProductoNavigation?.IdCategoria ?? Guid.Empty,
                 IdUnidadMedida = stock.IdProductoNavigation?.IdUnidadMedida ?? Guid.Empty,
-
                 CategoriaNombre = stock.IdProductoNavigation?.IdCategoriaNavigation?.Descripcion ?? "Sin categoría",
                 UnidadMedidaNombre = stock.IdProductoNavigation?.IdUnidadMedidaNavigation?.Descripcion ?? "Sin unidad",
-
-                // 🚀 CRUCIAL: Mapeamos los factores logísticos del producto hacia el DTO de stock
                 CantidadPorBulto = stock.IdProductoNavigation?.CantidadPorBulto ?? 1,
                 ContenidoPorVenta = stock.IdProductoNavigation?.ContenidoPorVenta ?? 1,
                 IdTipoEnvase = stock.IdProductoNavigation?.IdTipoEnvase ?? 0,
                 TipoEnvaseNombre = stock.IdProductoNavigation?.IdTipoEnvase <= 0 ? "Sin especificar" :
                 (System.Enum.IsDefined(typeof(TipoEnvaseEnum), stock.IdProductoNavigation.IdTipoEnvase)
                 ? ((TipoEnvaseEnum)stock.IdProductoNavigation.IdTipoEnvase).ToString()
-                : "Desconocido")
+                : "Desconocido"),
+                DiasVidaUtil = stock.IdProductoNavigation?.DiasVidaUtil,
+                DiasAlertaVencimiento = stock.IdProductoNavigation?.DiasAlertaVencimiento,
 
             };
         }
@@ -54,6 +52,7 @@ namespace BLL.GestiónStock.Mapper
                 CantidadTotal = dto.CantidadTotal,
                 StockMinimo = dto.StockMinimo,
                 StockMaximo = dto.StockMaximo
+
             };
         }
 

@@ -30,8 +30,7 @@ namespace BLL.DomainDtos
         public string? ProductoNombre { get; set; }
         public int? CodigoSku { get; set; }
         public string CategoriaNombre { get; set; } = string.Empty;
-        public string UnidadMedidaNombre { get; set; } = string.Empty; // Ej: "Gramo", "Kilogramo", "ML"
-
+        public string UnidadMedidaNombre { get; set; } = string.Empty; 
         public Guid IdCategoria { get; set; }
         public Guid IdUnidadMedida { get; set; }
 
@@ -39,12 +38,17 @@ namespace BLL.DomainDtos
         public int CantidadPorBulto { get; set; } // Ej: 6 (si viene en caja de 6) o 1 (si es una bolsa de harina suelta)
         public decimal ContenidoPorVenta { get; set; } // Lo que pesa cada unidad individual (ej: 500 gramos o 900 ml)
         public int IdTipoEnvase { get; set; } // El entero del Enum (Caja, Pack, Bolsa)
-        public string TipoEnvaseNombre { get; set; } = "Unidad"; // Ej: "Caja", "Pack" (Masticado desde el Enum en el mapper)
+        public string TipoEnvaseNombre { get; set; } = "Unidad"; // Ej: "Caja", "Pack"
 
         // ==== PROPIEDADES OPERATIVAS PARA TRANSACCIONES MANUALES ====
         public int IdTipoMovimiento { get; set; }
         public string Observaciones { get; set; } = string.Empty;
         public bool EsIngresoPorBulto { get; set; } // True: El usuario digitó bultos cerrados. False: Unidades sueltas.
+
+        public int? DiasVidaUtil { get; set; }
+        public int? DiasAlertaVencimiento { get; set; }
+        public bool TieneLotesVencidos { get; set; }
+
 
         //PROPIEDADES CALCULADAS INTELIGENTES PARA EL "EFECTO EXCEL" EN TU DGV
         /// <summary>
@@ -69,11 +73,18 @@ namespace BLL.DomainDtos
         public string BultosVisual
         {
             get
-            {
-                if (CantidadPorBulto <= 1 || string.IsNullOrWhiteSpace(TipoEnvaseNombre) || TipoEnvaseNombre == "Sin especificar")
+            {// Si no tiene envase o dice "Sin especificar", es un producto suelto puro
+                if (string.IsNullOrWhiteSpace(TipoEnvaseNombre) || TipoEnvaseNombre == "Sin especificar")
                     return "-";
 
-                return $"{BultosCerrados} {TipoEnvaseNombre}(s)";
+                // Si la cantidad por bulto es 0 (evitamos división por cero) o el stock neto es 0
+                if (CantidadPorBulto <= 0 || CantidadTotal <= 0)
+                    return $"0 {TipoEnvaseNombre}(s)";
+
+                // Calcula los bultos enteros (para Balde con CantidadPorBulto = 1, dará el total neto directo)
+                int bultosEnteros = CantidadTotal / CantidadPorBulto;
+
+                return $"{bultosEnteros} {TipoEnvaseNombre}(s)";
             }
         }
         /// <summary>
@@ -83,12 +94,22 @@ namespace BLL.DomainDtos
         {
             get
             {
-                if (CantidadPorBulto <= 1 || string.IsNullOrWhiteSpace(TipoEnvaseNombre) || TipoEnvaseNombre == "Sin especificar")
+                if (string.IsNullOrWhiteSpace(TipoEnvaseNombre) || TipoEnvaseNombre == "Sin especificar")
                     return "-";
+  
+                if (CantidadPorBulto == 1)
+                    return "0 unidades";
 
-                return $"({BultosCerrados} {TipoEnvaseNombre.ToLower()}(s) + {UnidadesSueltas} u. sueltas)";
+                return $"{UnidadesSueltas} unidades";
             }
         }
+
+        /// <summary>
+        /// Total Stock Und
+        /// Muestra la cantidad total de unidades físicas netas que componen el inventario.
+        /// Ej: "14 u." (Sabiendo que es 1 pack de 10 + 4 sueltas)
+        /// </summary>
+        public string TotalStockUnidadesVisual => $"{CantidadTotal} unidades";
 
 
         /// <summary>

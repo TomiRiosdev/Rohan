@@ -27,6 +27,10 @@ public partial class Producto
    
     public int? CantidadPorBulto { get; set; }
 
+    public int? DiasVidaUtil { get; set; }
+
+    public int? DiasAlertaVencimiento { get; set; }
+
     public virtual Categoria? IdCategoriaNavigation { get; set; }
 
     public virtual UnidadMedida? IdUnidadMedidaNavigation { get; set; }

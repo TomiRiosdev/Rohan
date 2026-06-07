@@ -20,44 +20,48 @@ namespace BLL.GestiónStock.Mapper
             }
 
             // 2.AUDITORÍA DINÁMICA: Extraer el Rol/Usuario inyectado en los corchetes
-            string observacionesDb = entity.Observaciones ?? string.Empty;
-            string usuarioDetectado = "Sistema / Operario"; // Valor por defecto en caso de registros viejos o automáticos
+            string observacionesDb = (entity.Observaciones ?? string.Empty).Trim();
+            string usuarioDetectado = "Gerente de Sucursal"; // Valor por defecto 
 
-            if (observacionesDb.StartsWith("["))
+            if (observacionesDb.Contains("[") && observacionesDb.Contains("]"))
             {
+                int inicioCorchete = observacionesDb.IndexOf("[");
                 int finCorchete = observacionesDb.IndexOf("]");
-                if (finCorchete > 1)
-                {
-                    // Extraemos lo que está adentro del corchete: "Gerente de Sucursal (Juan)"
-                    usuarioDetectado = observacionesDb.Substring(1, finCorchete - 1);
 
-                    // Limpiamos la cadena de observaciones quitando el prefijo para que en la grilla se lea limpio
+                if (finCorchete > inicioCorchete)
+                {
+                    // Extraemos puramente el contenido: "Gerente de Sucursal (Juan)"
+                    usuarioDetectado = observacionesDb.Substring(inicioCorchete + 1, finCorchete - inicioCorchete - 1);
+
+                    // Recortamos la cadena para dejar solo el mensaje del usuario
                     observacionesDb = observacionesDb.Substring(finCorchete + 1).Trim();
                 }
             }
 
+            if (string.IsNullOrWhiteSpace(observacionesDb) || observacionesDb.StartsWith("Ajuste manual"))
+            {
+                observacionesDb = "Ajuste manual de stock";
+            }
+
+
             // 3. Mapeo final al DTO enriquecido
             return new MovimientoStockDTO
-            {
-                IdMovimiento = entity.IdMovimiento,
-                IdSucursal = entity.IdSucursal ?? Guid.Empty,
-                IdLote = entity.IdLote ?? Guid.Empty,
-                NumeroLote = entity.IdLoteNavigation?.NumeroLote ?? "Sin Lote",
-                TipoMovimientoTexto = entity.IdTipoMovimientoNavigation?.Descripcion ?? tipoTexto,
-
-                Cantidad = entity.Cantidad ?? 0,
-                FechaMovimiento = entity.FechaMovimiento ?? DateTime.Now,
-                Observaciones = observacionesDb, // Notas limpias sin el texto del usuario metido a la fuerza
-
-                IdProducto = entity.IdLoteNavigation?.IdProducto ?? Guid.Empty,
-                ProductoNombre = entity.IdLoteNavigation?.IdProductoNavigation?.Nombre ?? "Producto no identificado",
-                CodigoSku = (int?)entity.IdLoteNavigation?.IdProductoNavigation?.CodigoSku,
-
-                UsuarioNombre = usuarioDetectado, //Ahora expone dinámicamente el Rol y Nombre del operario
-
-                DocumentoReferencia = string.IsNullOrEmpty(observacionesDb) ? "-" :
+                {  
+                    IdMovimiento = entity.IdMovimiento,
+                    IdSucursal = entity.IdSucursal ?? Guid.Empty,
+                    IdLote = entity.IdLote ?? Guid.Empty,
+                    NumeroLote = entity.IdLoteNavigation?.NumeroLote ?? "Sin Lote",
+                    TipoMovimientoTexto = entity.IdTipoMovimientoNavigation?.Descripcion ?? tipoTexto,
+                    Cantidad = entity.Cantidad ?? 0,
+                    FechaMovimiento = entity.FechaMovimiento ?? DateTime.Now,
+                    Observaciones = observacionesDb, 
+                    UsuarioNombre = usuarioDetectado, 
+                    IdProducto = entity.IdLoteNavigation?.IdProducto ?? Guid.Empty,
+                    ProductoNombre = entity.IdLoteNavigation?.IdProductoNavigation?.Nombre ?? "Producto no identificado",
+                    CodigoSku = (int?)entity.IdLoteNavigation?.IdProductoNavigation?.CodigoSku,
+                    DocumentoReferencia = string.IsNullOrEmpty(observacionesDb) ? "-" :
                     (observacionesDb.Contains("OC-") ? observacionesDb : "-")
-            };
+                };
         }
 
         public static MovimientosStock ToEntity(this MovimientoStockDTO dto)
