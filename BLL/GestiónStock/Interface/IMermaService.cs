@@ -12,5 +12,6 @@ namespace BLL.GestiónStock.Interface
         ConfiguracionAlertasDTO ObtenerAlertasPorProducto(Guid idProducto);
         void GuardarConfiguracionAlertas(ConfiguracionAlertasDTO dto);
         IEnumerable<InventarioAlertaDTO> ObtenerAlertasInventario(Guid idSucursal);
+        List<LoteDetalleVencimientoDTO> ObtenerLotesPorProducto(Guid idProducto, Guid idSucursal);
     }
 }

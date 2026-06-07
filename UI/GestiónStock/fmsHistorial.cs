@@ -54,8 +54,9 @@ namespace UI.GestiónStock
             dgvHistorial.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             dgvHistorial.MultiSelect = false;
             dgvHistorial.RowHeadersVisible = false;
-          
-          
+            dgvHistorial.BackgroundColor = Color.White;
+
+
 
             dgvHistorial.Columns.Clear();
 

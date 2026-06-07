@@ -1,6 +1,5 @@
 ﻿using BLL.DomainDtos;
 using BLL.GestiónProducto.Facade;
-using BLL.GestiónStock;
 using BLL.GestiónStock.Interface;
 
 
@@ -28,8 +27,11 @@ namespace UI.GestiónStock
         {
             var formInventario = new fmsInventario(_stockFacade);
 
-            //  Escuchamos cuando la grilla pida configurar
-            formInventario.OnSolicitarConfiguracionMermas += EscucharSolicitudMermas;
+      
+            formInventario.OnSolicitarVerVencimientos += VerVencimientosForms;
+
+         
+            formInventario.OnSolicitarConfiguracionMermas += SolicitudMermasAlertaForms;
 
             // Despachamos al contenedor general
             AbrirFormInPanel(formInventario);
@@ -69,7 +71,7 @@ namespace UI.GestiónStock
                 if (formInv.ProductoSeleccionadoActual != null)
                 {
                     // Gatillamos el flujo pasándole el DTO que el hijo nos dio
-                    EscucharSolicitudMermas(formInv, formInv.ProductoSeleccionadoActual);
+                    SolicitudMermasAlertaForms(formInv, formInv.ProductoSeleccionadoActual);
                 }
                 else
                 {
@@ -109,6 +111,13 @@ namespace UI.GestiónStock
             {
                 // Al hacer Dispose(), nos aseguramos de que el formulario viejo se destruya correctamente
                 Form? formAnterior = this.panelContenedor.Controls[0] as Form;
+
+                if (formAnterior is fmsInventario formInvViejo)
+                {
+                    formInvViejo.OnSolicitarVerVencimientos -= VerVencimientosForms;
+                    formInvViejo.OnSolicitarConfiguracionMermas -= SolicitudMermasAlertaForms;
+                }
+
                 formAnterior?.Dispose();
                 this.panelContenedor.Controls.Clear();
             }
@@ -127,7 +136,7 @@ namespace UI.GestiónStock
         /// <summary>
         /// Manejador del evento. Se ejecuta cuando el hijo gatilla el DoubleClick en la grilla.
         /// </summary>
-        private void EscucharSolicitudMermas(object sender, StockPorSucursalDTO productoElegido)
+        private void SolicitudMermasAlertaForms(object sender, StockPorSucursalDTO productoElegido)
         {
             if (productoElegido == null) return;
 
@@ -142,9 +151,22 @@ namespace UI.GestiónStock
                     }
                 }
             }
-
-            #endregion
-
+           
         }
+        private void VerVencimientosForms(object sender, StockPorSucursalDTO productoElegido)
+        {
+            if (productoElegido == null) return;
+
+            // pantalla flotante pasándole el DTO rico en información
+            using (var popUpVencimientos = new fmsVencimientosProducto(productoElegido, _mermaService))
+            {
+                popUpVencimientos.StartPosition = FormStartPosition.CenterParent;
+
+                // pantalla de consulta/visualización
+                popUpVencimientos.ShowDialog();
+            }
+        }
+
+        #endregion
     }
 }

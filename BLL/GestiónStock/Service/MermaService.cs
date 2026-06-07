@@ -168,5 +168,23 @@ namespace BLL.GestiónStock
                 throw new StockDomainException("Error crítico al intentar guardar los parámetros de control de inventario.", ex);
             }
         }
+
+        public List<LoteDetalleVencimientoDTO> ObtenerLotesPorProducto(Guid idProducto, Guid idSucursal)
+        {
+            return _uow.LoteRepository.GetLotesActivosPorSucursal(idSucursal)
+                .Where(l => l.IdProducto == idProducto
+                         && l.IdSucursal == idSucursal
+                         && (l.CantidadActual ?? 0) > 0)
+                .Select(l => new LoteDetalleVencimientoDTO
+                {
+                    NumeroLote = l.NumeroLote ?? "Sin Identificar",
+                    CantidadInicial = l.CantidadInicial ?? 0,
+                    CantidadActual = l.CantidadActual ?? 0,
+                    FechaIngreso = l.FechaIngreso ?? DateTime.Now,
+                    FechaVencimiento = l.FechaVencimiento
+                })
+                .OrderBy(l => l.FechaVencimiento)
+                .ToList();
+        }
     }
 }

@@ -10,6 +10,7 @@ namespace UI.GestiónStock
         private readonly IStockFacade _stockFacade;
         private List<StockPorSucursalDTO> _inventarioCompleto = new();
         public event EventHandler<StockPorSucursalDTO> OnSolicitarConfiguracionMermas;
+        public event EventHandler<StockPorSucursalDTO> OnSolicitarVerVencimientos;
 
         public fmsInventario
         (
@@ -47,6 +48,7 @@ namespace UI.GestiónStock
             dgvInventario.MultiSelect = false;
             dgvInventario.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             dgvInventario.RowHeadersVisible = false;
+            dgvInventario.BackgroundColor = Color.White;
 
             dgvInventario.Columns.Clear();
 
@@ -251,21 +253,31 @@ namespace UI.GestiónStock
             // Verificamos que sea una fila válida y que el objeto sea el DTO correcto
             if (e.RowIndex >= 0 && dgvInventario.Rows[e.RowIndex].DataBoundItem is StockPorSucursalDTO dto)
             {
-                // CRÍTICO / BAJO STOCK (Cantidad actual es menor o igual al mínimo)
-                if (dto.CantidadTotal <= dto.StockMinimo)
+                //  PRIORIDAD ABSOLUTA: RIESGO DE VENCIMIENTO CRÍTICO / MERMA (Coral Pastel)
+                if (dto.TieneLotesVencidos)
                 {
                     dgvInventario.Rows[e.RowIndex].DefaultCellStyle.BackColor = Color.FromArgb(255, 214, 207); // Coral pastel
                     dgvInventario.Rows[e.RowIndex].DefaultCellStyle.ForeColor = Color.DarkRed;
-                    dgvInventario.Rows[e.RowIndex].DefaultCellStyle.Font = new Font(dgvInventario.Font, FontStyle.Bold);
+                    dgvInventario.Rows[e.RowIndex].DefaultCellStyle.Font = new Font(dgvInventario.Font, FontStyle.Regular);
                 }
-                // OBRE STOCK (Supera el techo máximo y el máximo está parametrizado)
+
+                // ALERTA INTERMEDIA: BAJO STOCK / REPOSICIÓN REQUERIDA (Amarillo Pastel)
+                else if (dto.CantidadTotal <= dto.StockMinimo)
+                {
+                    dgvInventario.Rows[e.RowIndex].DefaultCellStyle.BackColor = Color.FromArgb(236, 245, 159); // Amarillo pastel
+                    dgvInventario.Rows[e.RowIndex].DefaultCellStyle.ForeColor = Color.FromArgb(40, 43, 3); 
+                    dgvInventario.Rows[e.RowIndex].DefaultCellStyle.Font = new Font(dgvInventario.Font, FontStyle.Regular);
+                }
+
+                //  ALERTA DE EXCESO: SOBRE STOCK (Verde Pastel)
                 else if (dto.StockMaximo > 0 && dto.CantidadTotal >= dto.StockMaximo)
                 {
                     dgvInventario.Rows[e.RowIndex].DefaultCellStyle.BackColor = Color.FromArgb(207, 255, 209); // Verde pastel
-                    dgvInventario.Rows[e.RowIndex].DefaultCellStyle.ForeColor = Color.DarkGreen;
+                    dgvInventario.Rows[e.RowIndex].DefaultCellStyle.ForeColor = Color.FromArgb(3, 43, 16);
                     dgvInventario.Rows[e.RowIndex].DefaultCellStyle.Font = new Font(dgvInventario.Font, FontStyle.Regular);
                 }
-                // ESTADO NORMAL: Limpiamos formatos por si la fila se recicla al filtrar
+
+                // ESTADO NORMAL: El stock está equilibrado en la franja correcta
                 else
                 {
                     dgvInventario.Rows[e.RowIndex].DefaultCellStyle.BackColor = dgvInventario.DefaultCellStyle.BackColor;
@@ -280,14 +292,12 @@ namespace UI.GestiónStock
             if (e.RowIndex >= 0 && dgvInventario.Rows[e.RowIndex].DataBoundItem is StockPorSucursalDTO dto)
             {
                 // Le disparamos el objeto completo al padre
-                OnSolicitarConfiguracionMermas?.Invoke(this, dto);
+                OnSolicitarVerVencimientos?.Invoke(this, dto);
             }
 
         }
 
         #endregion
-
-
 
         /// <summary>
         /// Propiedad pública que le permite al padre saber qué fila está seleccionada,
