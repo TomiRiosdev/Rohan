@@ -7,5 +7,7 @@ namespace DAO.Interface.GestionStock
         Lote GetById(Guid idLote);
         void Add(Lote lote);
         IEnumerable<Lote> GetLotesActivosPorSucursal(Guid idSucursal);
+        void Update(Lote lote);
+        void Delete(Guid idLote);
     }
 }

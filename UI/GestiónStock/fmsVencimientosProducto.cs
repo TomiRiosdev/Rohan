@@ -9,7 +9,7 @@ namespace UI.GestiónStock
 {
     public partial class fmsVencimientosProducto : Form
     {
-        private readonly IMermaService _mermaService;
+        private readonly IFacade _stockFacade;
         private readonly StockPorSucursalDTO _productoOriginal;
 
         private DataGridView dgvLotes = null!;
@@ -17,28 +17,58 @@ namespace UI.GestiónStock
         private BindingList<LoteDetalleVencimientoDTO> _lotesFiltrados = new();
         public fmsVencimientosProducto
         (
-            StockPorSucursalDTO productoElegido,
-            IMermaService mermaService
-
-            )
+            IFacade stockFacade,
+            StockPorSucursalDTO productoElegido
+        )
         {
             InitializeComponent();
+            _stockFacade = stockFacade;
             _productoOriginal = productoElegido;
-            _mermaService = mermaService;
-
+        
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
 
         }
-
+        #region Botones y Eventos
         private void btnRegistrarMerma_Click(object sender, EventArgs e)
         {
 
+            if (dgvLote.CurrentRow != null && dgvLote.CurrentRow.DataBoundItem is LoteDetalleVencimientoDTO loteSeleccionado)
+            {
+
+                int cantidadAMermar = loteSeleccionado.CantidadActual;
+
+                var resultado = MessageBox.Show($"¿Está seguro de registrar la baja por vencimiento de {cantidadAMermar} u. para el lote {loteSeleccionado.NumeroLote}?",
+                                                "Confirmar Merma Sanitaria", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+
+                if (resultado == DialogResult.Yes)
+                {
+                    try
+                    {
+                        Guid sucursalId = SessionManager.Current.IdSucursalActual ?? throw new Exception("Sesión inválida.");
+
+                        _stockFacade.RegistrarMermaLote(loteSeleccionado.IdLote, cantidadAMermar, "Descarte por vencimiento confirmado en depósito.", sucursalId);
+
+                        MessageBox.Show("Merma registrada con éxito. El stock fue descontado y auditado en el Kardex.", "Control de Depósito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                        CargarDatosLotes();
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.Message, "Error al mermar", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
+            else
+            {
+                MessageBox.Show("Por favor, seleccione un lote específico de la grilla para aplicar la baja.", "Control de Depósito", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
         }
 
         private void btnCerrar_Click(object sender, EventArgs e)
         {
+            this.DialogResult = DialogResult.OK;
             this.Close();
         }
 
@@ -47,6 +77,9 @@ namespace UI.GestiónStock
             FiltrarLotes();
         }
 
+        #endregion
+
+        #region Carga y Configuración de Datos
         private void fmsVencimientosProducto_Load(object sender, EventArgs e)
         {
             this.Text = $"Desglose de Trazabilidad: {_productoOriginal.ProductoNombre}";
@@ -65,12 +98,10 @@ namespace UI.GestiónStock
             dgvLote.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             dgvLote.BackgroundColor = Color.White;
             dgvLote.BorderStyle = BorderStyle.None;
-
-            // 🎨 Aplicamos tu formato de selección suave y moderno
             dgvLote.DefaultCellStyle.SelectionBackColor = Color.FromArgb(220, 235, 252);
             dgvLote.DefaultCellStyle.SelectionForeColor = Color.FromArgb(30, 30, 30);
 
-            // 2. Definimos y estructuramos las columnas sobre TU dgvLote
+            // Definimos y estructuramos las columnas sobre TU dgvLote
             dgvLote.Columns.Add(new DataGridViewTextBoxColumn { Name = "Lote", DataPropertyName = "NumeroLote", HeaderText = "Nro. Lote", FillWeight = 110 });
             dgvLote.Columns.Add(new DataGridViewTextBoxColumn { Name = "Ingreso", DataPropertyName = "FechaIngreso", HeaderText = "F. Ingreso", FillWeight = 85 });
             dgvLote.Columns.Add(new DataGridViewTextBoxColumn { Name = "Vencimiento", DataPropertyName = "TipoVencimientoTexto", HeaderText = "F. Vencimiento", FillWeight = 95 });
@@ -94,7 +125,7 @@ namespace UI.GestiónStock
                 Guid sucursalId = SessionManager.Current.IdSucursalActual ?? throw new Exception("Sesión inválida.");
 
                 // Consultamos a la BLL
-                _lotesCompletos = _mermaService.ObtenerLotesPorProducto(_productoOriginal.IdProducto, sucursalId);
+                _lotesCompletos = _stockFacade.ObtenerLotesPorProducto(_productoOriginal.IdProducto, sucursalId);
 
                 // Calculamos KPIs de las etiquetas superiores
                 CalcularIndicadoresMermas(_lotesCompletos);
@@ -107,6 +138,7 @@ namespace UI.GestiónStock
                 MessageBox.Show($"Error al desglosar los lotes: {ex.Message}", "Error de Carga", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+     
         private void CalcularIndicadoresMermas(List<LoteDetalleVencimientoDTO> lotes)
         {
             // 1. Conteo total de lotes físicos en estantería
@@ -206,5 +238,6 @@ namespace UI.GestiónStock
             }
         }
 
+        #endregion
     }
 }

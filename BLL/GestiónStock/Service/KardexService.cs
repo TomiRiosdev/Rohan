@@ -3,6 +3,7 @@ using BLL.Enum;
 using BLL.GestiónStock.Exceptions;
 using BLL.GestiónStock.Interface;
 using BLL.GestiónStock.Mapper;
+using BLL.Infrastructure;
 using DAO.Interface;
 using Models;
 
@@ -51,8 +52,16 @@ namespace BLL.GestiónStock
                 // 5. IMPACTO ATÓMICO FINAL EN LA BASE DE DATOS SQL SERVER
                 _uow.SaveChanges();
             }
+            catch (RohanStockException)
+            {
+                throw; // Dejamos pasar excepciones del dominio propias
+            }
             catch (Exception ex)
             {
+                // 🔴 Si la transacción de SQL Server aborta, guardamos la foto exacta del desastre
+                var context = ExceptionContext.Crear(ex, new object[] { idSucursal, lote?.NumeroLote ?? "Sin Lote", tipo, cantidad, observaciones });
+                ExceptionLogger.Log(context);
+
                 throw new StockDomainException($"Error crítico e irreversible en el motor transaccional del Kardex para el movimiento [{tipo}]. Operación abortada.", ex);
             }
         }

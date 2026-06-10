@@ -7,14 +7,14 @@ namespace UI.GestiónStock
 {
     public partial class fmsInventario : Form
     {
-        private readonly IStockFacade _stockFacade;
+        private readonly IFacade _stockFacade;
         private List<StockPorSucursalDTO> _inventarioCompleto = new();
         public event EventHandler<StockPorSucursalDTO> OnSolicitarConfiguracionMermas;
         public event EventHandler<StockPorSucursalDTO> OnSolicitarVerVencimientos;
 
         public fmsInventario
         (
-            IStockFacade stockFacade
+            IFacade stockFacade
         )
         {
             InitializeComponent();
@@ -49,6 +49,7 @@ namespace UI.GestiónStock
             dgvInventario.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             dgvInventario.RowHeadersVisible = false;
             dgvInventario.BackgroundColor = Color.White;
+            dgvInventario.BorderStyle = BorderStyle.None;
 
             dgvInventario.Columns.Clear();
 

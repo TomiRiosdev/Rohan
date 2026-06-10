@@ -132,7 +132,7 @@ namespace Bootstrapper
             services.AddScoped<IStockService, StockService>();
             services.AddScoped<IMermaService, MermaService>();
             services.AddScoped<IKardexService, KardexService>();
-            services.AddScoped<IStockFacade, StockFacade>();
+            services.AddScoped<IFacade, StockFacade>();
 
             #endregion
 

@@ -7,12 +7,12 @@ namespace UI.GestiónStock
 {
     public partial class fmsGestionStock : Form
     {
-        private readonly IStockFacade _stockFacade;
+        private readonly IFacade _stockFacade;
         private readonly ProductoFacade _productoFacade;
-        private readonly IMermaService _mermaService;
+      
         public fmsGestionStock
         (
-            IStockFacade stockFacade,
+            IFacade stockFacade,
             ProductoFacade productoFacade,
             IMermaService mermaService
         )
@@ -20,7 +20,7 @@ namespace UI.GestiónStock
             InitializeComponent();
             _stockFacade = stockFacade;
             _productoFacade = productoFacade;
-            _mermaService = mermaService;
+            
         }
         #region buttons
         private void btnVerInventario_Click(object sender, EventArgs e)
@@ -39,16 +39,16 @@ namespace UI.GestiónStock
 
         private void btnAgregarManual_Click(object sender, EventArgs e)
         {
-            // Lo levantamos de forma flotante con 'using' para liberar la memoria RAM al cerrar
             using (var frmManual = new fmsAgregarStockManual(_stockFacade, _productoFacade, null))
             {
-                frmManual.StartPosition = FormStartPosition.CenterParent; // Clave para que aparezca centrado
+                frmManual.StartPosition = FormStartPosition.CenterParent;
 
-                // Si el usuario guardó con éxito, al volver podemos refrescar la grilla de fondo automáticamente
                 if (frmManual.ShowDialog() == DialogResult.OK)
                 {
-
-                    btnVerInventario_Click(this, EventArgs.Empty);
+                    if (this.panelContenedor.Controls.Count > 0 && this.panelContenedor.Controls[0] is fmsInventario formInventarioActivo)
+                    {
+                        formInventarioActivo.ForzarRefrescoInventario();
+                    }
                 }
             }
         }
@@ -67,10 +67,8 @@ namespace UI.GestiónStock
         {
             if (this.panelContenedor.Controls.Count > 0 && this.panelContenedor.Controls[0] is fmsInventario formInv)
             {
-                // Usamos la propiedad pública que el formulario de inventario expone para obtener el producto seleccionado actualmente en la grilla.
                 if (formInv.ProductoSeleccionadoActual != null)
                 {
-                    // Gatillamos el flujo pasándole el DTO que el hijo nos dio
                     SolicitudMermasAlertaForms(formInv, formInv.ProductoSeleccionadoActual);
                 }
                 else
@@ -89,15 +87,15 @@ namespace UI.GestiónStock
         {
             AbrirFormInPanel(new fmsHistorial(_stockFacade));
         }
+       
         #endregion
 
         #region Eventos Generales del Formulario Contenedor
         private void fmsGestionStock_Load(object sender, EventArgs e)
         {
-            // El formulario principal de stock se ejecuta y, por defecto, simula 
-            // un clic en el botón de "Ver Inventario" para no arrancar con la pantalla vacía.
             btnVerInventario_Click(this, EventArgs.Empty);
         }
+      
         #endregion
 
         #region Motor de Renderizado (Sub-Paneles Dinámicos)
@@ -140,7 +138,7 @@ namespace UI.GestiónStock
         {
             if (productoElegido == null) return;
 
-            using (var popUp = new fmsMermaAlerta(_mermaService, productoElegido))
+            using (var popUp = new fmsMermaAlerta(_stockFacade, productoElegido))
             {
                 popUp.StartPosition = FormStartPosition.CenterParent;
                 if (popUp.ShowDialog() == DialogResult.OK)
@@ -157,13 +155,17 @@ namespace UI.GestiónStock
         {
             if (productoElegido == null) return;
 
-            // pantalla flotante pasándole el DTO rico en información
-            using (var popUpVencimientos = new fmsVencimientosProducto(productoElegido, _mermaService))
+            using (var popUpVencimientos = new fmsVencimientosProducto(_stockFacade, productoElegido))
             {
                 popUpVencimientos.StartPosition = FormStartPosition.CenterParent;
 
-                // pantalla de consulta/visualización
-                popUpVencimientos.ShowDialog();
+                if (popUpVencimientos.ShowDialog() == DialogResult.OK || true)
+                {
+                    if (sender is fmsInventario formInventarioActivo)
+                    {
+                        formInventarioActivo.ForzarRefrescoInventario();
+                    }
+                }
             }
         }
 

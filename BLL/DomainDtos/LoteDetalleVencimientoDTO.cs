@@ -8,6 +8,7 @@ namespace BLL.DomainDtos
 {
     public class LoteDetalleVencimientoDTO
     {
+        public Guid IdLote { get; set; }
         public string NumeroLote { get; set; } = string.Empty;
         public int CantidadInicial { get; set; }
         public int CantidadActual { get; set; }

@@ -9,11 +9,11 @@ namespace UI.GestiónStock
 {
     public partial class fmsHistorial : Form
     {
-        private readonly IStockFacade _stockFacade;
+        private readonly IFacade _stockFacade;
         private List<MovimientoStockDTO> _historialCompleto = new();
         public fmsHistorial
         (
-            IStockFacade stockFacade
+            IFacade stockFacade
         )
         {
             InitializeComponent();

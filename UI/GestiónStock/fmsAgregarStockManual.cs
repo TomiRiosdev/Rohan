@@ -9,12 +9,12 @@ namespace UI.GestiónStock
 {
     public partial class fmsAgregarStockManual : Form
     {
-        private readonly IStockFacade _stockFacade;
+        private readonly IFacade _stockFacade;
         private readonly ProductoFacade _productoFacade;
         private ProductoDTO _productoElegido;
         public fmsAgregarStockManual
         (
-            IStockFacade stockFacade,
+            IFacade stockFacade,
             ProductoFacade productoFacade,
             ProductoDTO productoElegido
 
@@ -69,6 +69,7 @@ namespace UI.GestiónStock
 
         private void btnCerrar_Click(object sender, EventArgs e)
         {
+            this.DialogResult = DialogResult.OK;
             this.Close();
         }
 
@@ -121,7 +122,7 @@ namespace UI.GestiónStock
                     StockMaximo = 100
                 };
 
-                _stockFacade.RegistrarStockManual(stockDto, sucursalId);
+               _stockFacade.RegistrarStockManual(stockDto, sucursalId);
 
                 MessageBox.Show($"¡Ajuste de stock para '{_productoElegido.Nombre}' registrado con éxito!",
                                 "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);

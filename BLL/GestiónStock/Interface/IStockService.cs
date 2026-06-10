@@ -10,6 +10,7 @@ namespace BLL.GestiónStock.Interface
         
         void RegistrarStockManual(StockPorSucursalDTO stockDto, Guid idSucursal);
         void RegistrarStockPorOc(Guid idProducto, int cantidadComprada, decimal costoPactado, string nroRemitoOc, Guid idSucursal);
+        void RegistrarMermaLote(Guid idLote, int cantidadABajar, string observaciones, Guid idSucursal);
         IEnumerable<StockPorSucursalDTO> ObtenerConsolidadoPorSucursal(Guid idSucursal);
     }
 }

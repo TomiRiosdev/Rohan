@@ -6,7 +6,6 @@ namespace BLL.GestiónCompra.Mapper
 {
     public static class SolicitudPedidoMapper
     {
-        
         public static SolicitudPedidoDTO ToDTO(this SolicitudPedido entity)
         {
             if (entity == null) return null;
@@ -18,8 +17,9 @@ namespace BLL.GestiónCompra.Mapper
                 IdSucursal = entity.IdSucursal,
                 NroSolicitud = entity.NroSolicitud ?? 0,
                 FechaSolicitud = entity.FechaSolicitud ?? DateTime.Now,
-                IdEstadoSolicitud = entity.IdEstadoSolicitud ?? 1, 
+                IdEstadoSolicitud = entity.IdEstadoSolicitud ?? 1,
                 EstadoNombre = entity.IdEstadoSolicitudNavigation?.Descripcion ?? "Pendiente",
+                UsuarioNombre = entity.IdUsuarioNavigation?.Nombre, //  Traemos el operario que lo emitió
 
                 Detalles = entity.SolicitudPedidoDetalle != null
                     ? entity.SolicitudPedidoDetalle.Select(d => d.ToDTO()).ToList()
@@ -45,7 +45,6 @@ namespace BLL.GestiónCompra.Mapper
             };
         }
 
-    
         public static SolicitudPedidoDetalleDTO ToDTO(this SolicitudPedidoDetalle entity)
         {
             if (entity == null)
@@ -53,10 +52,15 @@ namespace BLL.GestiónCompra.Mapper
 
             return new SolicitudPedidoDetalleDTO
             {
-                IdSolicitudPedido = entity.IdSolicitudPedido,
+                IdProducto = entity.IdProducto ?? Guid.Empty,
+                CodigoSku = entity.IdProductoNavigation?.CodigoSku ?? 0,
                 ProductoNombre = entity.IdProductoNavigation?.Nombre ?? "Producto no identificado",
                 Renglon = entity.Renglon ?? 0,
-                Cantidad = entity.Cantidad ?? 0
+
+                // 🚀 CORRECCIÓN: Mapeamos contra tus campos específicos de Bultos del DTO
+                CantidadBultosSolicitada = entity.Cantidad ?? 0,
+                PresentacionTipo = entity.PresentacionTipo ?? "Caja",
+                UnidadesPorBulto = entity.IdProductoNavigation?.CantidadPorBulto ?? 1
             };
         }
 
@@ -67,10 +71,12 @@ namespace BLL.GestiónCompra.Mapper
 
             return new SolicitudPedidoDetalle
             {
-                IdSolicitudPedido = dto.IdSolicitudPedido,
                 IdProducto = dto.IdProducto,
                 Renglon = dto.Renglon,
-                Cantidad = dto.Cantidad
+
+                //  CORRECCIÓN: Guardamos la cantidad de bultos en el campo de la base de datos
+                Cantidad = dto.CantidadBultosSolicitada,
+                PresentacionTipo = dto.PresentacionTipo
             };
         }
     }

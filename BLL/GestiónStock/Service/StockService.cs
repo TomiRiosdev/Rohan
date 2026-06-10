@@ -3,13 +3,11 @@ using BLL.Enum;
 using BLL.GestiónStock.Exceptions;
 using BLL.GestiónStock.Interface;
 using BLL.GestiónStock.Mapper;
+using BLL.Infrastructure;
 using DAO.Interface;
 using FluentValidation;
 using FluentValidation.Results;
 using Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace BLL.GestiónStock
 {
@@ -69,6 +67,23 @@ namespace BLL.GestiónStock
                 {
                     throw new TechoOperativoException(stockDto.StockMaximo, unidadesIndividualesNetas);
                 }
+                // Control de vencimiento al ingresar mercadería: Si el producto tiene una vida útil definida, calcular la fecha de vencimiento estimada
+                DateTime? fechaVencimientoCalculada = null;
+               
+                int diasParaSumar = stockDto.DiasVidaUtil ?? 0;
+
+                if (diasParaSumar == 0)
+                {
+                    var productoMaestro = _uow.ProductoRepository.GetById(stockDto.IdProducto);
+
+                  
+                    diasParaSumar = productoMaestro?.DiasVidaUtil ?? 0;
+                }
+
+                if (diasParaSumar > 0)
+                {
+                    fechaVencimientoCalculada = DateTime.Today.AddDays(diasParaSumar);
+                }
 
                 // 4. Persistencia de la Trazabilidad: Creación del Lote Físico de Mercadería
                 var nuevoLote = new Lote
@@ -82,18 +97,19 @@ namespace BLL.GestiónStock
                     FechaIngreso = DateTime.Now,
                     NumeroLote = string.IsNullOrEmpty(stockDto.NumeroLote)
                                  ? $"MAN-{DateTime.Now:yyyyMMddHHmmss}"
-                        :        stockDto.NumeroLote
+                        :        stockDto.NumeroLote,
+                    FechaVencimiento = fechaVencimientoCalculada
                 };
                 _uow.LoteRepository.Add(nuevoLote);
 
                 // 5. Orquestación: Enviar el Lote y las Unidades Netas Calculadas al Motor de Auditoría
                 string comentarioFinal = string.IsNullOrEmpty(stockDto.Observaciones)
-                    ? $"Ajuste manual de stock ({tipoMovimiento}). Lote: {nuevoLote.NumeroLote}"
-                    : stockDto.Observaciones;
+                ? $"Ajuste manual de stock ({tipoMovimiento}). Lote: {nuevoLote.NumeroLote}"
+                : stockDto.Observaciones;
 
                 _kardex.RegistrarMovimiento(idSucursal, nuevoLote, tipoMovimiento, unidadesIndividualesNetas, comentarioFinal);
 
-                // Nota: El SaveChanges se ejecuta al final de toda la cadena adentro del KardexService para mantener la atomicidad.
+                
             }
             catch (RohanStockException)
             {
@@ -101,6 +117,9 @@ namespace BLL.GestiónStock
             }
             catch (Exception ex)
             {
+                var context = ExceptionContext.Crear(ex, new object[] { stockDto, idSucursal });
+                ExceptionLogger.Log(context);
+
                 throw new StockDomainException("Error crítico interno al orquestar el ajuste de inventario en el servidor.", ex);
             }
         }
@@ -125,10 +144,25 @@ namespace BLL.GestiónStock
             {
                 if (idSucursal == Guid.Empty) return Enumerable.Empty<StockPorSucursalDTO>();
 
-                var lista = _uow.StockPorSucursalRepository.GetConsolidadoBySucursal(idSucursal);
+                // 1. Recuperamos la lista consolidada base
+                var listaEntities = _uow.StockPorSucursalRepository.GetConsolidadoBySucursal(idSucursal);
 
-                // Mapeo utilizando tu método de extensión de forma fluida
-                return lista.Select(s => s.ToDTO());
+                // 2. Traemos de la DB todos los lotes activos (con existencias reales) de esta sucursal
+                var lotesActivos = _uow.LoteRepository.GetLotesActivosPorSucursal(idSucursal)
+                    .Where(l => (l.CantidadActual ?? 0) > 0)
+                    .ToList();
+
+                // 3. Mapeamos y cruzamos la información analítica de mermas
+                var listaDtos = listaEntities.Select(s => s.ToDTO()).ToList();
+
+                foreach (var dto in listaDtos)
+                {
+                    var lotesDelProducto = lotesActivos.Where(l => l.IdProducto == dto.IdProducto).ToList();     
+                    dto.TieneLotesVencidos = lotesDelProducto.Any(l => l.FechaVencimiento.HasValue
+                                                                   && l.FechaVencimiento.Value.Date < DateTime.Today);
+                }
+
+                return listaDtos;
             }
             catch (Exception ex)
             {
@@ -148,6 +182,48 @@ namespace BLL.GestiónStock
             {
                 var primerError = validacion.Errors.First().ErrorMessage;
                 throw new StockValidationException(primerError);
+            }
+        }
+
+        public void RegistrarMermaLote(Guid idLote, int cantidadABajar, string observaciones, Guid idSucursal)
+        {
+            try
+            {
+                if (cantidadABajar <= 0)
+                    throw new StockValidationException("La cantidad a dar de baja por merma debe ser mayor a cero.");
+
+                // 1. Recuperamos el lote físico directo de la base de datos
+                var loteDb = _uow.LoteRepository.GetById(idLote)
+                    ?? throw new StockDomainException("El lote seleccionado no existe o ya fue eliminado.");
+
+                // 2. Control de Regla de Negocio: No podés mermar más de lo que realmente hay en el estante
+                if (cantidadABajar > loteDb.CantidadActual)
+                    throw new StockValidationException($"Operación inválida. El lote solo dispone de {loteDb.CantidadActual} u. y se intentaron mermar {cantidadABajar} u.");
+
+                // 3. Restamos las unidades del lote específico
+                loteDb.CantidadActual -= cantidadABajar;
+                _uow.LoteRepository.Update(loteDb);
+
+                // 4. Orquestamos la auditoría y el descuento del consolidado reutilizando el Kardex
+                // Le pasamos el Enum de Merma. Tu Kardex se va a encargar solito de multiplicar por -1 
+                // y restar del stock general de la sucursal, ejecutando el SaveChanges() al final.
+                string comentarioAuditoria = string.IsNullOrEmpty(observaciones)
+                    ? $"Baja por Merma/Vencimiento. Lote afectado: {loteDb.NumeroLote}"
+                    : observaciones;
+
+                _kardex.RegistrarMovimiento(idSucursal, loteDb, TipoMovimientoEnum.EgresoPorMerma, cantidadABajar, comentarioAuditoria);
+            }
+            catch (RohanStockException)
+            {
+                throw; // Excepciones de validación suben limpio a la UI
+            }
+            catch (Exception ex)
+            {
+                // Si explota SQL, capturamos el desastre con tu nuevo Logger
+                var context = ExceptionContext.Crear(ex, new object[] { idLote, cantidadABajar, observaciones, idSucursal });
+                ExceptionLogger.Log(context);
+
+                throw new StockDomainException("Falla crítica al procesar la baja por merma sanitaria en el servidor.", ex);
             }
         }
 

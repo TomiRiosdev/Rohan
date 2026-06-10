@@ -6,26 +6,26 @@ namespace UI.GestiónStock
 {
     public partial class fmsMermaAlerta : Form
     {
-        private readonly IMermaService _mermaService;
-        private ConfiguracionAlertasDTO _dtoAlertas;
+        private readonly IFacade _stockFacade;
         private readonly StockPorSucursalDTO _productoOriginal;
 
         public fmsMermaAlerta
         (
-            IMermaService mermaService,
+            IFacade stockFacade,
             StockPorSucursalDTO productoOriginal
 
 
         )
         {
             InitializeComponent();
-            _mermaService = mermaService;
+            _stockFacade = stockFacade; 
             _productoOriginal = productoOriginal;
 
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             txtSku.Enabled = false;
+            txtProducto.Enabled = false;
         }
 
         private void fmsMermaAlerta_Load(object sender, EventArgs e)
@@ -51,7 +51,11 @@ namespace UI.GestiónStock
             nudVidaUtil.Value = _productoOriginal.DiasVidaUtil ?? 0;
             nudDiasAlerta.Value = _productoOriginal.DiasAlertaVencimiento ?? 0;
         }
-
+        /// <summary>
+        /// valida las entradas del usuario, construye un DTO consolidado y se lo envía a la capa BLL
+        /// para que lo procese y guarde en la base de datos. Si todo sale bien, cierra el formulario con un resultado OK; 
+        /// si hay errores de validación, muestra un mensaje al usuario.
+        /// </summary>
         private void btnAceptar_Click(object sender, EventArgs e)
         {
             try
@@ -73,7 +77,7 @@ namespace UI.GestiónStock
                     DiasAlertaVencimiento = nudDiasAlerta.Value > 0 ? (int)nudDiasAlerta.Value : (int?)null
                 };
 
-                _mermaService.GuardarConfiguracionAlertas(dtoAlertas);
+                _stockFacade.GuardarConfiguracionAlertas(dtoAlertas);
 
                 MessageBox.Show("Parámetros de control de stock y mermas actualizados con éxito.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 this.DialogResult = DialogResult.OK;
@@ -84,8 +88,10 @@ namespace UI.GestiónStock
                 MessageBox.Show(ex.Message, "Validación de Alertas", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
+      
         private void btnAtras_Click(object sender, EventArgs e)
         {
+            this.DialogResult = DialogResult.OK;
             this.Close();
         }
     }

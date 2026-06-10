@@ -113,7 +113,7 @@ namespace BLL.GestiónStock
                 throw new StockDomainException("Error de cómputo algorítmico al intentar consolidar el reporte de mermas preventivas.", ex);
             }
         }
-
+       
         public ConfiguracionAlertasDTO ObtenerAlertasPorProducto(Guid idProducto)
         {
             // Buscamos el producto en las tablas maestras
@@ -137,6 +137,7 @@ namespace BLL.GestiónStock
                 DiasAlertaVencimiento = p.DiasAlertaVencimiento
             };
         }
+        
         public void GuardarConfiguracionAlertas(ConfiguracionAlertasDTO dto)
         {
             try
@@ -172,19 +173,20 @@ namespace BLL.GestiónStock
         public List<LoteDetalleVencimientoDTO> ObtenerLotesPorProducto(Guid idProducto, Guid idSucursal)
         {
             return _uow.LoteRepository.GetLotesActivosPorSucursal(idSucursal)
-                .Where(l => l.IdProducto == idProducto
-                         && l.IdSucursal == idSucursal
-                         && (l.CantidadActual ?? 0) > 0)
-                .Select(l => new LoteDetalleVencimientoDTO
-                {
+                  .Where(l => l.IdProducto == idProducto
+                     && l.IdSucursal == idSucursal
+                    && (l.CantidadActual ?? 0) > 0)
+                  .Select(l => new LoteDetalleVencimientoDTO
+                  {
+                    IdLote = l.IdLote,
                     NumeroLote = l.NumeroLote ?? "Sin Identificar",
                     CantidadInicial = l.CantidadInicial ?? 0,
                     CantidadActual = l.CantidadActual ?? 0,
                     FechaIngreso = l.FechaIngreso ?? DateTime.Now,
                     FechaVencimiento = l.FechaVencimiento
-                })
-                .OrderBy(l => l.FechaVencimiento)
-                .ToList();
+                  })
+                 .OrderBy(l => l.FechaVencimiento)
+                 .ToList();
         }
     }
 }

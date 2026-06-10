@@ -4,7 +4,7 @@ using BLL.GestiónStock.Interface;
 
 namespace BLL.GestiónStock.Facade
 {
-    public class StockFacade : IStockFacade
+    public class StockFacade : IFacade
     {
         private readonly IStockService _stockService;
         private readonly IKardexService _kardexService;
@@ -22,25 +22,34 @@ namespace BLL.GestiónStock.Facade
             _kardexService = kardexService ?? throw new ArgumentNullException(nameof(kardexService));
             _mermaService = mermaService ?? throw new ArgumentNullException(nameof(mermaService));
         }
-
+        // Delegados hacia StockService
         public void RegistrarStockManual(StockPorSucursalDTO stockDto, Guid idSucursal)
-        {
-             _stockService.RegistrarStockManual(stockDto, idSucursal);
-        }
+            => _stockService.RegistrarStockManual(stockDto, idSucursal);
+
+        public void RegistrarStockPorOc(Guid idProducto, int cantidadComprada, decimal costoPactado, string nroRemitoOc, Guid idSucursal)
+            => _stockService.RegistrarStockPorOc(idProducto, cantidadComprada, costoPactado, nroRemitoOc, idSucursal);
+
+        public void RegistrarMermaLote(Guid idLote, int cantidadABajar, string observaciones, Guid idSucursal)
+            => _stockService.RegistrarMermaLote(idLote, cantidadABajar, observaciones, idSucursal);
 
         public IEnumerable<StockPorSucursalDTO> ObtenerConsolidadoPorSucursal(Guid idSucursal)
-        {
-            return _stockService.ObtenerConsolidadoPorSucursal(idSucursal);
-        }
+            => _stockService.ObtenerConsolidadoPorSucursal(idSucursal);
 
-        public IEnumerable<MovimientoStockDTO> ObtenerHistorialKardex(Guid idSucursal, DateTime desde, DateTime hasta)
-        {
-            return _kardexService.ObtenerHistorial(idSucursal, desde, hasta);
-        }
+        // 🚀 Delegados hacia MermaService
+        public ConfiguracionAlertasDTO ObtenerAlertasPorProducto(Guid idProducto)
+            => _mermaService.ObtenerAlertasPorProducto(idProducto);
+
+        public void GuardarConfiguracionAlertas(ConfiguracionAlertasDTO dto)
+            => _mermaService.GuardarConfiguracionAlertas(dto);
 
         public IEnumerable<InventarioAlertaDTO> ObtenerTableroAlertas(Guid idSucursal)
-        {
-            return _mermaService.ObtenerAlertasInventario(idSucursal);
-        }
+            => _mermaService.ObtenerAlertasInventario(idSucursal);
+
+        public List<LoteDetalleVencimientoDTO> ObtenerLotesPorProducto(Guid idProducto, Guid idSucursal)
+            => _mermaService.ObtenerLotesPorProducto(idProducto, idSucursal);
+
+        // 🚀 Delegados hacia KardexService
+        public IEnumerable<MovimientoStockDTO> ObtenerHistorialKardex(Guid idSucursal, DateTime desde, DateTime hasta)
+            => _kardexService.ObtenerHistorial(idSucursal, desde, hasta);
     }
 }

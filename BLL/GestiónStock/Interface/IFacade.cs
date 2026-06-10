@@ -1,22 +1,23 @@
 ﻿using BLL.DomainDtos;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BLL.GestiónStock.Interface
 {
-    public interface IStockFacade
+    public interface IFacade
     {
-        // Delegado hacia StockService
-        void RegistrarStockManual(StockPorSucursalDTO stockDto, Guid idSucursal);
-        IEnumerable<StockPorSucursalDTO> ObtenerConsolidadoPorSucursal(Guid idSucursal);
+        // OPERACIONES DE STOCK CORE (Hacia StockService)
+            void RegistrarStockManual(StockPorSucursalDTO stockDto, Guid idSucursal);
+            void RegistrarStockPorOc(Guid idProducto, int cantidadComprada, decimal costoPactado, string nroRemitoOc, Guid idSucursal);
+            void RegistrarMermaLote(Guid idLote, int cantidadABajar, string observaciones, Guid idSucursal);
+            IEnumerable<StockPorSucursalDTO> ObtenerConsolidadoPorSucursal(Guid idSucursal);
 
-        // Delegado hacia KardexService
-        IEnumerable<MovimientoStockDTO> ObtenerHistorialKardex(Guid idSucursal, DateTime desde, DateTime hasta);
+            // TABLERO OPERATIVO Y LOGÍSTICA SANITARIA (Hacia MermaService)
+            ConfiguracionAlertasDTO ObtenerAlertasPorProducto(Guid idProducto);
+            void GuardarConfiguracionAlertas(ConfiguracionAlertasDTO dto);
+            IEnumerable<InventarioAlertaDTO> ObtenerTableroAlertas(Guid idSucursal);
+            List<LoteDetalleVencimientoDTO> ObtenerLotesPorProducto(Guid idProducto, Guid idSucursal);
 
-        // Delegado hacia MermaService
-        IEnumerable<InventarioAlertaDTO> ObtenerTableroAlertas(Guid idSucursal);
+            // LIBRO CONTABLE DE AUDITORÍA (Hacia KardexService)
+            IEnumerable<MovimientoStockDTO> ObtenerHistorialKardex(Guid idSucursal, DateTime desde, DateTime hasta);
+        
     }
 }

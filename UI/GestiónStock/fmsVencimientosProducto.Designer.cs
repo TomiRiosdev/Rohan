@@ -106,7 +106,7 @@
             // 
             lblEstadoSanitarioTexto.AutoSize = true;
             lblEstadoSanitarioTexto.Font = new Font("Segoe UI Semibold", 11.25F, FontStyle.Bold);
-            lblEstadoSanitarioTexto.Location = new Point(587, 38);
+            lblEstadoSanitarioTexto.Location = new Point(558, 38);
             lblEstadoSanitarioTexto.Name = "lblEstadoSanitarioTexto";
             lblEstadoSanitarioTexto.Size = new Size(58, 20);
             lblEstadoSanitarioTexto.TabIndex = 19;
