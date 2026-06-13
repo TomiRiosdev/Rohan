@@ -20,6 +20,6 @@ public partial class OrdenCompra
     public decimal? CostoTotal { get; set; }
 
     public virtual Proveedor? IdProveedorNavigation { get; set; }
-    public virtual EstadoSolicitud? IdEstadoOcNavigation { get; set; }
+    public virtual EstadoSolicitud? IdEstadoSolicitudNavigation { get; set; } // cambiar el nombre a IdEstadoSolicitudNavigation
     public virtual ICollection<OrdenCompraDetalle> OrdenCompraDetalle { get; set; } = new List<OrdenCompraDetalle>();
 }

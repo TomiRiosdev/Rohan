@@ -29,6 +29,8 @@ namespace DAO.Implementations.SQLServer
         public IMovimientosStockRepository MovimientosStockRepository { get; private set; }
         public ILoteRepository LoteRepository { get; private set; }
         public ITipoMovimientoRepository TipoMovimientoRepository { get; private set; }
+        public IOrdenCompraRepository OrdenCompraRepository { get; private set; }
+        public ICompraSolicitudQueryRepository CompraSolicitudQueryRepository { get; private set; }
 
 
         // Recibe el contexto único administrado por el ServiceProvider
@@ -49,6 +51,8 @@ namespace DAO.Implementations.SQLServer
             MovimientosStockRepository = new MovimientosStockRepository(_dbContext);
             LoteRepository = new LoteRepository(_dbContext);
             TipoMovimientoRepository = new TipoMovimientoRepository(_dbContext);
+            OrdenCompraRepository = new OrdenCompraRepository(_dbContext);
+            CompraSolicitudQueryRepository = new CompraSolicitudQueryRepository(_dbContext);
 
         }
 

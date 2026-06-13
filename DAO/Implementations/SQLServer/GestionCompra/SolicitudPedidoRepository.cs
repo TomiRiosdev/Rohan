@@ -1,6 +1,7 @@
-﻿using Models;
+﻿using DAO.Interface.GestionCompra;
 using Microsoft.EntityFrameworkCore;
-using DAO.Interface.GestionCompra;
+using Models;
+using System.Data.Entity.Core.Common.CommandTrees.ExpressionBuilder;
 
 
 namespace DAO.Implementations.SQLServer.GestionCompra
@@ -23,9 +24,16 @@ namespace DAO.Implementations.SQLServer.GestionCompra
         {
             if (entity == null) throw new ArgumentNullException(nameof(entity));
 
-            // EF es inteligente: al agregar la entidad cabecera, detecta la colección interna 
-            // de 'SolicitudPedidoDetalles' y preparará los INSERTS para todas las tablas en la misma cola.
-            _dbContext.SolicitudPedido.Add(entity);
+            try
+            {
+                _dbContext.SolicitudPedido.Add(entity);
+                _dbContext.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error nativo en el repositorio DAL al insertar el maestro-detalle de la solicitud.", ex);
+            }
+            
         }
 
         // 2. OBTENER MAESTRO-DETALLE COMPLETO POR ID
@@ -68,6 +76,20 @@ namespace DAO.Implementations.SQLServer.GestionCompra
             catch (Exception ex)
             {
                 throw new Exception($"DAO Error: No se pudo listar el historial de solicitudes para la sucursal {idSucursal}.", ex);
+            }
+        }
+
+        public int GetNextNroSolicitud(Guid idSucursal)
+        {
+            try
+            {
+                return _dbContext.SolicitudPedido
+                    .Where(s => s.IdSucursal == idSucursal)
+                    .Max(s => (int?)s.NroSolicitud) ?? 0;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error en la DAL al calcular el correlativo de solicitudes para la sucursal {idSucursal}.", ex);
             }
         }
     }

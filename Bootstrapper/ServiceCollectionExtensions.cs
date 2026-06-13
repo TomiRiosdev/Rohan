@@ -36,6 +36,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Service.DateAccess.Implementations;
 using Service.DateAccess.Interface;
 using Service.Logic;
+using BLL.GestiónCompra.Facade;
 
 
 
@@ -140,16 +141,23 @@ namespace Bootstrapper
             #region DOMINIO: GESTIÓN DE COMPRAS Y REPOSICIÓN (MAESTRO-DETALLE)
             // Repositorios (DAL)
             services.AddTransient<ISolicitudPedidoRepository, SolicitudPedidoRepository>();
-         
+            services.AddTransient<IOrdenCompraRepository, OrdenCompraRepository>();
+            services.AddTransient<ICompraSolicitudQueryRepository, CompraSolicitudQueryRepository>();
+
 
             // Validadores (FluentValidation)
             services.AddScoped<IValidator<SolicitudPedidoDTO>, SolicitudPedidoValidator>();
 
+
             // Servicios de Negocio (BLL)
             services.AddScoped<ISolicitudPedidoService, SolicitudPedidoService>();
-          
+            services.AddScoped<IOrdenCompraService, OrdenCompraService>();
+
+            // Fachadas (UI Gateway)
+            services.AddTransient<SolicitudPedidoFacade>();
+
             #endregion
-         
+
             return services;
         }
        

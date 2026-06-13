@@ -1,6 +1,7 @@
 ﻿using BLL.DomainDtos;
 using BLL.GestiónProducto.Facade;
 using BLL.GestiónStock.Interface;
+using Microsoft.Extensions.DependencyInjection;
 
 
 namespace UI.GestiónStock
@@ -9,18 +10,21 @@ namespace UI.GestiónStock
     {
         private readonly IFacade _stockFacade;
         private readonly ProductoFacade _productoFacade;
-      
+        private readonly IServiceProvider _serviceProvider;
+
         public fmsGestionStock
         (
             IFacade stockFacade,
             ProductoFacade productoFacade,
-            IMermaService mermaService
+            IMermaService mermaService,
+            IServiceProvider serviceProvider
+
         )
         {
             InitializeComponent();
             _stockFacade = stockFacade;
             _productoFacade = productoFacade;
-            
+            _serviceProvider = serviceProvider; 
         }
         #region buttons
         private void btnVerInventario_Click(object sender, EventArgs e)
@@ -60,7 +64,16 @@ namespace UI.GestiónStock
 
         private void btnSolicitudPedido_Click(object sender, EventArgs e)
         {
-
+            try
+            {
+                var fmsSolicitud = _serviceProvider.GetRequiredService<fmsSolicitudPedido>();
+                AbrirFormInPanel(fmsSolicitud);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error de infraestructura al incrustar la Solicitud de Pedido: {ex.Message}",
+                                "Error Crítico", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void btnMermaAlerta_Click(object sender, EventArgs e)

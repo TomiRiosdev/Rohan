@@ -93,17 +93,14 @@ namespace BLL.GestiónCompra.Mapper
 
             return new SolicitudPedidoDetalle
             {
-                //  Forzamos el calce de llaves primarias compuestas/relacionales
-                IdSolicitudPedido = idCabecera,
-                IdSolicitud = idCabecera, // Asignamos ambos campos por las variantes de tu modelo
-
+             
+                IdSolicitudPedidoDetalle =Guid.NewGuid(),
+                IdSolicitudPedido = idCabecera, 
                 IdProducto = dto.IdProducto,
                 Renglon = dto.Renglon,
                 Cantidad = dto.CantidadBultosSolicitada
 
-                // Nota: Si tu tabla 'SolicitudPedidoDetalle' física en Models llega a tener la columna 
-                // PresentacionTipo más adelante, descomentás esta línea:
-                // PresentacionTipo = dto.PresentacionTipo
+                
             };
         }
 

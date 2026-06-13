@@ -1,12 +1,41 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using BLL.DomainDtos;
+using BLL.GestiónCompra.Interface;
+using System;
+
 
 namespace BLL.GestiónCompra.Facade
 {
-    internal class SolicitudPedidoFacade
-    {
+   public class SolicitudPedidoFacade
+   {
+       private readonly ISolicitudPedidoService _service;
+
+       public SolicitudPedidoFacade
+       (
+           ISolicitudPedidoService service
+       )
+       {
+           _service = service ?? throw new ArgumentNullException(nameof(service));
+       }
+
+        public void CrearSolicitud(SolicitudPedidoDTO dto)
+        {
+            if (dto == null) throw new ArgumentNullException(nameof(dto));
+            _service.CrearSolicitud(dto);
+        }
+        public  SolicitudPedidoDTO ObtenerPorId(Guid idSolicitud)
+        {
+            if (idSolicitud == Guid.Empty) throw new ArgumentNullException(nameof(idSolicitud));
+            return _service.ObtenerPorId(idSolicitud);
+        }
+        public IEnumerable<SolicitudPedidoDTO> ObtenerHistorialPorSucursal(Guid idSucursal)
+        {
+            if (idSucursal == Guid.Empty) throw new ArgumentNullException(nameof(idSucursal));
+            return _service.ObtenerHistorialPorSucursal(idSucursal);
+        }
+        public List<SolicitudPedidoDetalleDTO> GenerarDetallesSugeridosBajoMinimo(Guid idSucursal)
+        {
+            if (idSucursal == Guid.Empty) throw new ArgumentNullException(nameof(idSucursal));
+            return _service.GenerarDetallesSugeridosBajoMinimo(idSucursal);
+        }   
     }
 }

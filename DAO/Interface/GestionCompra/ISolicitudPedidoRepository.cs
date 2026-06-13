@@ -20,6 +20,9 @@ namespace DAO.Interface.GestionCompra
 
         // 4. Repositorio exclusivo para consultar los estados comerciales de la tabla EstadoSolicitud
         IEstadoSolicitudRepository Estados { get; }
+
+        // 5. Obtener el siguiente número de solicitud para una sucursal específica
+        int GetNextNroSolicitud(Guid idSucursal);
     }
 
     // Interfaz secundaria integrada para no llenar de archivos la DAL con tablas de soporte cortas

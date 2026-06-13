@@ -22,6 +22,8 @@ namespace DAO.Interface
         IMovimientosStockRepository MovimientosStockRepository { get; }
         ILoteRepository LoteRepository { get; }
         ITipoMovimientoRepository TipoMovimientoRepository { get; }
+        IOrdenCompraRepository OrdenCompraRepository { get; }
+        ICompraSolicitudQueryRepository CompraSolicitudQueryRepository { get; }
 
         // Método para guardar los cambios en la base de datos
 

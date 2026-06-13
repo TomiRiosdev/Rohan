@@ -5,9 +5,9 @@ namespace Models;
 
 public partial class SolicitudPedidoDetalle
 {
-    public Guid IdSolicitudPedido { get; set; }
+    public Guid IdSolicitudPedidoDetalle { get; set; }
 
-    public Guid? IdSolicitud { get; set; }
+    public Guid? IdSolicitudPedido { get; set; }
 
     public Guid? IdProducto { get; set; }
 

@@ -8,7 +8,6 @@ namespace BLL.GestiónSucursal.Mapper
     {
         public static SucursalDTO ToDTO(this Sucursal sucursal)
         {
-
             if (sucursal == null)
                 throw new ArgumentNullException(nameof(sucursal), "La entidad Sucursal no puede ser null.");
 
@@ -23,7 +22,6 @@ namespace BLL.GestiónSucursal.Mapper
                 IdTipoSucursal = sucursal.IdTipoSucursal ?? Guid.Empty,
                 TipoSucursalNombre = sucursal.IdTipoSucursalNavigation?.Descripcion ?? "Sin tipo de sucursal",
                 Localidad = sucursal.Localidad,
-
             };
         }
 
@@ -48,7 +46,7 @@ namespace BLL.GestiónSucursal.Mapper
 
         public static IEnumerable<SucursalDTO> ToDTOList(this IEnumerable<Sucursal> sucursales)
         {
-                return sucursales?.Select(ToDTO) ?? Enumerable.Empty<SucursalDTO>();
+            return sucursales?.Select(ToDTO) ?? Enumerable.Empty<SucursalDTO>();
         }
         
         public static void UpdateEntity(this Sucursal entity, SucursalDTO dto)
@@ -62,7 +60,7 @@ namespace BLL.GestiónSucursal.Mapper
             entity.Telefono = dto.Telefono;
             entity.IdTipoSucursal = dto.IdTipoSucursal;
             entity.Localidad = dto.Localidad;
-           
+       
         }
     }
 }

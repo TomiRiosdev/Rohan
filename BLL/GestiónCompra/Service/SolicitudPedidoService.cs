@@ -8,7 +8,6 @@ using DAO.Interface;
 using FluentValidation;
 using FluentValidation.Results;
 
-
 namespace BLL.GestiónCompra.Service
 {
     public class SolicitudPedidoService : ISolicitudPedidoService
@@ -38,22 +37,20 @@ namespace BLL.GestiónCompra.Service
                     throw new SolicitudPedidoServiceException("Error: La solicitud debe incluir una sucursal de origen válida.");
                 if (dto.IdUsuario == null || dto.IdUsuario == Guid.Empty)
                     throw new SolicitudPedidoServiceException("Error: La solicitud debe incluir el usuario emisor.");
+                if (dto.Detalles == null || !dto.Detalles.Any())
+                    throw new SolicitudPedidoServiceException("No se puede generar una solicitud de pedido sin renglones de productos.");
+                
+         
 
-                int idEstadoInicial = (int)EstadoSolicitudEnum.Pendiente;
+                Guid idSolicitudNuevo = Guid.NewGuid(); 
 
-                var entity = dto.ToEntity();  
-                entity.IdSolicitudPedido = Guid.NewGuid();
-                entity.FechaSolicitud = DateTime.Now;
-                entity.IdEstadoSolicitud = idEstadoInicial; 
-
-       
-                int contadorRenglon = 1;
-                foreach (var detalle in entity.SolicitudPedidoDetalle)
-                {
-                    detalle.IdSolicitudPedido = entity.IdSolicitudPedido;
-                    detalle.Renglon = contadorRenglon;
-                    contadorRenglon++;                 
-                }
+                dto.IdSolicitudPedido = idSolicitudNuevo;
+                dto.FechaSolicitud = DateTime.Now;
+                dto.IdEstadoSolicitud = 1;
+                int ultimoNro = _uow.SolicitudPedidoRepository.GetNextNroSolicitud(dto.IdSucursal.Value);
+                dto.NroSolicitud = ultimoNro + 1;
+              
+                var entity = SolicitudPedidoMapper.ToEntity(dto);
 
                 _uow.SolicitudPedidoRepository.Add(entity);
                 _uow.SaveChanges();
@@ -111,6 +108,57 @@ namespace BLL.GestiónCompra.Service
             }
         }
 
+        public List<SolicitudPedidoDetalleDTO> GenerarDetallesSugeridosBajoMinimo(Guid idSucursal)
+        {
+            try
+            {
+                // 1. Consumimos el consolidado de stock que ya tenés programado en tu módulo de Stock
+                var stockConsolidado = _uow.StockPorSucursalRepository.GetConsolidadoBySucursal(idSucursal);
+
+                var detallesSugeridos = new List<SolicitudPedidoDetalleDTO>();
+                int renglonContador = 1;
+
+                // 2. Filtramos únicamente los productos en quiebre o bajo el mínimo operativo
+                var productosBajoMinimo = stockConsolidado
+                        .Where(s => s.CantidadTotal <= s.StockMinimo && s.StockMaximo > s.CantidadTotal)
+                        .GroupBy(s => s.IdProducto) 
+                        .Select(g => g.First())    
+                        .ToList();
+
+                foreach (var prod in productosBajoMinimo)
+                {
+                    // Calcular faltantes en unidades sueltas
+                    int unidadesFaltantes = (prod.StockMaximo ?? 0) - (prod.CantidadTotal ?? 0);
+                    int unidadesPorBulto = prod.IdProductoNavigation?.CantidadPorBulto ?? 1;
+
+                    // Convertimos las unidades sueltas que faltan a Bultos Cerrados (redondeando hacia arriba)
+                    int bultosAPedir = (int)Math.Ceiling((double)unidadesFaltantes / unidadesPorBulto);
+
+                    if (bultosAPedir > 0)
+                    {
+                        detallesSugeridos.Add(new SolicitudPedidoDetalleDTO
+                        {
+                            IdProducto = prod.IdProducto,
+                            CodigoSku = prod.IdProductoNavigation?.CodigoSku ?? 0,
+                            ProductoNombre = prod.IdProductoNavigation?.Nombre ?? "Materia Prima",
+                            UnidadesPorBulto = unidadesPorBulto,
+                            CantidadBultosSolicitada = bultosAPedir,
+                            PresentacionTipo = "Caja",
+                            Renglon = renglonContador
+                        });
+
+                        renglonContador++;
+                    }
+                }
+
+                return detallesSugeridos;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error al precalcular la sugerencia automática de pedido.", ex);
+            }
+        }
+
         #endregion
 
         #region Métodos Privados
@@ -142,7 +190,7 @@ namespace BLL.GestiónCompra.Service
                 throw new SolicitudPedidoServiceException(primerError);
             }
         }
-
+    
         #endregion
     }
 }

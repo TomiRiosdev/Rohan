@@ -169,7 +169,7 @@ public partial class RohanContext : DbContext
             entity.HasOne(d => d.IdProveedorNavigation).WithMany(p => p.OrdenCompra)
                 .HasForeignKey(d => d.IdProveedor)
                 .HasConstraintName("FK_OrdenCompra_Proveedor");
-            entity.HasOne(d => d.IdEstadoOcNavigation)
+            entity.HasOne(d => d.IdEstadoSolicitudNavigation)
                  .WithMany(p => p.OrdenCompra) // Machea con la colección que agregamos en EstadoSolicitud
                  .HasForeignKey(d => d.IdEstadoOc)
                  .HasConstraintName("FK_OrdenCompra_EstadoSolicitud");
@@ -266,40 +266,40 @@ public partial class RohanContext : DbContext
             entity.Property(e => e.IdSolicitudPedido).ValueGeneratedNever();
             entity.Property(e => e.FechaSolicitud).HasColumnType("datetime");
 
-            
             entity.HasOne(d => d.IdSucursalNavigation)
                 .WithMany(p => p.SolicitudPedido)
                 .HasForeignKey(d => d.IdSucursal)
                 .HasConstraintName("FK_SolicitudPedido_Sucursal");
 
-           
+         
             entity.HasOne(d => d.IdEstadoSolicitudNavigation)
-                .WithMany(p => p.SolicitudPedido) 
+                .WithMany(p => p.SolicitudPedido)
                 .HasForeignKey(d => d.IdEstadoSolicitud)
                 .HasConstraintName("FK_SolicitudPedido_EstadoSolicitud");
 
-            
             entity.HasMany(d => d.SolicitudPedidoDetalle)
-                .WithOne(p => p.IdSolicitudPedidoNavigation) 
+                .WithOne(p => p.IdSolicitudPedidoNavigation)
                 .HasForeignKey(d => d.IdSolicitudPedido)
                 .HasConstraintName("FK_SolicitudPedidoDetalle_SolicitudPedido");
-
-
         });
 
         modelBuilder.Entity<SolicitudPedidoDetalle>(entity =>
         {
-            entity.HasKey(e => e.IdSolicitudPedido);
+       
+            entity.HasKey(e => e.IdSolicitudPedidoDetalle);
 
             entity.ToTable("SolicitudPedidoDetalle");
 
-            entity.Property(e => e.IdSolicitudPedido).ValueGeneratedNever();
+            entity.Property(e => e.IdSolicitudPedidoDetalle).ValueGeneratedNever();
 
-            entity.HasOne(d => d.IdProductoNavigation).WithMany(p => p.SolicitudPedidoDetalle)
+        
+            entity.HasOne(d => d.IdProductoNavigation)
+                .WithMany(p => p.SolicitudPedidoDetalle)
                 .HasForeignKey(d => d.IdProducto)
                 .HasConstraintName("FK_SolicitudPedidoDetalle_Producto");
 
-            entity.HasOne(d => d.IdSolicitudPedidoNavigation).WithMany(p => p.SolicitudPedidoDetalle)
+            entity.HasOne(d => d.IdSolicitudPedidoNavigation)
+                .WithMany(p => p.SolicitudPedidoDetalle)
                 .HasForeignKey(d => d.IdSolicitudPedido)
                 .HasConstraintName("FK_SolicitudPedidoDetalle_SolicitudPedido");
         });

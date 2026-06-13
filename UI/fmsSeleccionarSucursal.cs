@@ -67,7 +67,6 @@ namespace UI
                              MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-
         private void fmsSeleccionarSucursal_Load(object sender, EventArgs e)
         {
             CargarCombos();
