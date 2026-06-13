@@ -11,14 +11,17 @@ namespace UI.GestiónStock
         private List<StockPorSucursalDTO> _inventarioCompleto = new();
         public event EventHandler<StockPorSucursalDTO> OnSolicitarConfiguracionMermas;
         public event EventHandler<StockPorSucursalDTO> OnSolicitarVerVencimientos;
+     
 
         public fmsInventario
         (
             IFacade stockFacade
+         
         )
         {
             InitializeComponent();
             _stockFacade = stockFacade;
+         
             ConfigurarFiltrosIniciales();
         }
 
@@ -314,7 +317,6 @@ namespace UI.GestiónStock
                  return null;
             }
         }
-
         /// <summary>
         /// Método público que actúa como puente para que el padre pueda ordenar 
         /// </summary>

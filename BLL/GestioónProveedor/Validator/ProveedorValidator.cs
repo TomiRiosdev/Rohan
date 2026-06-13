@@ -1,7 +1,7 @@
 ﻿using BLL.DomainDtos;
 using FluentValidation;
 
-namespace BLL.GestioónProveedor.Validator
+namespace BLL.GestiónProveedor.Validator
 {
     public class ProveedorValidator : AbstractValidator<ProveedorDTO>
     {

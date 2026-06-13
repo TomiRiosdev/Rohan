@@ -1,12 +1,12 @@
 ﻿using BLL.DomainDtos;
-using BLL.GestioónProveedor.Exceptions;
-using BLL.GestioónProveedor.Interface;
-using BLL.GestioónProveedor.Mapper;
+using BLL.GestiónProveedor.Exceptions;
+using BLL.GestiónProveedor.Interface;
+using BLL.GestiónProveedor.Mapper;
 using DAO.Interface;
 using FluentValidation;
 using FluentValidation.Results;
 
-namespace BLL.GestioónProveedor.Service
+namespace BLL.GestiónProveedor.Service
 {
    public class ProveedorService : IProveedorService
     { 

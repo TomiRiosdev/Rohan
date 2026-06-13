@@ -1,167 +1,113 @@
 ﻿using BLL.DomainDtos;
-using BLL.GestiónStock.Mapper;
-using BLL.GestioónProveedor.Exceptions;
-using BLL.GestioónProveedor.Interface;
-using BLL.GestioónProveedor.Mapper;
+using BLL.GestiónProveedor.Interface;
+using BLL.GestiónProveedor.Mapper;
+using BLL.Infrastructure;
 using DAO.Interface;
-using FluentValidation;
-using FluentValidation.Results;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-
-namespace BLL.GestioónProveedor.Service
+namespace BLL.GestiónProveedor.Service
 {
     public class ProductoProveedorService : IProductoProveedorService
     {
         private readonly IUnitOfWork _uow;
-        private readonly IValidator<ProductoProveedorDTO> _validator;
 
-        public ProductoProveedorService(IUnitOfWork uow, IValidator<ProductoProveedorDTO> validator)
+        public ProductoProveedorService(IUnitOfWork uow)
         {
             _uow = uow ?? throw new ArgumentNullException(nameof(uow));
-            _validator = validator ?? throw new ArgumentNullException(nameof(validator));
         }
 
-        #region Métodos Públicos
-
-        public void VincularProductoProveedor(ProductoProveedorDTO dto)
+        public void VincularProductoAProveedor(ProductoProveedorDTO dto)
         {
             try
             {
-                // 1. Validaciones sintácticas básicas (FluentValidation)
-                ValidarDto(dto);
+                // 1. Validaciones básicas de integridad
+                if (dto == null)
+                    throw new Exception("Los datos de asignación provistos son nulos.");
+                if (dto.IdProducto == Guid.Empty || dto.IdProveedor == Guid.Empty)
+                    throw new Exception("Identificadores de Producto o Proveedor inválidos para establecer el vínculo.");
 
-                // 2. Validar existencia de las entidades en la DB
-                var producto = _uow.ProductoRepository.GetById(dto.IdProducto);
-                if (producto == null || !producto.Habilitado == false)
-                    throw new ProductoProveedorServiceException("El producto seleccionado no existe o está deshabilitado.");
+                // 2. Control de Regla de Negocio: Evitar duplicados físicos en la base de datos
+                bool existe = _uow.ProductoProveedorRepository.ExisteRelacion(dto.IdProducto, dto.IdProveedor);
+                if (existe)
+                    throw new Exception("Operación redundante: El producto seleccionado ya se encuentra asignado a este proveedor.");
 
-                var proveedor = _uow.ProveedorRepository.GetById(dto.IdProveedor);
-                if (proveedor == null || !proveedor.Habilitado == false)
-                    throw new ProductoProveedorServiceException("El proveedor seleccionado no existe o está deshabilitado.");
-
-                // 3. Regla de Negocio: Validar duplicados de la relación en esta sucursal/catálogo
-                var relacionesExistentes = _uow.ProductoProveedorRepository.GetByProveedor(dto.IdProveedor);
-                bool yaExisteVínculo = relacionesExistentes.Any(r => r.IdProducto == dto.IdProducto);
-
-                if (yaExisteVínculo)
-                    throw new ProductoProveedorServiceException("Operación inválida: Este producto ya se encuentra vinculado al proveedor seleccionado.");
-
-                // 4. Regla de Negocio Compleja: Control de Proveedor Principal
-                // Si el DTO viene marcado como Principal, tenemos que desmarcar el principal anterior de ese producto
-                if (dto.EsProveedorPrincipal)
-                    NormalizarProveedorPrincipal(dto.IdProducto);
-
-                // 5. Mapeo y encolado en memoria RAM
+                // 3. Transformación e inserción a través del repositorio compuesto
                 var entity = dto.ToEntity();
+
                 _uow.ProductoProveedorRepository.Add(entity);
+                _uow.SaveChanges(); // Confirmación de persistencia atómica
+            }
+            catch (Exception ex) when (ex.Message.Contains("Operación redundante") || ex.Message.Contains("inválidos"))
+            {
+                throw; // Dejamos burbujear los errores de negocio limpios hacia la UI
+            }
+            catch (Exception ex)
+            {
+                // Telemetría forense en caso de caídas de índices de SQL Server
+                var context = ExceptionContext.Crear(ex, new object[] { dto });
+                ExceptionLogger.Log(context);
+                throw new Exception("Falla crítica al intentar registrar la asignación Producto-Proveedor en el servidor.", ex);
+            }
+        }
 
-                // 6. Confirmación de la transacción mediante Unit of Work
+        public void DesvincularProductoDeProveedor(Guid idProducto, Guid idProveedor)
+        {
+            try
+            {
+                if (idProducto == Guid.Empty || idProveedor == Guid.Empty)
+                    throw new Exception("No se puede revocar la asignación: Identificadores inválidos.");
+
+                // Ejecutamos la baja física en la tabla puente intermediaria
+                _uow.ProductoProveedorRepository.Delete(idProducto, idProveedor);
                 _uow.SaveChanges();
             }
-            catch (ProductoProveedorServiceException)
-            {
-                throw;
-            }
             catch (Exception ex)
             {
-                throw new ProductoProveedorServiceException("Error de negocio: No se pudo registrar la vinculación del producto con el proveedor.", ex);
+                var context = ExceptionContext.Crear(ex, new object[] { idProducto, idProveedor });
+                ExceptionLogger.Log(context);
+                throw new Exception("Error interno de infraestructura al intentar remover el vínculo comercial.", ex);
             }
         }
 
-        public void DesvincularProductoProveedor(Guid idProductoProveedor)
+        public IEnumerable<ProductoProveedorDTO> ListarProductosPorProveedor(Guid idProveedor)
         {
             try
             {
-                if (idProductoProveedor == Guid.Empty)
-                    throw new ProductoProveedorServiceException("El ID de relación proporcionado no es válido.");
+                if (idProveedor == Guid.Empty) return Enumerable.Empty<ProductoProveedorDTO>();
 
-                // Ejecuta la remoción en memoria
-                _uow.ProductoProveedorRepository.Remove(idProductoProveedor);
+                var entidadesPuente = _uow.ProductoProveedorRepository.GetByProveedor(idProveedor);
 
-                // Impacta físicamente en la DB
-                _uow.SaveChanges();
+                // Mapeo fluido utilizando los métodos de extensión estáticos compilados hoy
+                return entidadesPuente.Select(pp => pp.ToDTO()).ToList();
             }
             catch (Exception ex)
             {
-                throw new ProductoProveedorServiceException("Error de negocio: No se pudo eliminar la vinculación comercial.", ex);
+                var context = ExceptionContext.Crear(ex, new object[] { idProveedor });
+                ExceptionLogger.Log(context);
+                throw new Exception("Error al consultar el catálogo de materias primas asignadas al proveedor.", ex);
             }
         }
 
-        public IEnumerable<ProductoProveedorDTO> ObtenerProductosPorProveedor(Guid idProveedor)
+        public IEnumerable<ProductoProveedorDTO> ListarProveedoresPorProducto(Guid idProducto)
         {
             try
             {
-                var entidades = _uow.ProductoProveedorRepository.GetByProveedor(idProveedor);
-                return entidades.ToDTOList();
+                if (idProducto == Guid.Empty) return Enumerable.Empty<ProductoProveedorDTO>();
+
+                var entidadesPuente = _uow.ProductoProveedorRepository.GetByProducto(idProducto);
+
+                return entidadesPuente.Select(pp => pp.ToDTO()).ToList();
             }
             catch (Exception ex)
             {
-                throw new ProductoProveedorServiceException("Error al recuperar el catálogo del proveedor.", ex);
+                var context = ExceptionContext.Crear(ex, new object[] { idProducto });
+                ExceptionLogger.Log(context);
+                throw new Exception("Error analítico al recuperar los canales de suministro del producto.", ex);
             }
         }
-
-        public IEnumerable<ProductoProveedorDTO> ObtenerProveedoresPorProducto(Guid idProducto)
-        {
-            try
-            {
-                var entidades = _uow.ProductoProveedorRepository.GetByProducto(idProducto);
-                return entidades.ToDTOList();
-            }
-            catch (Exception ex)
-            {
-                throw new ProductoProveedorServiceException("Error al recuperar la lista de proveedores del producto.", ex);
-            }
-        }
-
-        #endregion
-
-        #region Métodos Privados
-
-        private void ValidarDto(ProductoProveedorDTO dto)
-        {
-            if (dto == null)
-                throw new ProductoProveedorServiceException("El objeto de relación Producto-Proveedor no puede ser nulo.");
-
-            if (_validator == null)
-                throw new ProductoProveedorServiceException("Error interno: El validador correspondiente no fue inyectado.");
-
-            ValidationResult validationResult;
-
-            try
-            {
-                validationResult = _validator.Validate(dto);
-            }
-            catch (Exception ex)
-            {
-                throw new ProductoProveedorServiceException("Error interno al procesar la validación de la relación.", ex);
-            }
-
-            if (!validationResult.IsValid)
-            {
-                var primerError = validationResult.Errors.FirstOrDefault()?.ErrorMessage
-                                  ?? "Error de validación desconocido.";
-
-                throw new ProductoProveedorServiceException(primerError);
-            }
-        }
-
-        private void NormalizarProveedorPrincipal(Guid idProducto)
-        {
-            // Buscamos todas las relaciones existentes para ese producto específico
-            var proveedoresDelProducto = _uow.ProductoProveedorRepository.GetByProducto(idProducto);
-
-            // Si hay alguna relación que estaba marcada como principal, la desmarcamos
-            foreach (var relacion in proveedoresDelProducto)
-            {
-                if (relacion.EsProveedorPrincipal == true)
-                {
-                    relacion.EsProveedorPrincipal = false;
-                    // Al ser objetos traídos por EF con Tracking activo, modificarlos acá
-                    // hace que queden listos para enviarse como UPDATE cuando se ejecute el SaveChanges() global.
-                }
-            }
-        }
-
-        #endregion
     }
 }

@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BLL.GestioónProveedor.Mapper
+namespace BLL.GestiónProveedor.Mapper
 {
     public static class ProveedorMapper
     {

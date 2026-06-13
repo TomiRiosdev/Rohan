@@ -8,12 +8,20 @@ namespace BLL.DomainDtos
 {
     public class ProductoProveedorDTO
     {
-        public Guid IdProductoProveedor { get; set; }
+        // IDs de Clave Primaria Compuesta
         public Guid IdProducto { get; set; }
-        public string? ProductoNombre { get; set; } // Para mostrar en las grillas de proveedores
         public Guid IdProveedor { get; set; }
-        public string? ProveedorNombre { get; set; } // Para mostrar en las grillas de productos
+
+        // Propiedades del Producto 
+        public int CodigoSku { get; set; }
+        public string ProductoNombre { get; set; } = string.Empty;
+        public string CategoriaNombre { get; set; } = string.Empty;
+
+        // Propiedades del Proveedor 
+        public string ProveedorRazonSocial { get; set; } = string.Empty;
+        public string ProveedorCuit { get; set; } = string.Empty;
+
+        // Atributo Comercial de Control
         public bool EsProveedorPrincipal { get; set; }
-        public decimal UltimoPrecioCompra { get; set; }
     }
 }

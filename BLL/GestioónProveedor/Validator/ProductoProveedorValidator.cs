@@ -2,7 +2,7 @@
 using FluentValidation;
 
 
-namespace BLL.GestioónProveedor.Validator
+namespace BLL.GestiónProveedor.Validator
 {
     public class ProductoProveedorValidator : AbstractValidator<ProductoProveedorDTO>
     {
@@ -13,11 +13,7 @@ namespace BLL.GestioónProveedor.Validator
                 .NotEmpty().WithMessage("La relación requiere un producto válido.");
 
             RuleFor(x => x.IdProveedor)
-                .NotEmpty().WithMessage("La relación requiere un proveedor válido.");
-
-            // 2. Validaciones Comerciales
-            RuleFor(x => x.UltimoPrecioCompra)
-                .GreaterThanOrEqualTo(0).WithMessage("El último precio de compra registrado no puede ser un valor negativo.");
+                .NotEmpty().WithMessage("La relación requiere un proveedor válido.");    
           
         }
     }

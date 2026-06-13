@@ -1,8 +1,8 @@
 ﻿using BLL.DomainDtos;
-using BLL.GestioónProveedor.Interface;
+using BLL.GestiónProveedor.Interface;
 
 
-namespace BLL.GestioónProveedor.Facade
+namespace BLL.GestiónProveedor.Facade
 {
     public class ProveedorFacade
     {

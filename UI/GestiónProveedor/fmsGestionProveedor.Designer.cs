@@ -40,7 +40,16 @@
             label2 = new Label();
             cbxBuscar = new ComboBox();
             txtBuscar = new TextBox();
+            btnAgregarProducto = new Button();
+            dgvProductoProveedor = new DataGridView();
+            groupBox1 = new GroupBox();
+            label4 = new Label();
+            groupBox2 = new GroupBox();
+            label3 = new Label();
             ((System.ComponentModel.ISupportInitialize)dgvProveedor).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)dgvProductoProveedor).BeginInit();
+            groupBox1.SuspendLayout();
+            groupBox2.SuspendLayout();
             SuspendLayout();
             // 
             // btnAgregar
@@ -118,10 +127,11 @@
             // dgvProveedor
             // 
             dgvProveedor.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgvProveedor.Location = new Point(12, 209);
+            dgvProveedor.Location = new Point(7, 23);
             dgvProveedor.Name = "dgvProveedor";
-            dgvProveedor.Size = new Size(1087, 458);
+            dgvProveedor.Size = new Size(794, 417);
             dgvProveedor.TabIndex = 6;
+            dgvProveedor.SelectionChanged += dgvProveedor_SelectionChanged_1;
             // 
             // label1
             // 
@@ -137,7 +147,7 @@
             // 
             btnBuscar.BackColor = Color.Azure;
             btnBuscar.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold);
-            btnBuscar.Location = new Point(453, 158);
+            btnBuscar.Location = new Point(453, 137);
             btnBuscar.Name = "btnBuscar";
             btnBuscar.Size = new Size(69, 33);
             btnBuscar.TabIndex = 9;
@@ -149,7 +159,7 @@
             // 
             label2.AutoSize = true;
             label2.Font = new Font("Segoe UI Semibold", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            label2.Location = new Point(12, 163);
+            label2.Location = new Point(12, 142);
             label2.Name = "label2";
             label2.Size = new Size(86, 21);
             label2.TabIndex = 10;
@@ -158,7 +168,7 @@
             // cbxBuscar
             // 
             cbxBuscar.FormattingEnabled = true;
-            cbxBuscar.Location = new Point(104, 163);
+            cbxBuscar.Location = new Point(104, 142);
             cbxBuscar.Name = "cbxBuscar";
             cbxBuscar.Size = new Size(140, 23);
             cbxBuscar.TabIndex = 11;
@@ -166,10 +176,72 @@
             // 
             // txtBuscar
             // 
-            txtBuscar.Location = new Point(257, 163);
+            txtBuscar.Location = new Point(257, 142);
             txtBuscar.Name = "txtBuscar";
             txtBuscar.Size = new Size(189, 23);
             txtBuscar.TabIndex = 12;
+            // 
+            // btnAgregarProducto
+            // 
+            btnAgregarProducto.BackColor = Color.Azure;
+            btnAgregarProducto.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold);
+            btnAgregarProducto.Location = new Point(672, 71);
+            btnAgregarProducto.Name = "btnAgregarProducto";
+            btnAgregarProducto.Size = new Size(104, 49);
+            btnAgregarProducto.TabIndex = 13;
+            btnAgregarProducto.Text = "Agregar producto";
+            btnAgregarProducto.UseVisualStyleBackColor = false;
+            btnAgregarProducto.Click += btnAgregarProducto_Click;
+            // 
+            // dgvProductoProveedor
+            // 
+            dgvProductoProveedor.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgvProductoProveedor.Location = new Point(6, 22);
+            dgvProductoProveedor.Name = "dgvProductoProveedor";
+            dgvProductoProveedor.Size = new Size(345, 417);
+            dgvProductoProveedor.TabIndex = 14;
+            // 
+            // groupBox1
+            // 
+            groupBox1.Controls.Add(label4);
+            groupBox1.Controls.Add(dgvProductoProveedor);
+            groupBox1.Font = new Font("Segoe UI", 9F);
+            groupBox1.Location = new Point(816, 187);
+            groupBox1.Name = "groupBox1";
+            groupBox1.Size = new Size(357, 446);
+            groupBox1.TabIndex = 15;
+            groupBox1.TabStop = false;
+            // 
+            // label4
+            // 
+            label4.AutoSize = true;
+            label4.Font = new Font("Segoe UI Semibold", 10F, FontStyle.Bold);
+            label4.Location = new Point(0, 0);
+            label4.Name = "label4";
+            label4.Size = new Size(66, 19);
+            label4.TabIndex = 18;
+            label4.Text = "Producto";
+            // 
+            // groupBox2
+            // 
+            groupBox2.Controls.Add(label3);
+            groupBox2.Controls.Add(dgvProveedor);
+            groupBox2.Font = new Font("Segoe UI", 9F);
+            groupBox2.Location = new Point(3, 187);
+            groupBox2.Name = "groupBox2";
+            groupBox2.Size = new Size(807, 446);
+            groupBox2.TabIndex = 16;
+            groupBox2.TabStop = false;
+            // 
+            // label3
+            // 
+            label3.AutoSize = true;
+            label3.Font = new Font("Segoe UI Semibold", 10F, FontStyle.Bold);
+            label3.Location = new Point(0, 0);
+            label3.Name = "label3";
+            label3.Size = new Size(72, 19);
+            label3.TabIndex = 17;
+            label3.Text = "Proveedor";
             // 
             // fmsGestionProveedor
             // 
@@ -177,12 +249,14 @@
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.AliceBlue;
             ClientSize = new Size(1175, 638);
+            Controls.Add(groupBox2);
+            Controls.Add(groupBox1);
+            Controls.Add(btnAgregarProducto);
             Controls.Add(txtBuscar);
             Controls.Add(cbxBuscar);
             Controls.Add(label2);
             Controls.Add(btnBuscar);
             Controls.Add(label1);
-            Controls.Add(dgvProveedor);
             Controls.Add(btnActualizar);
             Controls.Add(btnListarDeshabilitados);
             Controls.Add(btnActivar);
@@ -190,9 +264,14 @@
             Controls.Add(btnModificar);
             Controls.Add(btnAgregar);
             Name = "fmsGestionProveedor";
-            Text = "fmsGestionProveedor";
+            Text = "Gestion de Proveedor";
             Load += fmsGestionProveedor_Load;
             ((System.ComponentModel.ISupportInitialize)dgvProveedor).EndInit();
+            ((System.ComponentModel.ISupportInitialize)dgvProductoProveedor).EndInit();
+            groupBox1.ResumeLayout(false);
+            groupBox1.PerformLayout();
+            groupBox2.ResumeLayout(false);
+            groupBox2.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -211,5 +290,11 @@
         private Label label2;
         private ComboBox cbxBuscar;
         private TextBox txtBuscar;
+        private Button btnAgregarProducto;
+        private DataGridView dgvProductoProveedor;
+        private GroupBox groupBox1;
+        private GroupBox groupBox2;
+        private Label label4;
+        private Label label3;
     }
 }

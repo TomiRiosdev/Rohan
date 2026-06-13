@@ -1,7 +1,7 @@
 ﻿using BLL.DomainDtos;
 
 
-namespace BLL.GestioónProveedor.Interface
+namespace BLL.GestiónProveedor.Interface
 {
    public interface IProveedorService
    {

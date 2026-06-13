@@ -1,9 +1,10 @@
 ﻿using BLL.DomainDtos;
 using BLL.Enum;
 using BLL.GestiónProducto.Facade;
+using BLL.GestiónStock.Exceptions;
 using BLL.GestiónStock.Interface;
 using Service.Facade;
-using BLL.GestiónStock.Exceptions;
+
 
 namespace UI.GestiónStock
 {
@@ -12,11 +13,13 @@ namespace UI.GestiónStock
         private readonly IFacade _stockFacade;
         private readonly ProductoFacade _productoFacade;
         private ProductoDTO _productoElegido;
+  
         public fmsAgregarStockManual
         (
             IFacade stockFacade,
             ProductoFacade productoFacade,
             ProductoDTO productoElegido
+          
 
         )
         {
@@ -24,7 +27,7 @@ namespace UI.GestiónStock
             _stockFacade = stockFacade;
             _productoFacade = productoFacade;
             _productoElegido = productoElegido;
-
+         
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
@@ -126,7 +129,7 @@ namespace UI.GestiónStock
 
                 MessageBox.Show($"¡Ajuste de stock para '{_productoElegido.Nombre}' registrado con éxito!",
                                 "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
+               
                 this.DialogResult = DialogResult.OK; 
                 this.Close();
             }

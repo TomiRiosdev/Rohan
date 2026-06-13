@@ -6,6 +6,7 @@ using UI.GestiónStock;
 using UI.GestiónSucursal;
 using UI.GestionUsuario;
 
+
 namespace UI
 {
     internal static class Program
@@ -17,7 +18,7 @@ namespace UI
         static void Main()
         {
             ApplicationConfiguration.Initialize();
-
+           
             var services = new ServiceCollection();
             // 1. Configuración de tu capa de aplicación (Bootstrapper)
             services.AddApplicationLayer();        
@@ -39,6 +40,8 @@ namespace UI
             // FORMULARIOS 
             services.AddTransient<Login>();
             services.AddTransient<fmsPrincipal>();
+ 
+
 
             // Formularios de Gestión de Producto
             services.AddTransient<fmsGestiónProducto>();
@@ -50,6 +53,7 @@ namespace UI
             services.AddTransient<fmsGestionProveedor>();
             services.AddTransient<fmsCrearProveedor>();
             services.AddTransient<fmsModificarProveedor>();
+            services.AddTransient<fmsAsignarProductoAProveedor>();
 
             // Formularios de Gestión de Sucursal
             services.AddTransient<fmsGestionSucursal>();
@@ -75,6 +79,7 @@ namespace UI
             services.AddTransient<fmsListarProductosPopUp>();
             services.AddTransient<fmsHistorial>();
             services.AddTransient<fmsVencimientosProducto>();
+
           
 
         }

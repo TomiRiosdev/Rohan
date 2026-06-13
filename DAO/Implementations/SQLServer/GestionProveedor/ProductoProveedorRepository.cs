@@ -1,6 +1,7 @@
 ﻿using DAO.Interface.GestionProveedor;
+using Microsoft.EntityFrameworkCore;
 using Models;
-using System.Data.Entity;
+
 
 namespace DAO.Implementations.SQLServer.GestionProveedor
 {
@@ -28,7 +29,6 @@ namespace DAO.Implementations.SQLServer.GestionProveedor
         }
 
         // 2. BUSCAR QUÉ PRODUCTOS LE PERTENECEN A UN PROVEEDOR
-        // (Clave para filtrar el combo de productos cuando se elija el proveedor en la Orden de Compra)
         public IEnumerable<ProductoProveedor> GetByProveedor(Guid idProveedor)
         {
             try
@@ -65,23 +65,22 @@ namespace DAO.Implementations.SQLServer.GestionProveedor
                 throw new Exception($"DAO Error: No se pudieron recuperar los proveedores del producto {idProducto}.", ex);
             }
         }
-
-        // 4. DESVINCULAR RELACIÓN
-        public void Remove(Guid idProductoProveedor)
+    
+        public void Delete(Guid idProducto, Guid idProveedor)
         {
-            try
-            {
-                var registro = _dbContext.ProductoProveedor.Find(idProductoProveedor);
-                if (registro == null) throw new KeyNotFoundException("No se encontró la relación Producto-Proveedor.");
+            var registro = _dbContext.ProductoProveedor
+                 .FirstOrDefault(pp => pp.IdProducto == idProducto && pp.IdProveedor == idProveedor);
 
-                // Al ser una tabla puramente intermedia de asociación, acá sí corresponde un Hard Delete (Remove físico)
-                // ya que si se quiere romper el vínculo, la fila deja de existir. No afecta históricos.
+            if (registro != null)
+            {
                 _dbContext.ProductoProveedor.Remove(registro);
             }
-            catch (Exception ex)
-            {
-                throw new Exception("DAO Error: No se pudo eliminar la relación Producto-Proveedor.", ex);
-            }
+        }
+
+        public bool ExisteRelacion(Guid idProducto, Guid idProveedor)
+        {
+            return _dbContext.ProductoProveedor
+                .Any(pp => pp.IdProducto == idProducto && pp.IdProveedor == idProveedor);
         }
     }
 }

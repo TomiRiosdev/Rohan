@@ -5,12 +5,14 @@ using System.ComponentModel;
 using System.Data;
 
 
+
 namespace UI.GestiónStock
 {
     public partial class fmsVencimientosProducto : Form
     {
         private readonly IFacade _stockFacade;
         private readonly StockPorSucursalDTO _productoOriginal;
+
 
         private DataGridView dgvLotes = null!;
         private List<LoteDetalleVencimientoDTO> _lotesCompletos = new();
@@ -19,12 +21,13 @@ namespace UI.GestiónStock
         (
             IFacade stockFacade,
             StockPorSucursalDTO productoElegido
+
         )
         {
             InitializeComponent();
             _stockFacade = stockFacade;
             _productoOriginal = productoElegido;
-        
+           
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
@@ -50,6 +53,7 @@ namespace UI.GestiónStock
 
                         _stockFacade.RegistrarMermaLote(loteSeleccionado.IdLote, cantidadAMermar, "Descarte por vencimiento confirmado en depósito.", sucursalId);
 
+            
                         MessageBox.Show("Merma registrada con éxito. El stock fue descontado y auditado en el Kardex.", "Control de Depósito", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                         CargarDatosLotes();

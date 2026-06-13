@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace BLL.GestiónCompra.Validator
 {
-    // 1. VALIDADOR DEL RENGLÓN (DETALLE)
+    // 1. VALIDADOR DEL RENGLÓN 
     public class SolicitudPedidoDetalleValidator : AbstractValidator<SolicitudPedidoDetalleDTO>
     {
         public SolicitudPedidoDetalleValidator()
@@ -16,23 +16,26 @@ namespace BLL.GestiónCompra.Validator
             RuleFor(x => x.IdProducto)
                 .NotEmpty().WithMessage("Cada renglón de la solicitud debe especificar un producto válido.");
 
-            RuleFor(x => x.Cantidad)
-                .GreaterThan(0).WithMessage("La cantidad solicitada en cada renglón debe ser mayor a cero.");
+            //  Protege contra cantidades negativas o nulas de stock comercial
+            RuleFor(x => x.CantidadBultosSolicitada)
+                .GreaterThan(0).WithMessage("La cantidad de bultos solicitada debe ser mayor a cero.");
         }
     }
 
-    // 2. VALIDADOR DE LA CABECERA (MAESTRO)
+    // 2. VALIDADOR DE LA CABECERA 
     public class SolicitudPedidoValidator : AbstractValidator<SolicitudPedidoDTO>
     {
         public SolicitudPedidoValidator()
         {
-            // Validamos que la solicitud contenga elementos en su lista de detalles
             RuleFor(x => x.Detalles)
                 .NotEmpty().WithMessage("Operación inválida: No se puede registrar una Solicitud de Pedido sin renglones.")
                 .Must(detalles => detalles != null && detalles.Any())
-                .WithMessage("La solicitud debe contener al menos un producto.");
+                .WithMessage("La solicitud debe contener al menos un producto.")
 
-            // REGLA EN CASCADA: Registramos el validador hijo para que itere y evalúe cada renglón de la lista
+                // Evita que metan el mismo producto dos veces en el mismo pedido
+                .Must(detalles => detalles != null && detalles.Select(d => d.IdProducto).Distinct().Count() == detalles.Count)
+                .WithMessage("Error de carga: No se permiten renglones duplicados para el mismo producto. Consolide las cantidades.");
+
             RuleForEach(x => x.Detalles)
                 .SetValidator(new SolicitudPedidoDetalleValidator());
         }

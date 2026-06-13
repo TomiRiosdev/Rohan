@@ -14,10 +14,10 @@ using BLL.GestiónSucursal.Facade;
 using BLL.GestiónSucursal.Interface;
 using BLL.GestiónSucursal.Service;
 using BLL.GestiónSucursal.Validator;
-using BLL.GestioónProveedor.Facade;
-using BLL.GestioónProveedor.Interface;
-using BLL.GestioónProveedor.Service;
-using BLL.GestioónProveedor.Validator;
+using BLL.GestiónProveedor.Facade;
+using BLL.GestiónProveedor.Interface;
+using BLL.GestiónProveedor.Service;
+using BLL.GestiónProveedor.Validator;
 using DAO;
 using DAO.Implementations.SQLServer;
 using DAO.Implementations.SQLServer.GestionCompra;
@@ -96,6 +96,7 @@ namespace Bootstrapper
 
             // Fachadas (UI Gateway)
             services.AddTransient<ProveedorFacade>();
+            services.AddTransient<ProductoProveedorFacade>();
 
             #endregion
 
@@ -139,6 +140,7 @@ namespace Bootstrapper
             #region DOMINIO: GESTIÓN DE COMPRAS Y REPOSICIÓN (MAESTRO-DETALLE)
             // Repositorios (DAL)
             services.AddTransient<ISolicitudPedidoRepository, SolicitudPedidoRepository>();
+         
 
             // Validadores (FluentValidation)
             services.AddScoped<IValidator<SolicitudPedidoDTO>, SolicitudPedidoValidator>();

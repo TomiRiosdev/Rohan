@@ -1,5 +1,5 @@
 ﻿using BLL.DomainDtos;
-using BLL.GestioónProveedor.Facade;
+using BLL.GestiónProveedor.Facade;
 using Microsoft.Extensions.DependencyInjection;
 
 
@@ -9,18 +9,21 @@ namespace UI.GestiónProveedor
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly ProveedorFacade _proveedorFacade;
+        private readonly ProductoProveedorFacade _prodProvService;
 
         private bool _viendoEliminados = false; // Para alternar entre activos y deshabilitados
 
         public fmsGestionProveedor
         (
             IServiceProvider serviceProvider,
-            ProveedorFacade proveedorFacade
+            ProveedorFacade proveedorFacade,
+            ProductoProveedorFacade prodProvService
         )
         {
             InitializeComponent();
             _serviceProvider = serviceProvider;
             _proveedorFacade = proveedorFacade;
+            _prodProvService = prodProvService;
 
             ConfigurarDataGridView();
             ConfigurarFiltrosIniciales();
@@ -35,7 +38,7 @@ namespace UI.GestiónProveedor
         {
             CargarProveedor();
             btnActivar.Enabled = false;
-          
+
 
         }
 
@@ -193,7 +196,7 @@ namespace UI.GestiónProveedor
                 MessageBox.Show($"Error al buscar: {ex.Message}");
             }
         }
-      
+
         private void btnAtras_Click(object sender, EventArgs e)
         {
             var fmsPrincipal = _serviceProvider.GetRequiredService<fmsPrincipal>();
@@ -220,6 +223,16 @@ namespace UI.GestiónProveedor
             dgvProveedor.ReadOnly = true;
             dgvProveedor.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             dgvProveedor.MultiSelect = false;
+            dgvProveedor.RowHeadersVisible = false;
+            dgvProveedor.BackgroundColor = Color.White;
+            dgvProveedor.BorderStyle = BorderStyle.None;
+            Color azulPastelRohan = Color.FromArgb(185, 210, 245);
+
+            dgvProveedor.DefaultCellStyle.SelectionBackColor = azulPastelRohan;
+            dgvProveedor.DefaultCellStyle.SelectionForeColor = Color.FromArgb(30, 30, 30); // Texto oscuro para que contraste
+
+            // Opcional: También modificamos el color cuando la grilla pierde el foco
+            dgvProveedor.ColumnHeadersDefaultCellStyle.SelectionBackColor = azulPastelRohan;
 
             // Limpiar columnas previas (por si acaso)
             dgvProveedor.Columns.Clear();
@@ -247,7 +260,7 @@ namespace UI.GestiónProveedor
                 Name = "Email",
                 HeaderText = "Email",
                 DataPropertyName = "Email",
-                Width = 230
+                Width = 200
             });
 
             dgvProveedor.Columns.Add(new DataGridViewTextBoxColumn
@@ -263,7 +276,7 @@ namespace UI.GestiónProveedor
                 Name = "RazonSocial",
                 HeaderText = "Razon Social",
                 DataPropertyName = "RazonSocial",
-                Width = 230,
+                Width = 210,
                 DefaultCellStyle = new DataGridViewCellStyle { WrapMode = DataGridViewTriState.True }
             });
 
@@ -311,14 +324,118 @@ namespace UI.GestiónProveedor
             if (criterio == "Nombre")
             {
                 txtBuscar.PlaceholderText = "Ingrese el nombre del proveedor...";
-     
+
             }
             else if (criterio == "CUIT")
-            { 
+            {
                 txtBuscar.PlaceholderText = "Ingrese el CUIT del proveedor...";
             }
-           
+
 
         }
+
+        #region Eventos de selección de grilla Proveedor a Producto
+        private void CargarProductosDelProveedor(Guid idProveedor)
+        {
+            try
+            {
+                // 1. Apagamos la autogeneración para tomar el control total del diseño
+                dgvProductoProveedor.AutoGenerateColumns = false;
+
+                // 2. Llamamos a la BLL pasando el ID correcto (proveedorSeleccionado.Id)
+                List<ProductoProveedorDTO> productos = _prodProvService.ListarProductosPorProveedor(idProveedor).ToList();
+
+                // 3. Asignamos la lista
+                dgvProductoProveedor.DataSource = null;
+                dgvProductoProveedor.DataSource = productos;
+
+                // 4. Armamos la estructura visual exacta
+                ConfigurarColumnasGrillaDerecha();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al cargar productos del proveedor: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void ConfigurarColumnasGrillaDerecha()
+        {
+            // Limpiamos las columnas para que no se dupliquen al cambiar de proveedor
+            dgvProductoProveedor.Columns.Clear();
+
+            // Configuración estética general
+            dgvProductoProveedor.AllowUserToAddRows = false;
+            dgvProductoProveedor.ReadOnly = true;
+            dgvProductoProveedor.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            dgvProductoProveedor.RowHeadersVisible = false;
+            dgvProductoProveedor.BackgroundColor = Color.White;
+            dgvProductoProveedor.BorderStyle = BorderStyle.None;
+            dgvProductoProveedor.DefaultCellStyle.SelectionBackColor = Color.White;
+            dgvProductoProveedor.DefaultCellStyle.SelectionForeColor = Color.Black;
+            dgvProductoProveedor.CurrentCell = null;
+
+            // Columna 1: Código SKU (Alineada con tu DTO: 'CodigoSku')
+            dgvProductoProveedor.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                Name = "CodigoSku",
+                DataPropertyName = "CodigoSku", // Mapea directo al DTO
+                HeaderText = "Código SKU",
+                Width = 100,
+                DefaultCellStyle = new DataGridViewCellStyle { Alignment = DataGridViewContentAlignment.MiddleCenter }
+            });
+
+            // Columna 2: Nombre del Producto (Alineada con tu DTO: 'ProductoNombre')
+            dgvProductoProveedor.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                Name = "ProductoNombre",
+                DataPropertyName = "ProductoNombre", // Mapea directo al DTO
+                HeaderText = "Producto",
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill // Estira el control para ocupar el panel
+            });
+        }
+
+        private void btnAgregarProducto_Click(object sender, EventArgs e)
+        {
+            // Rescatamos el proveedor que está pintado en la pantalla
+            if (dgvProveedor.CurrentRow != null && dgvProveedor.CurrentRow.DataBoundItem is ProveedorDTO provSeleccionado)
+            {
+                // Levantamos tu Pop-up pasando el servicio de asignación y el objeto seleccionado
+                using (var frmAsignar = new fmsAsignarProductoAProveedor(_prodProvService, provSeleccionado))
+                {
+                    frmAsignar.StartPosition = FormStartPosition.CenterParent;
+
+                    // Si el usuario guardó con éxito en la ventana flotante, refrescamos al instante la grilla derecha
+                    if (frmAsignar.ShowDialog() == DialogResult.OK)
+                    {
+                        CargarProductosDelProveedor(provSeleccionado.Id);
+                    }
+                }
+            }
+            else
+            {
+                MessageBox.Show("Por favor, seleccione un proveedor de la lista izquierda antes de intentar asociar un producto.", "Atención", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
+        private void dgvProveedor_SelectionChanged_1(object sender, EventArgs e)
+        {
+
+            // 1. Verificamos que haya una fila seleccionada y que no sea una fila vacía de cabecera
+            if (dgvProveedor.CurrentRow != null && dgvProveedor.CurrentRow.DataBoundItem != null)
+            {
+                // 2. Casteamos el objeto de la fila al DTO original de tu grilla
+                var proveedorSeleccionado = (ProveedorDTO)dgvProveedor.CurrentRow.DataBoundItem;
+
+                // 3. Cargamos los productos asociados usando su ID
+                CargarProductosDelProveedor(proveedorSeleccionado.Id);
+            }
+            else
+            {
+                // Si por algún motivo no hay selección, limpiamos la grilla derecha
+                dgvProductoProveedor.DataSource = null;
+            }
+        }
+       
+        #endregion
     }
 }

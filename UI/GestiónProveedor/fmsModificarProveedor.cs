@@ -1,6 +1,6 @@
 ﻿using BLL.DomainDtos;
-using BLL.GestioónProveedor.Exceptions;
-using BLL.GestioónProveedor.Facade;
+using BLL.GestiónProveedor.Exceptions;
+using BLL.GestiónProveedor.Facade;
 
 namespace UI.GestiónProveedor
 {
