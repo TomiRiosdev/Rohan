@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Service.Facade;
+using UI.GestionCompra;
 using UI.GestiónProducto;
 using UI.GestiónProveedor;
 using UI.GestiónStock;
@@ -92,6 +93,11 @@ namespace UI
         private void btnGestionStock_Click(object sender, EventArgs e)
         {
             AbrirFormularioEnContenedor<fmsGestionStock>();
+        }
+
+        private void btnGestionCompra_Click(object sender, EventArgs e)
+        {
+            AbrirFormularioEnContenedor<fmsGestionCompra>();
         }
 
         private void AbrirFormularioEnContenedor<T>() where T : Form

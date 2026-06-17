@@ -20,7 +20,6 @@
 
   <ItemGroup>
     <Folder Include="I18n\" />
-    <Folder Include="GestionCompra\" />
   </ItemGroup>
 
 </Project>

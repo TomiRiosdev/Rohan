@@ -1,4 +1,4 @@
-﻿using DAO.Implementations.SQLServer.GestionCompra;
+﻿using Implementations.SQLServer.GestionCompra;
 using DAO.Implementations.SQLServer.GestionProducto;
 using DAO.Implementations.SQLServer.GestionProveedor;
 using DAO.Implementations.SQLServer.GestionStock;

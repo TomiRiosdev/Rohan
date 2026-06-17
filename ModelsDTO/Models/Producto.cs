@@ -42,4 +42,6 @@ public partial class Producto
     public virtual ICollection<SolicitudPedidoDetalle> SolicitudPedidoDetalle { get; set; } = new List<SolicitudPedidoDetalle>();
 
     public virtual ICollection<StockPorSucursal> StockPorSucursal { get; set; } = new List<StockPorSucursal>();
+
+    public virtual ICollection<OrdenCompraDetalle> OrdenCompraDetalle { get; set; } = new List<OrdenCompraDetalle>();
 }

@@ -143,27 +143,46 @@ namespace UI.GestiónStock
                 Guid idSucursalActual = SessionManager.Current.IdSucursalActual
                     ?? throw new Exception("No se detectó una sucursal activa en la sesión.");
 
+                // Traemos la propuesta de stock crítico
                 var sugeridos = _solicitudPedido.GenerarDetallesSugeridosBajoMinimo(idSucursalActual);
 
                 if (!sugeridos.Any())
                 {
-                    MessageBox.Show("El stock se encuentra equilibrado. Ningún producto está por debajo del mínimo operativo.", "Información", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show("El stock se encuentra equilibrado. Ningún producto está por debajo del mínimo operativo.",
+                                    "Información", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
                 }
 
-                // Limpiamos el carrito viejo y cargamos la propuesta automática completa
-                _carritoDetalles.Clear();
                 foreach (var sug in sugeridos)
                 {
-                    _carritoDetalles.Add(sug);
-                }
+                    // Buscamos si el artículo sugerido ya estaba metido en el carrito actual
+                    var itemExistente = _carritoDetalles.FirstOrDefault(x => x.IdProducto == sug.IdProducto);
 
+                    if (itemExistente != null)
+                    {
+                        itemExistente.CantidadBultosSolicitada += sug.CantidadBultosSolicitada;
+                    }
+                    else
+                    {
+                        _carritoDetalles.Add(sug);
+                    }
+                }
+                
                 ReordenarRenglonesMatematicos();
+                RefrescarGrillaCarrito();
+
+                MessageBox.Show("Productos de bajo stock cargado con éxito",
+                                "Propuesta Combinada", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message, "Error Logístico", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+        private void RefrescarGrillaCarrito()
+        {
+            dgvProductosSolicitud.DataSource = null;
+            dgvProductosSolicitud.DataSource = _carritoDetalles;
         }
         private void btnEliminarRenglon_Click_1(object sender, EventArgs e)
         {

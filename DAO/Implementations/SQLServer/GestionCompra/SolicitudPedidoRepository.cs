@@ -1,25 +1,38 @@
-﻿using DAO.Interface.GestionCompra;
+﻿using DAO;
+using DAO.Interface.GestionCompra;
 using Microsoft.EntityFrameworkCore;
 using Models;
-using System.Data.Entity.Core.Common.CommandTrees.ExpressionBuilder;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
-
-namespace DAO.Implementations.SQLServer.GestionCompra
+namespace Implementations.SQLServer.GestionCompra
 {
+    /// <summary>
+    /// Repositorio de persistencia para las Solicitudes de Pedido internas de las sucursales.
+    /// </summary>
     public class SolicitudPedidoRepository : ISolicitudPedidoRepository
     {
         private readonly RohanContext _dbContext;
+
+        /// <summary>
+        /// Punto de acceso integrado para consultar los estados de las solicitudes.
+        /// </summary>
         public IEstadoSolicitudRepository Estados { get; private set; }
 
+        /// <summary>
+        /// Inicializa una nueva instancia de la clase <see cref="SolicitudPedidoRepository"/>.
+        /// </summary>
+        /// <param name="dbContext">Contexto de datos de Entity Framework.</param>
         public SolicitudPedidoRepository(RohanContext dbContext)
         {
             _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext), "El contexto no puede ser nulo.");
-
-            // Instanciamos el sub-repositorio compartiendo exactamente el mismo contexto transaccional
             Estados = new EstadoSolicitudRepository(_dbContext);
         }
 
-        // 1. REGISTRAR UNA NUEVA SOLICITUD CON SUS RENGLONES
+        /// <summary>
+        /// Inserta una Solicitud de Pedido en la base de datos de manera diferida.
+        /// </summary>
         public void Add(SolicitudPedido entity)
         {
             if (entity == null) throw new ArgumentNullException(nameof(entity));
@@ -27,16 +40,16 @@ namespace DAO.Implementations.SQLServer.GestionCompra
             try
             {
                 _dbContext.SolicitudPedido.Add(entity);
-                _dbContext.SaveChanges();
             }
             catch (Exception ex)
             {
-                throw new Exception("Error nativo en el repositorio DAL al insertar el maestro-detalle de la solicitud.", ex);
+                throw new InvalidOperationException("Error nativo en el repositorio DAL al insertar el maestro-detalle de la solicitud.", ex);
             }
-            
         }
 
-        // 2. OBTENER MAESTRO-DETALLE COMPLETO POR ID
+        /// <summary>
+        /// Buscar una solicitud puntual trayendo de forma obligatoria sus renglones (Maestro-Detalle).
+        /// </summary>
         public SolicitudPedido GetById(Guid idSolicitud)
         {
             try
@@ -44,22 +57,20 @@ namespace DAO.Implementations.SQLServer.GestionCompra
                 if (idSolicitud == Guid.Empty) throw new ArgumentException("ID de solicitud inválido.");
 
                 return _dbContext.SolicitudPedido
-                    // 1. Cargamos los renglones usando la nueva propiedad directa generada por EF
                     .Include(s => s.SolicitudPedidoDetalle)
-                        // 2. De esos renglones, navegamos al producto asociado
                         .ThenInclude(d => d.IdProductoNavigation)
-
-                    // 3. Cargamos la navegación del Estado (Revisá si EF lo nombró sin el "Id" adelante)
                     .Include(s => s.IdEstadoSolicitudNavigation)
-
-                    .FirstOrDefault(s => s.IdSolicitudPedido == idSolicitud);
+                    .FirstOrDefault(s => s.IdSolicitudPedido == idSolicitud)!;
             }
             catch (Exception ex)
             {
-                throw new Exception($"DAO Error: Error al recuperar la solicitud de pedido {idSolicitud}.", ex);
+                throw new InvalidOperationException($"DAO Error: Error al recuperar la solicitud de pedido {idSolicitud}.", ex);
             }
         }
 
+        /// <summary>
+        /// Recuperar el historial de solicitudes filtrado por el local actual del operador.
+        /// </summary>
         public IEnumerable<SolicitudPedido> GetBySucursal(Guid idSucursal)
         {
             try
@@ -67,7 +78,6 @@ namespace DAO.Implementations.SQLServer.GestionCompra
                 if (idSucursal == Guid.Empty) throw new ArgumentException("ID de sucursal inválido.");
 
                 return _dbContext.SolicitudPedido
-                    // Incluimos el estado para que la grilla principal pueda mostrar "Pendiente", "Aprobada", etc.
                     .Include(s => s.IdEstadoSolicitudNavigation)
                     .Where(s => s.IdSucursal == idSucursal)
                     .AsNoTracking()
@@ -75,10 +85,13 @@ namespace DAO.Implementations.SQLServer.GestionCompra
             }
             catch (Exception ex)
             {
-                throw new Exception($"DAO Error: No se pudo listar el historial de solicitudes para la sucursal {idSucursal}.", ex);
+                throw new InvalidOperationException($"DAO Error: No se pudo listar el historial de solicitudes para la sucursal {idSucursal}.", ex);
             }
         }
 
+        /// <summary>
+        /// Obtener el siguiente número de solicitud para una sucursal específica.
+        /// </summary>
         public int GetNextNroSolicitud(Guid idSucursal)
         {
             try
@@ -89,12 +102,31 @@ namespace DAO.Implementations.SQLServer.GestionCompra
             }
             catch (Exception ex)
             {
-                throw new Exception($"Error en la DAL al calcular el correlativo de solicitudes para la sucursal {idSucursal}.", ex);
+                throw new InvalidOperationException($"Error en la DAL al calcular el correlativo de solicitudes para la sucursal {idSucursal}.", ex);
+            }
+        }
+
+        /// <summary>
+        /// Actualiza los campos de la solicitud, fundamentalmente para cambiar su estado.
+        /// </summary>
+        public void Update(SolicitudPedido entity)
+        {
+            if (entity == null) throw new ArgumentNullException(nameof(entity));
+
+            try
+            {
+                _dbContext.SolicitudPedido.Update(entity);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Error nativo en la DAL al actualizar la Solicitud de Pedido ID: {entity.IdSolicitudPedido}.", ex);
             }
         }
     }
 
-    #region SUB-REPOSITORIO INTERNO PARA ESTADOS 
+    /// <summary>
+    /// Repositorio secundario embebido para la lectura del diccionario de estados comerciales.
+    /// </summary>
     public class EstadoSolicitudRepository : IEstadoSolicitudRepository
     {
         private readonly RohanContext _dbContext;
@@ -111,12 +143,11 @@ namespace DAO.Implementations.SQLServer.GestionCompra
 
         public EstadoSolicitud GetByDescripcion(string descripcion)
         {
-            if (string.IsNullOrWhiteSpace(descripcion)) return null;
+            if (string.IsNullOrWhiteSpace(descripcion)) return null!;
 
-            // Buscamos ignorando mayúsculas/minúsculas para blindar el matching con el Enum de la BLL
             return _dbContext.EstadoSolicitud
-                .FirstOrDefault(e => e.Descripcion.ToLower() == descripcion.ToLower());
+                .FirstOrDefault(e => e.Descripcion.ToLower() == descripcion.ToLower())!;
         }
     }
-    #endregion
 }
+

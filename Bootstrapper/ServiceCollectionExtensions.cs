@@ -20,7 +20,7 @@ using BLL.GestiónProveedor.Service;
 using BLL.GestiónProveedor.Validator;
 using DAO;
 using DAO.Implementations.SQLServer;
-using DAO.Implementations.SQLServer.GestionCompra;
+using Implementations.SQLServer.GestionCompra;
 using DAO.Implementations.SQLServer.GestionProducto;
 using DAO.Implementations.SQLServer.GestionProveedor;
 using DAO.Implementations.SQLServer.GestionStock;
@@ -147,14 +147,18 @@ namespace Bootstrapper
 
             // Validadores (FluentValidation)
             services.AddScoped<IValidator<SolicitudPedidoDTO>, SolicitudPedidoValidator>();
+            services.AddScoped<IValidator<OrdenCompraDTO>, OrdenCompraDTOValidator>();
+            services.AddScoped<IValidator<OrdenCompraDetalleDTO>, OrdenCompraDetalleDTOValidator>();
 
 
             // Servicios de Negocio (BLL)
             services.AddScoped<ISolicitudPedidoService, SolicitudPedidoService>();
             services.AddScoped<IOrdenCompraService, OrdenCompraService>();
+            services.AddScoped<IOrdenCompraFacade, OrdenCompraFacade>();
 
             // Fachadas (UI Gateway)
             services.AddTransient<SolicitudPedidoFacade>();
+            services.AddTransient<OrdenCompraFacade>();
 
             #endregion
 

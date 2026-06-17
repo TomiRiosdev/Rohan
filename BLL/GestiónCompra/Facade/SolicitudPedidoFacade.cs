@@ -36,6 +36,18 @@ namespace BLL.GestiónCompra.Facade
         {
             if (idSucursal == Guid.Empty) throw new ArgumentNullException(nameof(idSucursal));
             return _service.GenerarDetallesSugeridosBajoMinimo(idSucursal);
-        }   
+        }
+
+        public void CambiarEstado(Guid idSolicitud, int nuevoEstadoId)
+        {
+            try
+            {
+                _service.ModificarEstadoSolicitud(idSolicitud, nuevoEstadoId);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"No se pudo cambiar el estado de la Solicitud de Pedido ID: {idSolicitud}: {ex.Message}", ex);
+            }
+        }
     }
 }

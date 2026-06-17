@@ -3,19 +3,54 @@ using System;
 
 namespace DAO.Interface.GestionCompra
 {
+    /// <summary>
+    /// Repositorio de persistencia y gestión transaccional física para las Órdenes de Compra en SQL Server.
+    /// </summary>
     public interface IOrdenCompraRepository
     {
-        // CRUD Básico
+        /// <summary>
+        /// Registra una nueva Orden de Compra (Borrador o Emitida) junto con sus renglones en la base de datos.
+        /// </summary>
+        /// <param name="entity">Entidad física de cabecera con su colección de detalles acoplada.</param>
         void Add(OrdenCompra entity);
+
+        /// <summary>
+        /// Actualiza los cambios de estado, montos totales o modificaciones en los renglones de una orden existente.
+        /// </summary>
+        /// <param name="entity">Entidad OrdenCompra modificada.</param>
         void Update(OrdenCompra entity);
+
+        /// <summary>
+        /// Recupera una Orden de Compra específica mediante su clave primaria.
+        /// </summary>
+        /// <param name="idOc">Guid identificador de la orden.</param>
+        /// <returns>La entidad OrdenCompra o null si no se encuentra.</returns>
         OrdenCompra GetById(Guid idOc);
-        IEnumerable<OrdenCompra> GetAll();
 
-        // Filtros del Listado Operativo
-        IEnumerable<OrdenCompra> GetByEstado(int idEstadoOc);
-        IEnumerable<OrdenCompra> GetByProveedor(Guid idProveedor);
+        /// <summary>
+        /// Trae el historial de órdenes de compra filtrado estrictamente por el contexto de la sucursal activa,
+        /// aplicando Eager Loading (Includes) para resolver proveedores, usuarios y artículos de un solo tiro en SQL.
+        /// </summary>
+        /// <param name="idSucursal">Identificador unívoco regional.</param>
+        /// <param name="fechaDesde">Fecha de inicio del rango de búsqueda.</param>
+        /// <param name="fechaHasta">Fecha de fin del rango de búsqueda.</param>
+        /// <returns>Colección de Órdenes de Compra con sus grafos de objetos cargados.</returns>
+        IEnumerable<OrdenCompra> GetHistorialConDetalles(Guid idSucursal,DateTime fechaDesde, DateTime fechaHasta);
 
-        // Calcular el correlativo de la OC (Ej: OC-0001)
+        /// <summary>
+        /// Consulta el historial de órdenes de compra filtrado por sucursal, proveedor y estado.
+        /// </summary>
+        /// <param name="idSucursal">Identificador unívoco de la sucursal.</param>
+        /// <param name="idProveedor">Identificador del proveedor.</param>
+        /// <param name="idEstado">Identificador del estado de la orden.</param>
+        /// <returns>Colección de Órdenes de Compra que cumplen con los criterios de filtrado.</returns>
+        IEnumerable<OrdenCompra> ConsultarHistorial(Guid idSucursal,Guid idProveedor, int idEstado);
+
+        /// <summary>
+        /// Consulta el contador secuencial máximo en las tablas físicas.
+        /// </summary>
+        /// <remarks> Seguirá usándose como fallback si falla el algoritmo no incremental de Timestamp.</remarks>
+        /// <returns>El último número entero registrado o 0 si la tabla está vacía.</returns>
         int ObtenerUltimoNumeroOc();
     }
 }

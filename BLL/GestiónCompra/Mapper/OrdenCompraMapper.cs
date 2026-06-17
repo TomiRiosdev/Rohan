@@ -21,6 +21,8 @@ namespace BLL.GestiónCompra.Mapper
                 FechaOc = entity.FechaOc ?? DateTime.Now,
                 IdEstadoOc = entity.IdEstadoOc ?? 1,
                 EstadoDescripcion = entity.IdEstadoSolicitudNavigation?.Descripcion ?? "Pendiente",
+                NroOrdenCompra = entity.NroSolicitud ?? 0,
+                //NombreUsuario = entity.IdUsuarioNavigation?.NombreUsuario ?? "Sistema / Automático",
 
                 // Datos extendidos del proveedor para la UI/Documento
                 RazonSocialProveedor = entity.IdProveedorNavigation?.RazonSocial ?? "Proveedor no identificado",
@@ -87,7 +89,6 @@ namespace BLL.GestiónCompra.Mapper
         {
             if (dto == null) throw new ArgumentNullException(nameof(dto));
 
-            // 🌟 1. Generamos la PK unívoca del renglón de la OC
             Guid idDetalleNuevo = Guid.NewGuid();
 
             var detalleEntity = new OrdenCompraDetalle
@@ -105,7 +106,7 @@ namespace BLL.GestiónCompra.Mapper
             // armamos físicamente la entidad intermedia de Vinculo de forma interna en el mapper
             if (dto.IdSolicitudPedidoDetalleOrigen.HasValue)
             {
-                detalleEntity.VinculoSolicitudOcs.Add(new VinculoSolicitudOc
+                detalleEntity.VinculoSolicitudOc.Add(new VinculoSolicitudOc
                 {
                     IdVinculoSolicitudOc = Guid.NewGuid(),
                     IdOrdenCompraDetalle = idDetalleNuevo,

@@ -36,4 +36,5 @@ public partial class Sucursal
     public virtual ICollection<SolicitudPedido> SolicitudPedido { get; set; } = new List<SolicitudPedido>();
 
     public virtual ICollection<StockPorSucursal> StockPorSucursal { get; set; } = new List<StockPorSucursal>();
+    public virtual ICollection<OrdenCompra> OrdenCompra { get; set; } = new List<OrdenCompra>();
 }

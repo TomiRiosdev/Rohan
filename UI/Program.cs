@@ -1,5 +1,6 @@
 using Bootstrapper;
 using Microsoft.Extensions.DependencyInjection;
+using UI.GestionCompra;
 using UI.GestiónProducto;
 using UI.GestiónProveedor;
 using UI.GestiónStock;
@@ -80,7 +81,14 @@ namespace UI
             services.AddTransient<fmsHistorial>();
             services.AddTransient<fmsVencimientosProducto>();
 
-          
+            // Formularios de Gestión de Compra
+            services.AddTransient<fmsGestionCompra>();
+            services.AddTransient<fmsSolicitudesPendientes>();  
+            services.AddTransient<fmsCargarOrdenCompra>();
+            services.AddTransient<fmsCrearManualOC>();
+            services.AddTransient<fmsHistorialOrdenCompra>();
+
+
 
         }
     }

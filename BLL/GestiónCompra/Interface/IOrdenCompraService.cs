@@ -9,23 +9,22 @@ namespace BLL.GestiónCompra.Interface
 {
     public interface IOrdenCompraService
     {
-        // Operaciones Principales de la OC
+        #region Metodos de IOrdenCompraRepository
         void GenerarOrdenCompra(OrdenCompraDTO dto);
         void ModificarEstadoOc(Guid idOc, int nuevoEstadoId);
         void CancelarOrdenCompra(Guid idOc); // Baja lógica comercial
-
-        // Consultas para los combos, filtros y grillas de la UI
         OrdenCompraDTO ObtenerPorId(Guid idOc);
-        IEnumerable<OrdenCompraDTO> ListarHistorialOc(Guid? idProveedor, int? idEstado);
+        IEnumerable<OrdenCompraDTO> ConsultarHistorial(Guid idSucursal, Guid? idProveedor, int? idEstado);
+        void ExportarOcABlocDeNotas(Guid idOc, string rutaDirectorio);
 
-        // Filtros cruzados rápidos para la carga manual
+        #endregion
+
+        #region Metodos de ICompraSolicitudQueryRepository
+        IEnumerable<SolicitudPedidoDTO> ObtenerSolicitudesPendientesPorSucursal(Guid idSucursal);
+        bool VerificarSolicitudesPendientes(Guid idSucursal);
+        void GenerarOcAutomaticasDesdeSolicitudes(Guid idSucursal, Guid idSolicitud);
         IEnumerable<ProductoDTO> ListarProductosDeProveedor(Guid idProveedor);
 
-        // AUTOMATIZACIÓN E INDICADORES
-        bool VerificarSolicitudesPendientes(); // Alimentará tu lblPendiente
-        void GenerarOcAutomaticasDesdeSolicitudes(); // El motor automático transaccional
-
-        // DOCUMENTACIÓN FISICA
-        void ExportarOcABlocDeNotas(Guid idOc, string rutaDirectorio);
+        #endregion
     }
 }

@@ -71,14 +71,9 @@ namespace BLL.GestiónCompra.Mapper
                 IdProducto = entity.IdProducto ?? Guid.Empty,
                 Renglon = entity.Renglon ?? 0,
                 CantidadBultosSolicitada = entity.Cantidad ?? 0,
-
-                // Mapeos ricos extraídos de la navegación del Producto maestro (Evitan cortocircuitos por Nulls)
                 CodigoSku = entity.IdProductoNavigation?.CodigoSku ?? 0,
                 ProductoNombre = entity.IdProductoNavigation?.Nombre ?? "Materia Prima No Identificada",
                 UnidadesPorBulto = entity.IdProductoNavigation?.CantidadPorBulto ?? 1,
-
-                // Si en el modelo de base de datos no existe PresentacionTipo, dejamos por defecto "Caja" 
-                // para que no rompa tu DTO industrial.
                 PresentacionTipo = "Caja"
             };
         }
@@ -91,16 +86,18 @@ namespace BLL.GestiónCompra.Mapper
             if (dto == null)
                 throw new ArgumentNullException(nameof(dto), "El DTO SolicitudPedidoDetalle no puede ser nulo.");
 
+            // 🚀 RETORNA ESTRICTAMENTE LA ENTIDAD FÍSICA DE EF COHRENTE CON LA FIRMA
             return new SolicitudPedidoDetalle
             {
-             
-                IdSolicitudPedidoDetalle =Guid.NewGuid(),
-                IdSolicitudPedido = idCabecera, 
+                IdSolicitudPedidoDetalle = Guid.NewGuid(),
+                IdSolicitudPedido = idCabecera,
                 IdProducto = dto.IdProducto,
                 Renglon = dto.Renglon,
-                Cantidad = dto.CantidadBultosSolicitada
+                Cantidad = dto.CantidadBultosSolicitada,
 
-                
+                // Bloqueo defensivo contra el Error 2 (OC fantasmas)
+                IdProductoNavigation = null,
+                IdSolicitudPedidoNavigation = null
             };
         }
 

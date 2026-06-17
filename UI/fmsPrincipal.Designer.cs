@@ -38,6 +38,7 @@
             btnCambiarSucursal = new Button();
             lblAdministrador = new Label();
             panelContenedor = new Panel();
+            btnGestionCompra = new Button();
             SuspendLayout();
             // 
             // btnGestionProducto
@@ -151,12 +152,25 @@
             panelContenedor.Size = new Size(1191, 677);
             panelContenedor.TabIndex = 9;
             // 
+            // btnGestionCompra
+            // 
+            btnGestionCompra.BackColor = Color.Azure;
+            btnGestionCompra.Font = new Font("Segoe UI Semibold", 11.25F, FontStyle.Bold);
+            btnGestionCompra.Location = new Point(12, 107);
+            btnGestionCompra.Name = "btnGestionCompra";
+            btnGestionCompra.Size = new Size(93, 59);
+            btnGestionCompra.TabIndex = 10;
+            btnGestionCompra.Text = "Gestión Compras";
+            btnGestionCompra.UseVisualStyleBackColor = false;
+            btnGestionCompra.Click += btnGestionCompra_Click;
+            // 
             // fmsPrincipal
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.AliceBlue;
             ClientSize = new Size(1327, 761);
+            Controls.Add(btnGestionCompra);
             Controls.Add(panelContenedor);
             Controls.Add(lblAdministrador);
             Controls.Add(btnCambiarSucursal);
@@ -186,5 +200,6 @@
         private Button btnCambiarSucursal;
         private Label lblAdministrador;
         private Panel panelContenedor;
+        private Button btnGestionCompra;
     }
 }

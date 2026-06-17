@@ -13,5 +13,7 @@ namespace BLL.GestiónCompra.Interface
         SolicitudPedidoDTO ObtenerPorId(Guid idSolicitud);
         IEnumerable<SolicitudPedidoDTO> ObtenerHistorialPorSucursal(Guid idSucursal);
         List<SolicitudPedidoDetalleDTO> GenerarDetallesSugeridosBajoMinimo(Guid idSucursal);
+        void ModificarEstadoSolicitud(Guid idSolicitud, int nuevoEstadoId);
+
     }
 }

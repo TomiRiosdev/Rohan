@@ -12,6 +12,7 @@ namespace BLL.DomainDtos
         public Guid IdOrdenCompra { get; set; }
         public Guid? IdProveedor { get; set; }
         public Guid? IdUsuario { get; set; }
+        public string NombreUsuario { get; set; } = string.Empty;
 
         // Información Comercial del Comprobante
         public int NroOrdenCompra { get; set; } 
@@ -25,9 +26,6 @@ namespace BLL.DomainDtos
         // Datos del Proveedor para el Bloc de Notas
         public string RazonSocialProveedor { get; set; } = string.Empty;
         public string CuitProveedor { get; set; } = string.Empty;
-
-        // Acumulador Financiero Automatizado
-        // Suma el subtotal de todos los renglones cargados en la lista de detalles
         public decimal CostoTotal => Detalles.Sum(d => d.SubTotal);
 
         // Lista En Cascada de los Renglones de la OC

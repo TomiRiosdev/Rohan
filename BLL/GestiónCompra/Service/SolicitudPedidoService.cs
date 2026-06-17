@@ -190,7 +190,29 @@ namespace BLL.GestiónCompra.Service
                 throw new SolicitudPedidoServiceException(primerError);
             }
         }
-    
+
+        public void ModificarEstadoSolicitud(Guid idSolicitud, int nuevoEstadoId)
+        {
+            try
+            {
+                var solicitud = _uow.SolicitudPedidoRepository.GetById(idSolicitud);
+                if (solicitud == null)
+                    throw new ReglaNegocioComprasException("No se encontró la Solicitud de Pedido solicitada.");
+
+                // Regla: No se puede modificar una solicitud cancelada
+                if (solicitud.IdEstadoSolicitud == 3) // 3 = Cancelada
+                    throw new ReglaNegocioComprasException("Operación inválida: La Solicitud de Pedido ya se encuentra Cancelada.");
+                solicitud.IdEstadoSolicitud = nuevoEstadoId;
+                _uow.SolicitudPedidoRepository.Update(solicitud);
+                _uow.SaveChanges();
+            }
+            catch (RohanComprasException) { throw; }
+            catch (Exception ex)
+            {
+                throw new ComprasDomainException("Error al actualizar el estado de la Orden de Compra.", ex);
+            }
+        }
+
         #endregion
     }
 }
