@@ -14,7 +14,7 @@ namespace BLL.GestiónCompra.Interface
         void ModificarEstadoOc(Guid idOc, int nuevoEstadoId);
         void CancelarOrdenCompra(Guid idOc); // Baja lógica comercial
         OrdenCompraDTO ObtenerPorId(Guid idOc);
-        IEnumerable<OrdenCompraDTO> ConsultarHistorial(Guid idSucursal, Guid? idProveedor, int? idEstado);
+        IEnumerable<OrdenCompraDTO> ConsultarHistorial(Guid idSucursal, Guid? idProveedor, int? idEstado, DateTime fechaDesde, DateTime fechaHasta);
         void ExportarOcABlocDeNotas(Guid idOc, string rutaDirectorio);
 
         #endregion

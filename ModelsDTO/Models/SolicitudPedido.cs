@@ -16,6 +16,7 @@ public partial class SolicitudPedido
     public DateTime? FechaSolicitud { get; set; }
 
     public int? IdEstadoSolicitud { get; set; }
+    public string? UsuarioNombre { get; set; }
 
     public virtual Sucursal? IdSucursalNavigation { get; set; }
 

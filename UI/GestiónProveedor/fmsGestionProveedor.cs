@@ -1,6 +1,8 @@
 ﻿using BLL.DomainDtos;
+using BLL.GestiónProducto.Facade;
 using BLL.GestiónProveedor.Facade;
 using Microsoft.Extensions.DependencyInjection;
+using Models;
 
 
 namespace UI.GestiónProveedor
@@ -10,6 +12,7 @@ namespace UI.GestiónProveedor
         private readonly IServiceProvider _serviceProvider;
         private readonly ProveedorFacade _proveedorFacade;
         private readonly ProductoProveedorFacade _prodProvService;
+        private readonly ProductoFacade _productoFacade;
 
         private bool _viendoEliminados = false; // Para alternar entre activos y deshabilitados
 
@@ -17,13 +20,15 @@ namespace UI.GestiónProveedor
         (
             IServiceProvider serviceProvider,
             ProveedorFacade proveedorFacade,
-            ProductoProveedorFacade prodProvService
+            ProductoProveedorFacade prodProvService,
+            ProductoFacade productoFacade  
         )
         {
             InitializeComponent();
             _serviceProvider = serviceProvider;
             _proveedorFacade = proveedorFacade;
             _prodProvService = prodProvService;
+            _productoFacade = productoFacade;
 
             ConfigurarDataGridView();
             ConfigurarFiltrosIniciales();
@@ -202,6 +207,30 @@ namespace UI.GestiónProveedor
             var fmsPrincipal = _serviceProvider.GetRequiredService<fmsPrincipal>();
             this.Close();
             fmsPrincipal.Show();
+        }
+
+        private void btnAgregarProducto_Click(object sender, EventArgs e)
+        {
+            // Rescatamos el proveedor que está pintado en la pantalla
+            if (dgvProveedor.CurrentRow != null && dgvProveedor.CurrentRow.DataBoundItem is ProveedorDTO provSeleccionado)
+            {
+                // Levantamos tu Pop-up pasando el servicio de asignación y el objeto seleccionado
+                using (var frmAsignar = new fmsAsignarProductoAProveedor(_prodProvService, provSeleccionado, _productoFacade))
+                {
+                    frmAsignar.StartPosition = FormStartPosition.CenterParent;
+
+                    // Si el usuario guardó con éxito en la ventana flotante, refrescamos al instante la grilla derecha
+                    if (frmAsignar.ShowDialog() == DialogResult.OK)
+                    {
+                        CargarProductosDelProveedor(provSeleccionado.Id);
+                       
+                    }
+                }
+            }
+            else
+            {
+                MessageBox.Show("Por favor, seleccione un proveedor de la lista izquierda antes de intentar asociar un producto.", "Atención", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
         }
 
         #endregion
@@ -394,29 +423,7 @@ namespace UI.GestiónProveedor
             });
         }
 
-        private void btnAgregarProducto_Click(object sender, EventArgs e)
-        {
-            // Rescatamos el proveedor que está pintado en la pantalla
-            if (dgvProveedor.CurrentRow != null && dgvProveedor.CurrentRow.DataBoundItem is ProveedorDTO provSeleccionado)
-            {
-                // Levantamos tu Pop-up pasando el servicio de asignación y el objeto seleccionado
-                using (var frmAsignar = new fmsAsignarProductoAProveedor(_prodProvService, provSeleccionado))
-                {
-                    frmAsignar.StartPosition = FormStartPosition.CenterParent;
-
-                    // Si el usuario guardó con éxito en la ventana flotante, refrescamos al instante la grilla derecha
-                    if (frmAsignar.ShowDialog() == DialogResult.OK)
-                    {
-                        CargarProductosDelProveedor(provSeleccionado.Id);
-                    }
-                }
-            }
-            else
-            {
-                MessageBox.Show("Por favor, seleccione un proveedor de la lista izquierda antes de intentar asociar un producto.", "Atención", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
-        }
-
+       
         private void dgvProveedor_SelectionChanged_1(object sender, EventArgs e)
         {
 

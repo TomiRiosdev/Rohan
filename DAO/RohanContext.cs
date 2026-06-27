@@ -131,6 +131,9 @@ public partial class RohanContext : DbContext
             entity.Property(e => e.Observaciones)
                 .HasMaxLength(100)
                 .IsUnicode(false);
+            entity.Property(e => e.UsuarioNombre)
+                .HasMaxLength(100)
+                .IsUnicode(false);
 
             entity.HasOne(d => d.IdLoteNavigation).WithMany(p => p.MovimientosStock)
                 .HasForeignKey(d => d.IdLote)
@@ -165,6 +168,9 @@ public partial class RohanContext : DbContext
                 .HasColumnType("datetime")
                 .HasColumnName("FechaOC");
             entity.Property(e => e.IdEstadoOc).HasColumnName("IdEstadoOC");
+            entity.Property(e => e.UsuarioNombre)
+              .HasMaxLength(100)
+              .IsUnicode(false);
 
             entity.HasOne(d => d.IdEstadoSolicitudNavigation).WithMany(p => p.OrdenCompra)
                 .HasForeignKey(d => d.IdEstadoOc)
@@ -280,8 +286,11 @@ public partial class RohanContext : DbContext
                 .WithMany(p => p.SolicitudPedido)
                 .HasForeignKey(d => d.IdSucursal)
                 .HasConstraintName("FK_SolicitudPedido_Sucursal");
+            entity.Property(e => e.UsuarioNombre)
+                .HasMaxLength(100)
+                .IsUnicode(false);
 
-         
+
             entity.HasOne(d => d.IdEstadoSolicitudNavigation)
                 .WithMany(p => p.SolicitudPedido)
                 .HasForeignKey(d => d.IdEstadoSolicitud)

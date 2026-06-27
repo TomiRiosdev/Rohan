@@ -29,9 +29,8 @@ namespace BLL.GestiónStock
         /// <param name="cantidad">Unidades individuales netas procesadas.</param>
         /// <param name="observaciones">Justificación o texto descriptivo del movimiento.</param>
         /// <exception cref="StockDomainException">Lanzada si falla el mapeo del tipo de movimiento o la transacción SQL Server aborta.</exception>
-        public void RegistrarMovimiento(Guid idSucursal, Lote lote, TipoMovimientoEnum tipo, int cantidad, string observaciones)
-        {
-            try
+        public void RegistrarMovimiento(Guid idSucursal, Lote lote, TipoMovimientoEnum tipo, int cantidad, string observaciones, string usuarioNombre)
+        {   try
             {
                
                 // 1. Resolución robusta de tablas maestras contra el Enum de negocio
@@ -41,7 +40,7 @@ namespace BLL.GestiónStock
                     throw new StockDomainException("Falla de Consistencia Logística: El objeto lote provisto es nulo.");
 
                 // 2. Grabar Fila Histórica Imborrable en el Kardex (Auditoría)
-                CrearHistorialMovimiento(idSucursal, lote.IdLote, tipoMovimientoDb.IdTipoMovimiento, cantidad, observaciones);
+                CrearHistorialMovimiento(idSucursal, lote.IdLote, tipoMovimientoDb.IdTipoMovimiento, cantidad, observaciones, usuarioNombre);
 
                 // 3. Resolver Álgebra Logística: Suma o Resta según descripción del movimiento
                 int cambioNetoFisico = CalcularCambioFisico(tipoMovimientoDb.Descripcion, cantidad);
@@ -58,7 +57,7 @@ namespace BLL.GestiónStock
             }
             catch (Exception ex)
             {
-                // 🔴 Si la transacción de SQL Server aborta, guardamos la foto exacta del desastre
+                // Si la transacción de SQL Server aborta, guardamos la foto exacta del desastre
                 var context = ExceptionContext.Crear(ex, new object[] { idSucursal, lote?.NumeroLote ?? "Sin Lote", tipo, cantidad, observaciones });
                 ExceptionLogger.Log(context);
 
@@ -83,7 +82,7 @@ namespace BLL.GestiónStock
             return tipoMovimientoDb;
         }
 
-        private void CrearHistorialMovimiento(Guid idSucursal, Guid idLote, int idTipoMovimiento, int cantidad, string observaciones)
+        private void CrearHistorialMovimiento(Guid idSucursal, Guid idLote, int idTipoMovimiento, int cantidad, string observaciones, string usuarioNombre)
         {
             var movimiento = new MovimientosStock
             {
@@ -93,7 +92,8 @@ namespace BLL.GestiónStock
                 IdTipoMovimiento = idTipoMovimiento,
                 Cantidad = cantidad,
                 FechaMovimiento = DateTime.Now,
-                Observaciones = observaciones
+                Observaciones = observaciones,
+                UsuarioNombre = usuarioNombre 
             };
 
             _uow.MovimientosStockRepository.Add(movimiento);

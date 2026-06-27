@@ -99,33 +99,22 @@ namespace UI.GestiónStock
                 TipoMovimientoEnum tipoEnum = (TipoMovimientoEnum)cxbTipoMovimiento.SelectedItem;
                 int idTipoMovimientoInt = (int)tipoEnum;
 
-                string UsuarioLogueado = "Desconocido";
-                if (SessionManager.Current.UsuarioLogueado != null)
-                {
-                    // Ej: "Gerente de Sucursal - Juan" o el rol que recuperes de tu Session
-                    UsuarioLogueado = $"{SessionManager.Current.UsuarioLogueado.Patentes} ({SessionManager.Current.UsuarioLogueado.Nombre})";
-                }
+                string UsuarioLogueado = SessionManager.Current.UsuarioLogueado.Nombre;
 
                 var stockDto = new StockPorSucursalDTO
                 {
                     IdProducto = _productoElegido.Id,
                     CantidadTotal = (int)nupCantidad.Value,
                     IdTipoMovimiento = (int)(TipoMovimientoEnum)cxbTipoMovimiento.SelectedItem,
-                   
-                    Observaciones = $"[{UsuarioLogueado}] {txtObservacion.Text.Trim()}",
-
-                    // PASAMOS LOS FACTORES LOGÍSTICOS DEL MAESTRO AL SERVICIO
+                    Observaciones = txtObservacion.Text.Trim(),
                     CantidadPorBulto = _productoElegido.CantidadPorBulto , 
                     ContenidoPorVenta = _productoElegido.ContenidoPorVenta ?? 1,
-
-                    // Si seleccionó el índice 0, significa que ingresa el bulto cerrado entero
                     EsIngresoPorBulto = (cxmFormatoIngreso.SelectedIndex == 0 && _productoElegido.CantidadPorBulto > 1),
-
-                    StockMinimo = 5, // Valores base por defecto o los mapeás si tenés el control
+                    StockMinimo = 5, 
                     StockMaximo = 100
                 };
 
-               _stockFacade.RegistrarStockManual(stockDto, sucursalId);
+               _stockFacade.RegistrarStockManual(stockDto, sucursalId, UsuarioLogueado);
 
                 MessageBox.Show($"¡Ajuste de stock para '{_productoElegido.Nombre}' registrado con éxito!",
                                 "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);

@@ -8,6 +8,7 @@ namespace BLL.DomainDtos
 {
     public class ProductoProveedorDTO
     {
+        public Guid IdProductoProveedor { get; set; }
         // IDs de Clave Primaria Compuesta
         public Guid IdProducto { get; set; }
         public Guid IdProveedor { get; set; }

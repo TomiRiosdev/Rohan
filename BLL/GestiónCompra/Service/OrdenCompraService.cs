@@ -186,18 +186,16 @@ namespace BLL.GestiónCompra.Service
                     var nuevaOc = new OrdenCompra
                     {
                         IdOrdenCompra = idOcNuevo,
-                        IdSucursal = idSucursal,       // 🚀 FIX 1: Grabamos la sucursal obligatoria
+                        IdSucursal = idSucursal,       
                         IdProveedor = idProveedor,
-                        IdUsuario = sol.IdUsuario,     // Heredamos el operador original
-                        IdEstadoOc = 1,                // 1 = Pendiente
+                        IdUsuario = sol.IdUsuario,     
+                        IdEstadoOc = 1,              
                         FechaOc = DateTime.Now,
-
-                        // 🚀 FIX 2: Chau incremental simple, asignamos el código por Timestamp
                         NroSolicitud = CodigoGenerador.GenerarNumeroOcUnicoNumerico(),
-
-                        // Truncamos navegaciones pesadas de cabecera para aislar el proceso
                         IdProveedorNavigation = null,
-                        IdEstadoSolicitudNavigation = null
+                        IdEstadoSolicitudNavigation = null,
+
+                        OrdenCompraDetalle = new List<OrdenCompraDetalle>()
                     };
 
                     int nroRenglonOc = 1;
@@ -221,13 +219,14 @@ namespace BLL.GestiónCompra.Service
                             Renglon = nroRenglonOc,
 
                             // Truncamos navegación de producto para que EF no intente re-insertarlo
-                            IdProductoNavigation = null
+                            IdProductoNavigation = null,
+                            VinculoSolicitudOc = new List<VinculoSolicitudOc>()
+
                         };
 
                         costoTotalAcumulado += (cantidadPedida * precioPactadoInicial);
 
-                        // 🚀 FIX 3: Instanciamos la entidad intermedia de trazabilidad de forma pura por Ids primitivos
-                        // Cambié 'VinculoSolicitudOc' por 'VinculoSolicitudOcs' por si tu base mapeó en plural (revisalo)
+           
                         var vinculo = new VinculoSolicitudOc
                         {
                             IdVinculoSolicitudOc = Guid.NewGuid(),
@@ -238,6 +237,7 @@ namespace BLL.GestiónCompra.Service
                             // Aseguramos nulas las propiedades de objeto pesado
                             IdOrdenCompraDetalleNavigation = null,
                             IdSolicitudPedidoDetalleNavigation = null
+                           
                         };
 
                         ocDetalle.VinculoSolicitudOc.Add(vinculo);
@@ -248,7 +248,7 @@ namespace BLL.GestiónCompra.Service
 
                     nuevaOc.CostoTotal = costoTotalAcumulado;
 
-                    // 🎯 Ahora el Add va a ejecutarse de manera limpia y sin conflictos de grafo
+                    //  Ahora el Add va a ejecutarse de manera limpia y sin conflictos de grafo
                     _uow.OrdenCompraRepository.Add(nuevaOc);
                 }
 
@@ -280,7 +280,7 @@ namespace BLL.GestiónCompra.Service
             }
         }
 
-        public IEnumerable<OrdenCompraDTO> ListarHistorialOc(Guid idSucursal, Guid? idProveedor, int? idEstado)
+        public IEnumerable<OrdenCompraDTO> ListarHistorialOc(Guid idSucursal, Guid? idProveedor, int? idEstado, DateTime fechaDesde, DateTime fechaHasta)
         {
             // Validación de contexto regional
             if (idSucursal == Guid.Empty)
@@ -289,7 +289,7 @@ namespace BLL.GestiónCompra.Service
             try
             {
                 // 1. Le pedimos a la DAO los datos ya filtrados por Sucursal y con sus Includes resueltos
-                var listaEntidades = _uow.OrdenCompraRepository.GetHistorialConDetalles(idSucursal);
+                var listaEntidades = _uow.OrdenCompraRepository.GetHistorialConDetalles(idSucursal, fechaDesde, fechaHasta);
 
                 // 2. Aplicamos los filtros dinámicos comerciales en memoria sobre la lista regional
                 if (idProveedor.HasValue && idProveedor != Guid.Empty)
@@ -450,7 +450,7 @@ namespace BLL.GestiónCompra.Service
             }
         }
 
-        public IEnumerable<OrdenCompraDTO> ConsultarHistorial(Guid idSucursal, Guid? idProveedor, int? idEstado)
+        public IEnumerable<OrdenCompraDTO> ConsultarHistorial(Guid idSucursal, Guid? idProveedor, int? idEstado, DateTime fechaDesde, DateTime fechaHasta)
         {
             // 1. Validación 
             if (idSucursal == Guid.Empty)
@@ -459,7 +459,7 @@ namespace BLL.GestiónCompra.Service
             try
             {
                 // 2. Consumimos el método especializado de la DAO (Trae los datos con Includes resueltos desde SQL)
-                var listaEntidades = _uow.OrdenCompraRepository.GetHistorialConDetalles(idSucursal);
+                var listaEntidades = _uow.OrdenCompraRepository.GetHistorialConDetalles(idSucursal, fechaDesde, fechaHasta);
 
                 // Si la base de datos por algún motivo devuelve nulo, devolvemos una lista vacía para no romper la UI
                 if (listaEntidades == null)

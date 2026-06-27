@@ -21,6 +21,8 @@ public partial class OrdenCompra
 
     public int? IdEstadoOc { get; set; }
 
+    public string? UsuarioNombre { get; set; }
+
     public virtual EstadoSolicitud? IdEstadoSolicitudNavigation { get; set; }
 
     public virtual Proveedor? IdProveedorNavigation { get; set; }

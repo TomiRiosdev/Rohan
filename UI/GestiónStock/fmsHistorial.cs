@@ -19,6 +19,7 @@ namespace UI.GestiónStock
             InitializeComponent();
             _stockFacade = stockFacade;
             ConfigurarFiltrosIniciales();
+           
         }
 
 
@@ -46,22 +47,16 @@ namespace UI.GestiónStock
 
         private void ConfigurarDgvHistorial()
         {
-            // 1. Comportamiento Profesional de la Grilla de Auditoría
             dgvHistorial.AutoGenerateColumns = false;
             dgvHistorial.AllowUserToAddRows = false;
             dgvHistorial.AllowUserToDeleteRows = false;
             dgvHistorial.ReadOnly = true;
             dgvHistorial.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             dgvHistorial.MultiSelect = false;
+            dgvHistorial.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             dgvHistorial.RowHeadersVisible = false;
             dgvHistorial.BackgroundColor = Color.White;
-
-
-
-            dgvHistorial.Columns.Clear();
-
-
-            // 2. Definición Asimétrica de Columnas
+            dgvHistorial.BorderStyle = BorderStyle.None;    
             dgvHistorial.Columns.Clear();
 
             dgvHistorial.Columns.Add(new DataGridViewTextBoxColumn
@@ -83,7 +78,7 @@ namespace UI.GestiónStock
             dgvHistorial.Columns.Add(new DataGridViewTextBoxColumn
             {
                 Name = "Usuario",
-                DataPropertyName = "UsuarioNombre",
+                DataPropertyName = "UsuarioNombre", 
                 HeaderText = "Operario / Rol",
                 FillWeight = 150
             });
@@ -217,12 +212,12 @@ namespace UI.GestiónStock
                 {
                     string texto = dto.TipoMovimientoTexto.ToLower();
 
-                    // 🔴 Si es una salida de stock (Egreso/Merma), pintamos el número de rojo oscuro
+                    //  Si es una salida de stock (Egreso/Merma), pintamos el número de rojo oscuro
                     if (texto.Contains("egreso") || texto.Contains("merma") || texto.Contains("rotura"))
                     {
                         e.CellStyle.ForeColor = Color.DarkRed;
                     }
-                    // 🟢 Si es una entrada (Ingreso/OC), lo pintamos de verde oscuro
+                    //  Si es una entrada (Ingreso/OC), lo pintamos de verde oscuro
                     else if (texto.Contains("ingreso") || texto.Contains("oc"))
                     {
                         e.CellStyle.ForeColor = Color.DarkGreen;

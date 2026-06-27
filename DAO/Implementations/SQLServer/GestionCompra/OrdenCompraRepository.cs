@@ -102,7 +102,7 @@ namespace Implementations.SQLServer.GestionCompra
             try
             {
                 return _dbContext.Set<OrdenCompra>()
-                    .Include(oc => oc.IdProveedorNavigation)
+                    .Include(oc => oc.IdProveedorNavigation)      
                     .Include(oc => oc.IdEstadoSolicitudNavigation)
                     .Include(oc => oc.OrdenCompraDetalle)
                         .ThenInclude(d => d.IdProductoNavigation)
@@ -138,6 +138,28 @@ namespace Implementations.SQLServer.GestionCompra
             {
                 throw new InvalidOperationException($"Error en la DAL al consultar el historial de órdenes de compra de la sucursal {idSucursal}, proveedor {idProveedor} y estado {idEstado}.", ex);
             }
+        }
+
+        /// <summary>
+        /// Consulta si el proveedor tiene órdenes activas (Borrador o Emitida) en la base de datos.
+        /// </summary>
+        /// <param name="idProveedor">Identificador del proveedor.</param>
+        /// <returns>True si el proveedor tiene órdenes activas, False en caso contrario.</returns>
+        /// <exception cref="InvalidOperationException"></exception>
+        public bool TieneOrdenesActivas(Guid idProveedor)
+        {
+            try
+            {
+                return _dbContext.OrdenCompra.Any(oc =>
+                         oc.IdProveedor == idProveedor &&
+                        (oc.IdEstadoOc == 1 || oc.IdEstadoOc == 2));
+            }
+            catch (Exception ex)
+            {
+
+                throw new InvalidOperationException($"Error en la DAL al consultar el historial de órdenes de compra del proveedor {idProveedor}.", ex);
+            }
+         
         }
     }
 }

@@ -88,8 +88,6 @@ namespace UI
             services.AddTransient<fmsCrearManualOC>();
             services.AddTransient<fmsHistorialOrdenCompra>();
 
-
-
         }
     }
 }

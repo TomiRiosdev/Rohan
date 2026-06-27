@@ -5,7 +5,7 @@ namespace BLL.GestiónStock.Interface
     public interface IFacade
     {
         // OPERACIONES DE STOCK CORE (Hacia StockService)
-            void RegistrarStockManual(StockPorSucursalDTO stockDto, Guid idSucursal);
+            void RegistrarStockManual(StockPorSucursalDTO stockDto, Guid idSucursal, string usuarioNombre);
             void RegistrarStockPorOc(Guid idProducto, int cantidadComprada, decimal costoPactado, string nroRemitoOc, Guid idSucursal);
             void RegistrarMermaLote(Guid idLote, int cantidadABajar, string observaciones, Guid idSucursal);
             IEnumerable<StockPorSucursalDTO> ObtenerConsolidadoPorSucursal(Guid idSucursal);

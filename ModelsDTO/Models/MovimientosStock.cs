@@ -23,6 +23,8 @@ public partial class MovimientosStock
 
     public string? Observaciones { get; set; }
 
+    public string? UsuarioNombre { get; set; }
+
     public virtual Lote? IdLoteNavigation { get; set; }
 
     public virtual Sucursal? IdSucursalDestinoNavigation { get; set; }

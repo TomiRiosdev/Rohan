@@ -23,8 +23,8 @@ namespace BLL.GestiónStock.Facade
             _mermaService = mermaService ?? throw new ArgumentNullException(nameof(mermaService));
         }
         // Delegados hacia StockService
-        public void RegistrarStockManual(StockPorSucursalDTO stockDto, Guid idSucursal)
-            => _stockService.RegistrarStockManual(stockDto, idSucursal);
+        public void RegistrarStockManual(StockPorSucursalDTO stockDto, Guid idSucursal, string usuarioNombre)
+            => _stockService.RegistrarStockManual(stockDto, idSucursal, usuarioNombre);
 
         public void RegistrarStockPorOc(Guid idProducto, int cantidadComprada, decimal costoPactado, string nroRemitoOc, Guid idSucursal)
             => _stockService.RegistrarStockPorOc(idProducto, cantidadComprada, costoPactado, nroRemitoOc, idSucursal);
@@ -35,7 +35,6 @@ namespace BLL.GestiónStock.Facade
         public IEnumerable<StockPorSucursalDTO> ObtenerConsolidadoPorSucursal(Guid idSucursal)
             => _stockService.ObtenerConsolidadoPorSucursal(idSucursal);
 
-        // 🚀 Delegados hacia MermaService
         public ConfiguracionAlertasDTO ObtenerAlertasPorProducto(Guid idProducto)
             => _mermaService.ObtenerAlertasPorProducto(idProducto);
 
@@ -48,7 +47,6 @@ namespace BLL.GestiónStock.Facade
         public List<LoteDetalleVencimientoDTO> ObtenerLotesPorProducto(Guid idProducto, Guid idSucursal)
             => _mermaService.ObtenerLotesPorProducto(idProducto, idSucursal);
 
-        // 🚀 Delegados hacia KardexService
         public IEnumerable<MovimientoStockDTO> ObtenerHistorialKardex(Guid idSucursal, DateTime desde, DateTime hasta)
             => _kardexService.ObtenerHistorial(idSucursal, desde, hasta);
     }

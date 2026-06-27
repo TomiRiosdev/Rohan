@@ -52,5 +52,13 @@ namespace DAO.Interface.GestionCompra
         /// <remarks> Seguirá usándose como fallback si falla el algoritmo no incremental de Timestamp.</remarks>
         /// <returns>El último número entero registrado o 0 si la tabla está vacía.</returns>
         int ObtenerUltimoNumeroOc();
+
+        /// <summary>
+        /// Consulta si el proveedor tiene órdenes activas (Borrador o Emitida) en la base de datos.
+        /// </summary>
+        /// <param name="idProveedor">Identificador del proveedor.</param>
+        /// <returns>True si el proveedor tiene órdenes activas, False en caso contrario.</returns>
+        bool TieneOrdenesActivas(Guid idProveedor);     
+       
     }
 }

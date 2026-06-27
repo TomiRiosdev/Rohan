@@ -98,11 +98,11 @@ namespace BLL.GestiónCompra.Facade
             }
         }
 
-        public IEnumerable<OrdenCompraDTO> ConsultarHistorial(Guid idSucursal, Guid? idProveedor, int? idEstado)
+        public IEnumerable<OrdenCompraDTO> ConsultarHistorial(Guid idSucursal, Guid? idProveedor, int? idEstado, DateTime fechaDesde, DateTime fechaHasta)
         {
             try
             {
-                return _comprasService.ConsultarHistorial(idSucursal, idProveedor, idEstado);
+                return _comprasService.ConsultarHistorial(idSucursal, idProveedor, idEstado, fechaDesde, fechaHasta);
             }
             catch (Exception ex)
             {

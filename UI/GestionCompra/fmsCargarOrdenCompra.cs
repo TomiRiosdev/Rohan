@@ -80,12 +80,14 @@ namespace UI.GestionCompra
                 // 1. Desconectamos temporalmente el evento para evitar el bug de índices visuales
                 dgvPreOrdenCompra.SelectionChanged -= dgvPreOrdenCompra_SelectionChanged!;
 
-                // 2. 🚀 CAPTURAMOS EL CONTEXTO REGIONAL DE LA SESIÓN ACTIVA
+                // 2. CAPTURAMOS EL CONTEXTO REGIONAL DE LA SESIÓN ACTIVA
                 Guid idSucursalActual = SessionManager.Current.IdSucursalActual
                     ?? throw new Exception("No se detectó una sucursal activa en la sesión del usuario.");
 
-                // 3. 🎯 LLAMADA CORREGIDA: Pasamos (IdSucursal, IdProveedor = null, IdEstado = 1)
-                var todasLasOcs = _comprasFacade.ConsultarHistorial(idSucursalActual, null, 1);
+                // 3. Pasamos (IdSucursal, IdProveedor = null, IdEstado = 1, fechaDesde, fechaHasta)
+                DateTime fechaDesde = DateTime.Now.AddMonths(-1); // Ejemplo: último mes
+                DateTime fechaHasta = DateTime.Now;
+                var todasLasOcs = _comprasFacade.ConsultarHistorial(idSucursalActual, null, 1, fechaDesde, fechaHasta);
 
                 _preOrdenesLocales = new List<OrdenCompraDTO>(todasLasOcs);
 

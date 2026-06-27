@@ -62,6 +62,12 @@ namespace BLL.GestiónProveedor.Service
         {
             try
             {
+                // 1. Verificación de seguridad: ¿Tiene OCs activas?
+                if (_unitOfWork.OrdenCompraRepository.TieneOrdenesActivas(id))
+                {
+                    throw new ProveedorServiceException("No es posible deshabilitar este proveedor porque posee Órdenes de Compra pendientes o aprobadas en el sistema.");
+                }
+
                 var entity = _unitOfWork.ProveedorRepository.GetById(id);
 
                 if (entity == null)
@@ -75,6 +81,7 @@ namespace BLL.GestiónProveedor.Service
 
                 // Bitacora de Modificación
             }
+            catch (ProveedorServiceException) { throw; }
             catch (Exception ex)
             {
                 throw new ProveedorServiceException("Error interno al intentar deshabilitar el proveedor.", ex);

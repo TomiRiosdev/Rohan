@@ -17,7 +17,7 @@ namespace BLL.GestiónCompra.Interface
 
         // Lecturas y Filtros para Grillas / Combos
         OrdenCompraDTO BuscarPorId(Guid idOc);
-        IEnumerable<OrdenCompraDTO> ConsultarHistorial(Guid idSucursal, Guid? idProveedor, int? idEstado);
+        IEnumerable<OrdenCompraDTO> ConsultarHistorial(Guid idSucursal, Guid? idProveedor, int? idEstado, DateTime fechaDesde, DateTime fechaHasta);
         IEnumerable<ProductoDTO> ConsultarProductosDeProveedor(Guid idProveedor);
 
         // Alertas e Indicadores Visuales

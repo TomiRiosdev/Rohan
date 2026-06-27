@@ -39,7 +39,7 @@ namespace BLL.GestiónStock
         /// <exception cref="StockValidationException">Lanzada si los datos del DTO fallan las reglas de FluentValidation.</exception>
         /// <exception cref="TechoOperativoException">Lanzada si el ingreso supera el límite máximo permitido para el producto.</exception>
         /// <exception cref="StockDomainException">Lanzada ante fallas críticas en el servidor o infraestructura de datos.</exception>
-        public void RegistrarStockManual(StockPorSucursalDTO stockDto, Guid idSucursal)
+        public void RegistrarStockManual(StockPorSucursalDTO stockDto, Guid idSucursal, string usuarioNombre)
         {
             try
             {
@@ -107,9 +107,9 @@ namespace BLL.GestiónStock
                 ? $"Ajuste manual de stock ({tipoMovimiento}). Lote: {nuevoLote.NumeroLote}"
                 : stockDto.Observaciones;
 
-                _kardex.RegistrarMovimiento(idSucursal, nuevoLote, tipoMovimiento, unidadesIndividualesNetas, comentarioFinal);
+                _kardex.RegistrarMovimiento(idSucursal, nuevoLote, tipoMovimiento, unidadesIndividualesNetas, comentarioFinal, usuarioNombre);
 
-                
+
             }
             catch (RohanStockException)
             {
@@ -211,7 +211,7 @@ namespace BLL.GestiónStock
                     ? $"Baja por Merma/Vencimiento. Lote afectado: {loteDb.NumeroLote}"
                     : observaciones;
 
-                _kardex.RegistrarMovimiento(idSucursal, loteDb, TipoMovimientoEnum.EgresoPorMerma, cantidadABajar, comentarioAuditoria);
+                _kardex.RegistrarMovimiento(idSucursal, loteDb, TipoMovimientoEnum.EgresoPorMerma, cantidadABajar, comentarioAuditoria, observaciones);
             }
             catch (RohanStockException)
             {

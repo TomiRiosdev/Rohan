@@ -10,6 +10,7 @@ namespace UI.GestionCompra
     {
         private readonly OrdenCompraFacade _comprasFacade;
         private List<OrdenCompraDTO> _historialCompleto;
+
         public fmsHistorialOrdenCompra
         (
             OrdenCompraFacade comprasFacade
@@ -17,6 +18,7 @@ namespace UI.GestionCompra
         {
             InitializeComponent();
             _comprasFacade = comprasFacade ?? throw new ArgumentNullException(nameof(comprasFacade));
+
         }
 
         private void fmsHistorialOrdenCompra_Load(object sender, EventArgs e)
@@ -47,15 +49,14 @@ namespace UI.GestionCompra
         {
             try
             {
-                // 1. 🔌 DESCONECTAMOS el evento para evitar que Windows Forms salte en falso al redibujar
                 dgvMasterHistorial.SelectionChanged -= dgvMasterHistorial_SelectionChanged!;
 
-                // 2. 🚀 CAPTURAMOS EL CONTEXTO REGIONAL (Clave para el aislamiento multitenant)
                 Guid idSucursalActual = SessionManager.Current.IdSucursalActual
                     ?? throw new Exception("No se detectó una sucursal activa en la sesión del usuario actual.");
 
-                // 3. 🎯 LLAMADA CORREGIDA: Pasamos la sucursal obligatoria, proveedor (null) y estado (null) para traer TODO lo regional
-                var ocs = _comprasFacade.ConsultarHistorial(idSucursalActual, null, null);
+                DateTime fechaDesde = DateTime.Now.AddMonths(-1); 
+                DateTime fechaHasta = DateTime.Now;
+                var ocs = _comprasFacade.ConsultarHistorial(idSucursalActual, null, null, fechaDesde, fechaHasta);
 
                 // Almacenamos el búfer completo de la sucursal en memoria para los filtros rápidos del ComboBox
                 _historialCompleto = new List<OrdenCompraDTO>(ocs);
@@ -69,7 +70,6 @@ namespace UI.GestionCompra
             }
             finally
             {
-                // 5. 🔌 RECONECTAMOS el cableado del evento de forma garantizada, haya fallado o no la consulta
                 dgvMasterHistorial.SelectionChanged += dgvMasterHistorial_SelectionChanged!;
             }
         }
@@ -104,6 +104,7 @@ namespace UI.GestionCompra
                 dgvDetalleHistorial.DataSource = null;
             }
         }
+
         private void dgvMasterHistorial_SelectionChanged(object sender, EventArgs e)
         {
             if (dgvMasterHistorial.Rows.Count == 0 || dgvMasterHistorial.CurrentRow == null || dgvMasterHistorial.CurrentRow.Index < 0)
@@ -145,6 +146,7 @@ namespace UI.GestionCompra
                 DataPropertyName = "RazonSocialProveedor",
                 HeaderText = "Proveedor Comercial",
                 AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill,
+                Width = 75,
                 ReadOnly = true
             });
 
@@ -215,5 +217,9 @@ namespace UI.GestionCompra
             dgvDetalleHistorial.Columns.Add(colPrecio);
         }
 
+        private void btnBuscar_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }
