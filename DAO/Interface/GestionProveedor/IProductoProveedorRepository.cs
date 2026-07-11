@@ -10,6 +10,9 @@ namespace DAO.Interface.GestionProveedor
         IEnumerable<ProductoProveedor> GetByProveedor(Guid idProveedor);
         IEnumerable<ProductoProveedor> GetByProducto(Guid idProducto);
         bool ExisteRelacion(Guid idProducto, Guid idProveedor);
+        void UpdatePrecioUnitario(Guid idProducto, Guid idProveedor, decimal nuevoPrecioUnitario);
+        void AgregarProveedorPrincipal(Guid idProducto, Guid idProveedor);
+
 
     }
 }

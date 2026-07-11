@@ -13,7 +13,7 @@ namespace DAO.Implementations.SQLServer.GestionStock
             _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext), "El contexto no puede ser nulo.");
         }
 
-        // 1. BUSCAR UN REGISTRO ESPECÍFICO (Para saber si ya hay stock de ese producto en la sucursal)
+        // 1. BUSCAR UN REGISTRO ESPECÍFICO
         public StockPorSucursal GetByIds(Guid idSucursal, Guid idProducto)
         {
             try
@@ -28,20 +28,19 @@ namespace DAO.Implementations.SQLServer.GestionStock
             }
         }
 
-        // 2. LEER TODO EL STOCK DE LA SUCURSAL (Para llenar la grilla de la UI)
+        // 2. LEER TODO EL STOCK DE LA SUCURSAL
         public IEnumerable<StockPorSucursal> GetConsolidadoBySucursal(Guid idSucursal)
         {
             try
             {
                 return _dbContext.StockPorSucursal
-     
-                .Include(s => s.IdProductoNavigation)
-                .ThenInclude(p => p.IdCategoriaNavigation)
-                .Include(s => s.IdProductoNavigation)
-                .ThenInclude(p => p.IdUnidadMedidaNavigation)
-                .Where(s => s.IdSucursal == idSucursal)
-                .ToList();
-
+                    .Include(s => s.IdProductoNavigation)
+                        .ThenInclude(p => p.IdCategoriaNavigation)
+                    .Include(s => s.IdProductoNavigation)
+                        .ThenInclude(p => p.IdUnidadMedidaNavigation)
+                    .Where(s => s.IdSucursal == idSucursal &&
+                               (s.IdProductoNavigation.Habilitado == true || s.CantidadTotal > 0))
+                    .ToList();
             }
             catch (Exception ex)
             {

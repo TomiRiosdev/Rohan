@@ -14,7 +14,7 @@ public partial class RohanContext : DbContext
     {
     }
 
-    public virtual DbSet<Bitacora> Bitacoras { get; set; }
+    public virtual DbSet<Auditoria> Auditorias { get; set; }
 
     public virtual DbSet<Categoria> Categoria { get; set; }
 
@@ -52,19 +52,20 @@ public partial class RohanContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Bitacora>(entity =>
+        modelBuilder.Entity<Auditoria>(entity =>
         {
-            entity.HasKey(e => e.IdBitacora);
+            entity.HasKey(e => e.IdAuditoria).HasName("PK_Bitacora");
 
-            entity.ToTable("Bitacora");
-
-            entity.Property(e => e.IdBitacora).ValueGeneratedNever();
+            entity.Property(e => e.IdAuditoria).ValueGeneratedNever();
             entity.Property(e => e.Detalle).IsUnicode(false);
             entity.Property(e => e.Fecha).HasColumnType("datetime");
-            entity.Property(e => e.Operacion).HasMaxLength(100);
-            entity.Property(e => e.Usuario)
-                .HasMaxLength(50)
+            entity.Property(e => e.NombreSucursal)
+                .HasMaxLength(100)
                 .IsUnicode(false);
+            entity.Property(e => e.NombreUsuario)
+                .HasMaxLength(100)
+                .IsUnicode(false);
+            entity.Property(e => e.Operacion).HasMaxLength(100);
         });
 
         modelBuilder.Entity<Categoria>(entity =>

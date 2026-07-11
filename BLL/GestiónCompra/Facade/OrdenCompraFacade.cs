@@ -19,21 +19,21 @@ namespace BLL.GestiónCompra.Facade
 
         #region  Operaciones de Escritura
 
-        public void RegistrarNuevaOrdenCompra(OrdenCompraDTO dto)
+        public void RegistrarNuevaOrdenCompra(OrdenCompraDTO Oc)
         {
             try
             {
-                _comprasService.GenerarOrdenCompra(dto);
+                _comprasService.GenerarOrdenCompra(Oc);
             }
             catch (ComprasValidationException ex)
             {
                 // Error de tipeo, faltan campos, importes en 0
-                throw new Exception($"[Validación Comercial]: {ex.Message}");
+                throw new Exception($"Validación Comercial: {ex.Message}");
             }
             catch (ReglaNegocioComprasException ex)
             {
                 // El proveedor no existe o está deshabilitado
-                throw new Exception($"[Regla de Negocio]: {ex.Message}");
+                throw new Exception($"Regla de Negocio: {ex.Message}");
             }
             catch (Exception ex)
             {
@@ -121,6 +121,7 @@ namespace BLL.GestiónCompra.Facade
                 throw new Exception("Error al recuperar el catálogo indexado del proveedor.", ex);
             }
         }
+      
         public IEnumerable<SolicitudPedidoDTO> ConsultarSolicitudesPendientes(Guid idSucursal)
         {
             try
@@ -158,11 +159,25 @@ namespace BLL.GestiónCompra.Facade
         {
             try
             {
-                _comprasService.ExportarOcABlocDeNotas(idOc, rutaDirectorio);
+                var dto = _comprasService.ObtenerPorId(idOc);
+                _comprasService.ExportarOcABlocDeNotas(dto, rutaDirectorio);
             }
             catch (Exception ex)
             {
                 throw new Exception($"Fallo en el subsistema de Entrada/Salida (I/O) al guardar el archivo: {ex.Message}", ex);
+            }
+        }
+
+        public void ActualizarOrdenCompra(OrdenCompraDTO Oc)
+        {
+            try
+            {
+                _comprasService.ActualizarOrdenCompra(Oc);
+            }
+            catch (Exception ex)
+            {
+
+                throw new Exception("Error al actualizar la orden de compra.", ex);
             }
         }
 

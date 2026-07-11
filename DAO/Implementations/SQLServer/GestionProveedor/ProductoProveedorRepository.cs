@@ -36,10 +36,11 @@ namespace DAO.Implementations.SQLServer.GestionProveedor
                 if (idProveedor == Guid.Empty) throw new ArgumentException("ID de proveedor inválido.");
 
                 return _dbContext.ProductoProveedor
-                    .Include(pp => pp.IdProductoNavigation) // Trae los datos del Producto (Nombre, SKU)
-                    .Where(pp => pp.IdProveedor == idProveedor)
-                    .AsNoTracking()
-                    .ToList();
+                       .Include(pp => pp.IdProductoNavigation) 
+                       .Where(pp =>
+                            pp.IdProveedor == idProveedor &&
+                            pp.IdProductoNavigation.Habilitado == true) 
+                       .ToList();
             }
             catch (Exception ex)
             {
@@ -81,6 +82,35 @@ namespace DAO.Implementations.SQLServer.GestionProveedor
         {
             return _dbContext.ProductoProveedor
                 .Any(pp => pp.IdProducto == idProducto && pp.IdProveedor == idProveedor);
+        }
+
+        public void UpdatePrecioUnitario(Guid idProducto, Guid idProveedor, decimal nuevoPrecioUnitario)
+        {
+            var registro = _dbContext.ProductoProveedor
+            .FirstOrDefault(pp => pp.IdProducto == idProducto && pp.IdProveedor == idProveedor);
+
+            if (registro == null)
+                throw new Exception("No se encontró la relación entre el producto y el proveedor.");
+
+            // Asumimos que tienes una propiedad 'PrecioUnitario' en tu entidad ProductoProveedor
+            registro.UltimoPrecioCompra = nuevoPrecioUnitario;
+        }
+
+        public void AgregarProveedorPrincipal(Guid idProducto, Guid idProveedor)
+        {
+            // 1. Primero, quitamos el flag de principal a todos los proveedores de este producto
+            var actuales = _dbContext.ProductoProveedor.Where(pp => pp.IdProducto == idProducto);
+            foreach (var item in actuales)
+            {
+                item.EsProveedorPrincipal = false;
+            }
+
+            // 2. Marcamos al nuevo como principal
+            var nuevoPrincipal = actuales.FirstOrDefault(pp => pp.IdProveedor == idProveedor);
+            if (nuevoPrincipal != null)
+            {
+                nuevoPrincipal.EsProveedorPrincipal = true;
+            }
         }
     }
 }

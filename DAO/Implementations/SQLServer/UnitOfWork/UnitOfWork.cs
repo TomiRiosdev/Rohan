@@ -9,6 +9,8 @@ using DAO.Interface.GestionProducto;
 using DAO.Interface.GestionProveedor;
 using DAO.Interface.GestionStock;
 using DAO.Interface.GestionSucursal;
+using DAO.Interface.GestionAuditoria;
+using DAO.Implementations.SQLServer.GestionAuditoria;
 
 namespace DAO.Implementations.SQLServer
 {
@@ -31,6 +33,7 @@ namespace DAO.Implementations.SQLServer
         public ITipoMovimientoRepository TipoMovimientoRepository { get; private set; }
         public IOrdenCompraRepository OrdenCompraRepository { get; private set; }
         public ICompraSolicitudQueryRepository CompraSolicitudQueryRepository { get; private set; }
+        public IAuditoriaRepository AuditoriaRepository { get; private set; }
 
 
         // Recibe el contexto único administrado por el ServiceProvider
@@ -53,6 +56,7 @@ namespace DAO.Implementations.SQLServer
             TipoMovimientoRepository = new TipoMovimientoRepository(_dbContext);
             OrdenCompraRepository = new OrdenCompraRepository(_dbContext);
             CompraSolicitudQueryRepository = new CompraSolicitudQueryRepository(_dbContext);
+            AuditoriaRepository = new AuditoriaRepository(_dbContext);
 
         }
 

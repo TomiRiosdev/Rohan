@@ -1,6 +1,7 @@
 ﻿using BLL.DomainDtos;
+using BLL.GestiónCompra.Facade;
 using BLL.GestiónProducto.Facade;
-using BLL.GestiónStock.Interface;
+using BLL.GestiónStock.Facade;
 using Microsoft.Extensions.DependencyInjection;
 
 
@@ -8,23 +9,24 @@ namespace UI.GestiónStock
 {
     public partial class fmsGestionStock : Form
     {
-        private readonly IFacade _stockFacade;
-        private readonly ProductoFacade _productoFacade;
+        private readonly StockFacade _stockFacade;
+        private readonly ProductoFacade _productoFacade; 
+        private readonly OrdenCompraFacade _comprasFacade;
         private readonly IServiceProvider _serviceProvider;
 
         public fmsGestionStock
         (
-            IFacade stockFacade,
+            StockFacade stockFacade,
             ProductoFacade productoFacade,
-            IMermaService mermaService,
+            OrdenCompraFacade comprasFacade,
             IServiceProvider serviceProvider
-
         )
         {
             InitializeComponent();
             _stockFacade = stockFacade;
             _productoFacade = productoFacade;
             _serviceProvider = serviceProvider; 
+            _comprasFacade = comprasFacade;
         }
         #region buttons
         private void btnVerInventario_Click(object sender, EventArgs e)
@@ -59,7 +61,16 @@ namespace UI.GestiónStock
    
         private void btnAgregarPorOC_Click(object sender, EventArgs e)
         {
-            //   AbrirFormInPanel(new fmsAgregarStockPorOC(_stockFacade));
+            try
+            {
+                var fmsAgregarPorOC = _serviceProvider.GetRequiredService<fmsAgregarStockPorOC>();
+                AbrirFormInPanel(fmsAgregarPorOC);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error de infraestructura al incrustar el formulario de Agregar Stock por OC: {ex.Message}",
+                                "Error Crítico", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void btnSolicitudPedido_Click(object sender, EventArgs e)

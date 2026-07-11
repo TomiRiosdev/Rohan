@@ -1,5 +1,6 @@
 ﻿using BLL.DomainDtos;
 using BLL.GestiónStock.Interface;
+using System.Collections.Generic;
 
 
 namespace BLL.GestiónStock.Facade
@@ -26,8 +27,8 @@ namespace BLL.GestiónStock.Facade
         public void RegistrarStockManual(StockPorSucursalDTO stockDto, Guid idSucursal, string usuarioNombre)
             => _stockService.RegistrarStockManual(stockDto, idSucursal, usuarioNombre);
 
-        public void RegistrarStockPorOc(Guid idProducto, int cantidadComprada, decimal costoPactado, string nroRemitoOc, Guid idSucursal)
-            => _stockService.RegistrarStockPorOc(idProducto, cantidadComprada, costoPactado, nroRemitoOc, idSucursal);
+        public void RegistrarIngresoPorOrdenCompra(Guid idOrdenCompra, Guid idSucursal, string usuarioNombre, List<RecepcionMercaderiaDTO> detalleRecepcion)
+            => _stockService.RegistrarIngresoPorOrdenCompra(idOrdenCompra, idSucursal, usuarioNombre, detalleRecepcion);
 
         public void RegistrarMermaLote(Guid idLote, int cantidadABajar, string observaciones, Guid idSucursal)
             => _stockService.RegistrarMermaLote(idLote, cantidadABajar, observaciones, idSucursal);
@@ -49,5 +50,9 @@ namespace BLL.GestiónStock.Facade
 
         public IEnumerable<MovimientoStockDTO> ObtenerHistorialKardex(Guid idSucursal, DateTime desde, DateTime hasta)
             => _kardexService.ObtenerHistorial(idSucursal, desde, hasta);
+
+        public void RegistrarEgresoManualLote(Guid idLote, int cantidadADescontar, string observaciones, Guid idSucursal, string usuarioNombre)
+          => _stockService.RegistrarEgresoManualLote(idLote, cantidadADescontar, observaciones, idSucursal, usuarioNombre);
+        
     }
 }

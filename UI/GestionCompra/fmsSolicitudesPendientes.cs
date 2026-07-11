@@ -18,6 +18,9 @@ namespace UI.GestionCompra
         private readonly OrdenCompraFacade _comprasFacade;
         private List<SolicitudPedidoDTO> _solicitudesLocales;
         private readonly SolicitudPedidoFacade _solicitudFacade;
+        public event EventHandler SolicitudProcesada;
+
+
         public fmsSolicitudesPendientes
         (
             OrdenCompraFacade comprasFacade,
@@ -34,6 +37,13 @@ namespace UI.GestionCompra
             ConfigurarGrillaMaestro();
             ConfigurarGrillaDetalle();
             ActualizarPantallaCompleta();
+        }
+
+        protected override void OnFormClosed(FormClosedEventArgs e)
+        {
+            base.OnFormClosed(e);
+            // Notificamos al formulario padre que el estado de las solicitudes pudo haber cambiado
+            SolicitudProcesada?.Invoke(this, EventArgs.Empty);
         }
 
         #region Refresco Reactivo
@@ -76,7 +86,6 @@ namespace UI.GestionCompra
         }
 
         #endregion
-
 
         #region Botones 
         private void btnGenerarOrdenCompra_Click(object sender, EventArgs e)

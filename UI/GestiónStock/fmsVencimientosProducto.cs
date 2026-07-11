@@ -17,6 +17,7 @@ namespace UI.GestiónStock
         private DataGridView dgvLotes = null!;
         private List<LoteDetalleVencimientoDTO> _lotesCompletos = new();
         private BindingList<LoteDetalleVencimientoDTO> _lotesFiltrados = new();
+        private LoteDetalleVencimientoDTO _loteSeleccionadoActual;
         public fmsVencimientosProducto
         (
             IFacade stockFacade,
@@ -27,7 +28,7 @@ namespace UI.GestiónStock
             InitializeComponent();
             _stockFacade = stockFacade;
             _productoOriginal = productoElegido;
-           
+
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
@@ -53,7 +54,7 @@ namespace UI.GestiónStock
 
                         _stockFacade.RegistrarMermaLote(loteSeleccionado.IdLote, cantidadAMermar, "Descarte por vencimiento confirmado en depósito.", sucursalId);
 
-            
+
                         MessageBox.Show("Merma registrada con éxito. El stock fue descontado y auditado en el Kardex.", "Control de Depósito", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                         CargarDatosLotes();
@@ -88,7 +89,7 @@ namespace UI.GestiónStock
         {
             this.Text = $"Desglose de Trazabilidad: {_productoOriginal.ProductoNombre}";
 
-            ConfigurarColumnasGrilla(); 
+            ConfigurarColumnasGrilla();
             CargarDatosLotes();
         }
 
@@ -142,7 +143,7 @@ namespace UI.GestiónStock
                 MessageBox.Show($"Error al desglosar los lotes: {ex.Message}", "Error de Carga", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-     
+
         private void CalcularIndicadoresMermas(List<LoteDetalleVencimientoDTO> lotes)
         {
             // 1. Conteo total de lotes físicos en estantería
@@ -243,5 +244,70 @@ namespace UI.GestiónStock
         }
 
         #endregion
+
+        private void btnDescontarStock_Click(object sender, EventArgs e)
+        {
+            if (_loteSeleccionadoActual == null) return;
+
+            int cantidad = (int)nupCantidad.Value;
+            if (cantidad <= 0)
+            {
+                MessageBox.Show("Debe indicar una cantidad mayor a cero para descontar.", "Atención", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // Opcional: Preguntar confirmación
+            var result = MessageBox.Show($"¿Confirma el descuento de {cantidad} unidades del lote {_loteSeleccionadoActual.NumeroLote}?",
+                                         "Confirmar Acción", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+            if (result == DialogResult.Yes)
+            {
+                try
+                {
+                    Guid idSucursalActual = SessionManager.Current.IdSucursalActual.Value;
+                    string usuario = SessionManager.Current.UsuarioLogueado.Nombre;
+                    string motivo = "Falta mercadería en góndola"; // O lo que saques de un TextBox txtMotivo.Text
+
+                    // Llamamos a la Facade/Service
+                    _stockFacade.RegistrarEgresoManualLote(_loteSeleccionadoActual.IdLote, cantidad, motivo, idSucursalActual, usuario);
+
+                    MessageBox.Show("Stock descontado y auditado correctamente en el Kardex.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                    // Refrescar tu grilla de Lotes
+                    CargarDatosLotes();
+                    DeshabilitarControlesDescuento();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Error al procesar", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
+        private void dgvLote_SelectionChanged(object sender, EventArgs e)
+        {
+            if (dgvLote.CurrentRow == null || dgvLote.CurrentRow.Index < 0)
+            {
+                DeshabilitarControlesDescuento();
+                return;
+            }
+
+            if (dgvLote.CurrentRow.DataBoundItem is LoteDetalleVencimientoDTO lote)
+            {
+                _loteSeleccionadoActual = lote;
+                nupCantidad.Enabled = true;
+                btnDescontarStock.Enabled = true;
+                nupCantidad.Maximum = lote.CantidadActual;
+                nupCantidad.Value = 0;
+            }
+        }
+     
+        private void DeshabilitarControlesDescuento()
+        {
+            _loteSeleccionadoActual = null;
+            nupCantidad.Enabled = false;
+            nupCantidad.Value = 0;
+            btnDescontarStock.Enabled = false;
+        }
     }
 }

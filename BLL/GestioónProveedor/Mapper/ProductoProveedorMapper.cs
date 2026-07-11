@@ -15,14 +15,16 @@ namespace BLL.GestiónProveedor.Mapper
                 IdProducto = entity.IdProducto ?? Guid.Empty,
                 IdProveedor = entity.IdProveedor ?? Guid.Empty,
                 EsProveedorPrincipal = entity.EsProveedorPrincipal ?? false,
-
-                // Mapeos relacionales seguros (Evitan NullReferenceException)
+                PrecioUnitario = entity.UltimoPrecioCompra ?? 0,
                 CodigoSku = entity.IdProductoNavigation?.CodigoSku ?? 0,
                 ProductoNombre = entity.IdProductoNavigation?.Nombre ?? "Materia Prima No Identificada",
                 CategoriaNombre = entity.IdProductoNavigation?.IdCategoriaNavigation?.Descripcion ?? "Sin Categoría",
-
                 ProveedorRazonSocial = entity.IdProveedorNavigation?.RazonSocial ?? "Proveedor Desconocido",
-                ProveedorCuit = entity.IdProveedorNavigation?.Cuit ?? "Sin CUIT"
+                ProveedorCuit = entity.IdProveedorNavigation?.Cuit ?? "Sin CUIT",
+                CantidadPorBulto = entity.IdProductoNavigation?.CantidadPorBulto ?? 1,
+                ContenidoPorVenta = entity.IdProductoNavigation?.ContenidoPorVenta,
+                IdTipoEnvase = entity.IdProductoNavigation?.IdTipoEnvase,
+                UnidadMedidaNombre = entity.IdProductoNavigation?.IdUnidadMedidaNavigation?.Descripcion ?? "u."
             };
         }
 
@@ -35,7 +37,7 @@ namespace BLL.GestiónProveedor.Mapper
                 IdProducto = dto.IdProducto,
                 IdProveedor = dto.IdProveedor,
                 EsProveedorPrincipal = dto.EsProveedorPrincipal,
-              //  FechaAsignacion = DateTime.Now // Auditoría de trazabilidad interna de Rohan
+                // FechaAsignacion = DateTime.Now // Auditoría de trazabilidad interna de Rohan
             };
         }
     }

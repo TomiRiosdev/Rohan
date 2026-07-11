@@ -32,5 +32,7 @@ namespace BLL.DomainDtos
         public int? CantidadAsignadaDesdeSolicitud { get; set; }
 
         public int UnidadesPorBulto { get; set; } = 1; // Para calcular la cantidad de bultos en la UI, si el producto tiene esta info
+
+        public string Observaciones { get; set; }
     }
 }

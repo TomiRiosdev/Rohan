@@ -1,21 +1,18 @@
 ﻿using BLL.DomainDtos;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BLL.GestiónCompra.Interface
 {
     public interface IOrdenCompraService
     {
         #region Metodos de IOrdenCompraRepository
-        void GenerarOrdenCompra(OrdenCompraDTO dto);
+        void GenerarOrdenCompra(OrdenCompraDTO Oc);
+        void ActualizarOrdenCompra(OrdenCompraDTO Oc);
         void ModificarEstadoOc(Guid idOc, int nuevoEstadoId);
         void CancelarOrdenCompra(Guid idOc); // Baja lógica comercial
         OrdenCompraDTO ObtenerPorId(Guid idOc);
         IEnumerable<OrdenCompraDTO> ConsultarHistorial(Guid idSucursal, Guid? idProveedor, int? idEstado, DateTime fechaDesde, DateTime fechaHasta);
-        void ExportarOcABlocDeNotas(Guid idOc, string rutaDirectorio);
+        void ExportarOcABlocDeNotas(OrdenCompraDTO dto, string rutaDirectorio);
 
         #endregion
 

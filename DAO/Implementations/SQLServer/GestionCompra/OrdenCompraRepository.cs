@@ -2,9 +2,6 @@
 using DAO.Interface.GestionCompra;
 using Microsoft.EntityFrameworkCore;
 using Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Implementations.SQLServer.GestionCompra
 {
@@ -44,16 +41,25 @@ namespace Implementations.SQLServer.GestionCompra
         /// <summary>
         /// Recupera una Orden de Compra específica mediante su clave primaria con todo su grafo cargado.
         /// </summary>
-        public OrdenCompra GetById(Guid idOc)
+        public OrdenCompra GetById(Guid idOc, bool incluirDetalles)
         {
             try
             {
-                return _dbContext.OrdenCompra
-                    .Include(o => o.IdProveedorNavigation)
-                    .Include(o => o.IdEstadoSolicitudNavigation)
-                    .Include(o => o.OrdenCompraDetalle)
-                        .ThenInclude(d => d.IdProductoNavigation)
-                    .FirstOrDefault(o => o.IdOrdenCompra == idOc)!;
+                // 1. Iniciamos la consulta base
+                var query = _dbContext.OrdenCompra.AsQueryable();
+
+                // 2. Si pide detalles, arma los JOINs
+                if (incluirDetalles)
+                {
+                    query = query
+                        .Include(o => o.IdProveedorNavigation)
+                        .Include(o => o.IdEstadoSolicitudNavigation)
+                        .Include(o => o.OrdenCompraDetalle)
+                            .ThenInclude(d => d.IdProductoNavigation);
+                }
+
+                // 3. Ejecutamos la consulta final
+                return query.FirstOrDefault(o => o.IdOrdenCompra == idOc)!;
             }
             catch (Exception ex)
             {
@@ -160,6 +166,26 @@ namespace Implementations.SQLServer.GestionCompra
                 throw new InvalidOperationException($"Error en la DAL al consultar el historial de órdenes de compra del proveedor {idProveedor}.", ex);
             }
          
+        }
+
+        /// <summary>
+        /// Elimina los renglones de detalle de una orden de compra específica de la base de datos.
+        /// </summary>
+        /// <param name="detalle"></param>
+        /// <exception cref="InvalidOperationException"></exception>
+        public void RemoveDetalle(IEnumerable<OrdenCompraDetalle> detalle)
+        {
+            if (detalle == null || !detalle.Any()) return;
+
+            try
+            {
+                // Le indicamos al DbContext que estos registros deben ser borrados (DELETE en SQL)
+                _dbContext.RemoveRange(detalle);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException("Error nativo en la DAL al intentar eliminar los renglones de la Orden de Compra.", ex);
+            }
         }
     }
 }

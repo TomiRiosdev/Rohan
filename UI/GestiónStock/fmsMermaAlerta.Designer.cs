@@ -55,6 +55,7 @@
             // 
             txtProducto.Location = new Point(200, 33);
             txtProducto.Name = "txtProducto";
+            txtProducto.ReadOnly = true;
             txtProducto.Size = new Size(210, 23);
             txtProducto.TabIndex = 8;
             // 
@@ -62,6 +63,7 @@
             // 
             txtSku.Location = new Point(290, 82);
             txtSku.Name = "txtSku";
+            txtSku.ReadOnly = true;
             txtSku.Size = new Size(120, 23);
             txtSku.TabIndex = 9;
             // 

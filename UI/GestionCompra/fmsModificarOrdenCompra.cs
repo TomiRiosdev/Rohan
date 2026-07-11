@@ -4,115 +4,91 @@ using BLL.GestiónProveedor.Facade;
 using Service.Facade;
 using System.ComponentModel;
 
+
 namespace UI.GestionCompra
 {
-    public partial class fmsCrearManualOC : Form
+    public partial class fmsModificarOrdenCompra : Form
     {
-
-        private readonly ProveedorFacade _proveedorFacade;
-        private readonly ProductoProveedorFacade _prodProvService;
+        private readonly ProductoProveedorFacade _prodProvFacade;
         private readonly OrdenCompraFacade _ordenCompraFacade;
 
+
+        private Guid _idOrdenCompraActual;
+        private Guid _idProveedorActual;
         private ProductoProveedorDTO _productoElegidoActual;
         private BindingList<OrdenCompraDetalleDTO> _detallesPreOrden = new BindingList<OrdenCompraDetalleDTO>();
-       
-        public event EventHandler OnOrdenCreada;
 
-        public fmsCrearManualOC
+        public event EventHandler OnOrdenModificada;
+
+        public fmsModificarOrdenCompra
         (
+            Guid idOrdenCompraSeleccionada,
 
-            ProveedorFacade proveedorFacade,
-            ProductoProveedorFacade prodProvService,
+            ProductoProveedorFacade prodProvFacade,
             OrdenCompraFacade ordenCompraFacade
-
+         
         )
         {
             InitializeComponent();
+            _idOrdenCompraActual = idOrdenCompraSeleccionada;
 
-            _proveedorFacade = proveedorFacade;
-            _prodProvService = prodProvService;
-            _ordenCompraFacade = ordenCompraFacade;
-        }
-        /// <summary>
-        /// Se ejecuta al abrir el formulario. Configura la UI en modo lectura, carga combos y enlaza las grillas.
-        /// </summary>
-        private void fmsCrearManualOC_Load(object sender, EventArgs e)
+            _prodProvFacade = prodProvFacade ?? throw new ArgumentNullException(nameof(prodProvFacade));
+            _ordenCompraFacade = ordenCompraFacade ?? throw new ArgumentNullException(nameof(ordenCompraFacade));
+       
+        }   
+
+        private void fmsModificarOrdenCompra_Load(object sender, EventArgs e)
         {
             try
             {
-                // 1. Configuraciones de solo lectura de la UI (Blindaje)
                 txtProvRazonSocial.ReadOnly = true;
-                txtEmail.ReadOnly = true;
-                txtTelefono.ReadOnly = true;
-                lblCantidadBulto.Visible = false;
+                txtCuil.ReadOnly = true;
+                txtNroOrden.ReadOnly = true;
                 nupCantidad.Enabled = false;
+                lblCantidadBulto.Visible = false;
+                lblPrecio.Visible = false;
 
-                // 2. Apagamos eventos temporalmente para evitar disparos accidentales durante la carga
-                cxbNombreProveedor.SelectedIndexChanged -= cxbNombreProveedor_SelectedIndexChanged!;
-                dgvProducto.SelectionChanged -= dgvProducto_SelectionChanged!;
-
-                // 3. Cargamos TODOS los proveedores
-                var proveedores = _proveedorFacade.GetHabilitados();
-
-                // 4. Configuramos el ComboBox
-                cxbNombreProveedor.DataSource = proveedores;
-                cxbNombreProveedor.DisplayMember = "Nombre";
-                cxbNombreProveedor.ValueMember = "Id";
-                cxbNombreProveedor.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
-                cxbNombreProveedor.AutoCompleteSource = AutoCompleteSource.ListItems;
-                cxbNombreProveedor.SelectedIndex = -1;
-
-                // 5. Enlazamos la grilla inferior con nuestra lista en memoria
+                //  Configurar Grilla
                 dgvPreOrdenCompra.AutoGenerateColumns = false;
                 dgvPreOrdenCompra.DataSource = _detallesPreOrden;
                 ConfigurarColumnasPreOrden();
+
+                // CARGAR DATOS EXISTENTES
+                CargarDatosDeOrdenExistente();
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Error al iniciar", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Error al cargar la Orden de Compra: {ex.Message}", "Error Crítico", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                this.Close(); // Si falla la carga, cerramos por seguridad
             }
-            finally
-            {
-                // 6. Encendemos eventos
-                cxbNombreProveedor.SelectedIndexChanged += cxbNombreProveedor_SelectedIndexChanged!;
-                dgvProducto.SelectionChanged += dgvProducto_SelectionChanged!;
-            }
+
         }
 
-        #region Carga de Proveedor y Productos
-
-        /// <summary>
-        /// Se dispara al elegir un proveedor. Carga sus datos de contacto y busca sus productos asociados.
-        /// </summary>
-        private void cxbNombreProveedor_SelectedIndexChanged(object sender, EventArgs e)
+        private void CargarDatosDeOrdenExistente()
         {
-            if (cxbNombreProveedor.SelectedIndex < 0) return;
 
-            try
+            var ocExistente = _ordenCompraFacade.BuscarPorId(_idOrdenCompraActual);
+
+            if (ocExistente == null) throw new Exception("La orden de compra no existe o fue eliminada.");
+
+            // Cargar datos del Proveedor 
+            _idProveedorActual = ocExistente.IdProveedor.Value;
+            txtProvRazonSocial.Text = ocExistente.RazonSocialProveedor;
+            txtCuil.Text = ocExistente.CuitProveedor;
+            txtNroOrden.Text = ocExistente.NroSolicitudReferencia.ToString();
+
+
+            // Llenar la memoria (El carrito) con los renglones que ya tenía la OC
+            foreach (var detalle in ocExistente.Detalles)
             {
-                if (cxbNombreProveedor.SelectedItem is ProveedorDTO proveedorSeleccionado)
-                {
-                    txtProvRazonSocial.Text = proveedorSeleccionado.RazonSocial;
-                    txtEmail.Text = proveedorSeleccionado.Email;
-                    txtTelefono.Text = proveedorSeleccionado.Telefono;
-
-                    lblCantidadBulto.Visible = false;
-                    nupCantidad.Value = 0;
-                    nupCantidad.Enabled = false;
-                    _productoElegidoActual = null;
-
-                    CargarProductosDelProveedor(proveedorSeleccionado.Id);
-                }
+                _detallesPreOrden.Add(detalle);
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error al cargar el contexto del proveedor: {ex.Message}", "Error de Conexión", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            ActualizarTotalizadorOc();
+
+            // Cargar el catálogo de productos de este proveedor 
+            CargarProductosDelProveedor(_idProveedorActual);
         }
-
-        /// <summary>
-        /// Obtiene los productos del proveedor desde la BLL y los enlaza a la grilla superior.
-        /// </summary>
+      
         private void CargarProductosDelProveedor(Guid idProveedor)
         {
             try
@@ -120,7 +96,7 @@ namespace UI.GestionCompra
                 dgvProducto.SelectionChanged -= dgvProducto_SelectionChanged!;
 
                 dgvProducto.AutoGenerateColumns = false;
-                List<ProductoProveedorDTO> productos = _prodProvService.ListarProductosPorProveedor(idProveedor).ToList();
+                List<ProductoProveedorDTO> productos = _prodProvFacade.ListarProductosPorProveedor(idProveedor).ToList();
 
                 dgvProducto.DataSource = null;
                 dgvProducto.DataSource = productos;
@@ -137,7 +113,7 @@ namespace UI.GestionCompra
                 dgvProducto.SelectionChanged += dgvProducto_SelectionChanged!;
             }
         }
-
+       
         private void ConfigurarColumnasGrillaDerecha()
         {
             dgvProducto.Columns.Clear();
@@ -168,10 +144,7 @@ namespace UI.GestionCompra
                 AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
             });
         }
-
-        /// <summary>
-        /// Se dispara al seleccionar un producto de la grilla superior. Habilita el control de cantidad.
-        /// </summary>
+       
         private void dgvProducto_SelectionChanged(object sender, EventArgs e)
         {
             if (dgvProducto.CurrentRow == null || dgvProducto.CurrentRow.Index < 0)
@@ -209,7 +182,7 @@ namespace UI.GestionCompra
                         lblPrecio.ForeColor = Color.DarkRed; // Alerta visual
                     }
                     lblPrecio.Visible = true;
-                  
+
 
                     nupCantidad.Enabled = true;
                     nupCantidad.Value = 0;
@@ -221,23 +194,39 @@ namespace UI.GestionCompra
             }
         }
 
-        #endregion
-
-        #region Botones 
-
-        private void btnCerrar_Click(object sender, EventArgs e)
+        private void btnConfirmar_Click(object sender, EventArgs e)
         {
-            var result = MessageBox.Show("¿Está seguro de descartar la orden de compra en curso?", "Confirmar Cancelación", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-
-            if (result == DialogResult.Yes)
+            if (_detallesPreOrden.Count == 0)
             {
-                this.Close();
+                MessageBox.Show("La orden debe tener al menos un producto.", "Atención", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
             }
+
+            try
+            {
+                var ocModificadaDto = new OrdenCompraDTO
+                {
+                    IdOrdenCompra = _idOrdenCompraActual, // Le decimos a la BLL qué OC estamos pisando
+                    IdProveedor = _idProveedorActual,
+                    IdSucursal = SessionManager.Current.IdSucursalActual.Value,
+                    IdUsuario = SessionManager.Current.UsuarioLogueado?.IdUsuario,
+                    Detalles = _detallesPreOrden.ToList()
+                };
+
+                // LLAMADA A UN NUEVO MÉTODO EN LA BLL
+                _ordenCompraFacade.ActualizarOrdenCompra(ocModificadaDto);
+
+                MessageBox.Show("Orden de Compra actualizada correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                OnOrdenModificada?.Invoke(this, EventArgs.Empty);
+                this.Close(); // Cerramos automáticamente tras editar
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error al actualizar", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+
         }
 
-        /// <summary>
-        /// Agrega el producto seleccionado a la memoria temporal (BindingList) y bloquea el proveedor.
-        /// </summary>
         private void btnAgregar_Click(object sender, EventArgs e)
         {
             if (_productoElegidoActual == null)
@@ -275,8 +264,6 @@ namespace UI.GestionCompra
                         Observaciones = string.Empty
                     });
 
-                    // Bloqueamos proveedor para no mezclar en la misma OC
-                    cxbNombreProveedor.Enabled = false;
                 }
 
                 ReordenarNumerosDeRenglon();
@@ -294,114 +281,13 @@ namespace UI.GestionCompra
             }
         }
 
-        /// <summary>
-        /// Empaqueta la memoria temporal en un DTO y la envía a la BLL para su persistencia en la base de datos.
-        /// </summary>
-        private void btnConfirmar_Click(object sender, EventArgs e)
-        {
-            if (_detallesPreOrden.Count == 0)
-            {
-                MessageBox.Show("La orden está vacía.", "Atención", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            if (cxbNombreProveedor.SelectedItem is not ProveedorDTO proveedor)
-            {
-                MessageBox.Show("Debe seleccionar un proveedor.", "Atención", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            try
-            {
-                Guid idSucursalActual = SessionManager.Current.IdSucursalActual
-                       ?? throw new Exception("No se detectó una sucursal activa en la sesión actual.");
-
-                var nuevaOcDto = new OrdenCompraDTO
-                {
-                    IdProveedor = proveedor.Id,
-                    IdUsuario = SessionManager.Current.UsuarioLogueado?.IdUsuario,
-                    IdSucursal = idSucursalActual,
-                    Detalles = _detallesPreOrden.ToList()
-                };
-
-                _ordenCompraFacade.RegistrarNuevaOrdenCompra(nuevaOcDto);
-                MessageBox.Show("Orden de Compra generada correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-                // Notificamos al form principal para que refresque su grilla
-                OnOrdenCreada?.Invoke(this, EventArgs.Empty);
-
-                limpiarFormulario();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message, "Error en la operación", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        /// <summary>
-        /// Descarta todo el progreso actual tras una confirmación del usuario.
-        /// </summary>
-        private void btnEliminar_Click(object sender, EventArgs e)
+        private void btnCerrar_Click(object sender, EventArgs e)
         {
             var result = MessageBox.Show("¿Está seguro de descartar la orden de compra en curso?", "Confirmar Cancelación", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
             if (result == DialogResult.Yes)
             {
-                limpiarFormulario();
-            }
-        }
-
-        #endregion
-
-        /// <summary>
-        /// Restablece el estado del formulario a su estado original sin destruir la configuración de las grillas.
-        /// </summary>
-        private void limpiarFormulario()
-        {
-            // 1. Desbloquear combobox y limpiar selección
-            cxbNombreProveedor.Enabled = true;
-            cxbNombreProveedor.SelectedIndex = -1;
-
-            // 2. Limpiar listas de datos (¡NO borrar columnas!)
-            _detallesPreOrden.Clear();
-            dgvProducto.DataSource = null;
-
-            // 3. Limpiar textboxes
-            txtProvRazonSocial.Clear();
-            txtEmail.Clear();
-            txtTelefono.Clear();
-
-            // 4. Limpiar controles de producto
-            if (lblPrecio != null) lblPrecio.Visible = false;
-            lblCantidadBulto.Visible = false;
-            nupCantidad.Value = 0;
-            nupCantidad.Enabled = false;
-            _productoElegidoActual = null;
-
-            // 5. Forzar actualización del totalizador para que vuelva a $0.00
-            ActualizarTotalizadorOc();
-        }
-
-        #region DGV PreOrdenCompra Configuración y Eventos
-
-        /// <summary>
-        /// Escucha los clics en la grilla inferior, específicamente para eliminar un producto del carrito.
-        /// </summary>
-        private void dgvPreOrdenCompra_CellContentClick(object sender, DataGridViewCellEventArgs e)
-        {
-            if (e.RowIndex >= 0 && dgvPreOrdenCompra.Columns[e.ColumnIndex].Name == "colEliminar")
-            {
-                var detalle = (OrdenCompraDetalleDTO)dgvPreOrdenCompra.Rows[e.RowIndex].DataBoundItem;
-                _detallesPreOrden.Remove(detalle);
-
-                ReordenarNumerosDeRenglon();
-                ActualizarTotalizadorOc();
-
-                // Si eliminó el último ítem, se vuelve a permitir el cambio de proveedor
-                if (_detallesPreOrden.Count == 0)
-                {
-                    cxbNombreProveedor.Enabled = true;
-                }
+                this.Close();
             }
         }
 
@@ -475,9 +361,20 @@ namespace UI.GestionCompra
             lblSubtotal.Text = $"Total Estimado: {total:C2}";
         }
 
-        #endregion
+        private void dgvPreOrdenCompra_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+
+            if (e.RowIndex >= 0 && dgvPreOrdenCompra.Columns[e.ColumnIndex].Name == "colEliminar")
+            {
+                var detalle = (OrdenCompraDetalleDTO)dgvPreOrdenCompra.Rows[e.RowIndex].DataBoundItem;
+                _detallesPreOrden.Remove(detalle);
+
+                ReordenarNumerosDeRenglon();
+                ActualizarTotalizadorOc();
+
+            }
+        }
+
+       
     }
-
 }
-
-

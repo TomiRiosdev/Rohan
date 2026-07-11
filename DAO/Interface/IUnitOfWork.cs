@@ -1,4 +1,5 @@
-﻿using DAO.Interface.GestionCompra;
+﻿using DAO.Interface.GestionAuditoria;
+using DAO.Interface.GestionCompra;
 using DAO.Interface.GestionProducto;
 using DAO.Interface.GestionProveedor;
 using DAO.Interface.GestionStock;
@@ -24,6 +25,7 @@ namespace DAO.Interface
         ITipoMovimientoRepository TipoMovimientoRepository { get; }
         IOrdenCompraRepository OrdenCompraRepository { get; }
         ICompraSolicitudQueryRepository CompraSolicitudQueryRepository { get; }
+        IAuditoriaRepository AuditoriaRepository { get; }
 
         // Método para guardar los cambios en la base de datos
 

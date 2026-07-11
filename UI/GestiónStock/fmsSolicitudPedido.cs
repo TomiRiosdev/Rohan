@@ -88,7 +88,6 @@ namespace UI.GestiónStock
                 }
             }
         }
-
         private void LimpiarCamposCargaManual()
         {
             _productoSeleccionado = null;
@@ -97,7 +96,6 @@ namespace UI.GestiónStock
             numCantidadBultos.Value = 1;
             ActualizarLabelUnidadesSueltas();
         }
-
         private void btnAgregar_Click(object sender, EventArgs e)
         {
             if (_productoSeleccionado == null)

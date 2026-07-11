@@ -11,7 +11,7 @@ namespace BLL.Enum
     {
         IngresoManual = 1,
         IngresoPorCompra = 2,
-        EgresoPorVenta = 3,
+        EgresoManual = 3,
         EgresoPorMerma = 4,
         Transferencia = 5
     }

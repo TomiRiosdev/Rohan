@@ -1,6 +1,9 @@
 ﻿using BLL.DomainDtos;
 using BLL.GestiónProducto.Facade;
 using System.Data;
+using System.Globalization;
+using System.Text;
+using System.Linq;
 
 
 namespace UI.GestiónStock
@@ -32,6 +35,8 @@ namespace UI.GestiónStock
             ConfigurarDgv();
             CargarProductosOriginales();
         }
+
+        #region Metodos Privados
         private void ConfigurarFiltrosIniciales()
         {
             cboBuscarPor.Items.Clear();
@@ -39,9 +44,6 @@ namespace UI.GestiónStock
             cboBuscarPor.Items.Add("SKU");
             cboBuscarPor.SelectedIndex = 0;
         }
-
-        #region Configuración y Carga
-
         private void ConfigurarDgv()
         {
             dgvProductos.AutoGenerateColumns = false;
@@ -72,33 +74,37 @@ namespace UI.GestiónStock
                 MessageBox.Show("Error al listar productos en el catálogo: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-
-        #endregion
-
-        #region Lógica del Buscador Integrado (Doble Criterio)
-
         private void FiltrarProductos()
         {
             try
             {
 
-                var todos = _productoFacade.ListarProductosActivos().ToList();
+                string busqueda = NormalizarTexto(txtBusqueda.Text.ToLower());
                 string criterio = cboBuscarPor.Text;
+
                 IEnumerable<ProductoDTO> resultados;
 
-
-                switch (criterio)
+                if (string.IsNullOrWhiteSpace(busqueda))
                 {
-                    case "Nombre":
-                        resultados = todos.Where(p => p.Nombre.ToLower().Contains(txtBusqueda.Text.ToLower()));
-                        break;
-                    case "SKU":
-                        resultados = todos.Where(p => p.CodigoSku.ToString().Contains(txtBusqueda.Text));
-                        break;
+                    resultados = _productosDto;
+                }
+                else
+                {
 
-                    default:
-                        resultados = _productosDto;
-                        break;
+
+                    switch (criterio)
+                    {
+                        case "Nombre":
+                            resultados = _productosDto.Where(p => p.Nombre.ToLower().Contains(txtBusqueda.Text.ToLower()));
+                            break;
+                        case "SKU":
+                            resultados = _productosDto.Where(p => p.CodigoSku.ToString().Contains(txtBusqueda.Text));
+                            break;
+
+                        default:
+                            resultados = _productosDto;
+                            break;
+                    }
                 }
 
                 dgvProductos.DataSource = resultados.ToList();
@@ -108,23 +114,30 @@ namespace UI.GestiónStock
                 MessageBox.Show("Error al filtrar: " + ex.Message);
             }
         }
+        private string NormalizarTexto(string texto)
+        {
+            if (string.IsNullOrEmpty(texto)) return texto;
 
+            string textoNormalizado = texto.Normalize(NormalizationForm.FormD);
 
+            // Filtra y elimina todos los caracteres que son marcas de tilde/acento
+            var chars = textoNormalizado.Where(c => CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark);
 
+            return new string(chars.ToArray()).Normalize(NormalizationForm.FormC);
+        }
+        #endregion
+
+        #region Eventos de Controles
         private void cboBuscarPor_SelectedIndexChanged(object sender, EventArgs e)
         {
             txtBusqueda.Clear();
             txtBusqueda.Focus();
 
             if (cboBuscarPor.Text == "Nombre")
-                txtBusqueda.PlaceholderText = "Escriba el nombre del panificado...";
+                txtBusqueda.PlaceholderText = "Escriba el nombre del proucto...";
             else
                 txtBusqueda.PlaceholderText = "Escriba el código SKU...";
         }
-
-        #endregion
-
-        #region Evento de Confirmación y Cierre
         private void dgvProductos_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex >= 0 && dgvProductos.CurrentRow?.DataBoundItem is ProductoDTO prod)
@@ -134,18 +147,15 @@ namespace UI.GestiónStock
                 this.Close();
             }
         }
-
-        #endregion
-
-
-        private void btnBuscar_Click_1(object sender, EventArgs e)
-        {
-            FiltrarProductos();
-        }
-
         private void btnCerrar_Click(object sender, EventArgs e)
         {
             this.Close();
         }
+        private void txtBusqueda_TextChanged(object sender, EventArgs e)
+        {
+            FiltrarProductos();
+        }
+
+        #endregion
     }
 }

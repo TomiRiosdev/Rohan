@@ -1,4 +1,4 @@
-﻿using BLL.Bitacora.Interface;
+﻿using BLL.GestionAuditoria.Interface;
 using BLL.GestiónProducto.Exceptions;
 using BLL.GestiónProducto.Interface;
 using BLL.GestiónProducto.Mapper;

@@ -108,8 +108,6 @@ namespace UI.GestiónProveedor
 
         #endregion
 
-
-
         #region Eventos de Botones
         private void btnBuscar_Click(object sender, EventArgs e)
         {
@@ -228,8 +226,8 @@ namespace UI.GestiónProveedor
 
                 try
                 {
-                    // TODO: Crear en tu IProductoProveedorService un método para actualizar este flag
-                    // _prodProvFacade.ActualizarProveedorPrincipal(asignacionModificada.IdProductoProveedor, asignacionModificada.EsProveedorPrincipal);
+                   
+                     _prodProvFacade.EstablecerProveedorPrincipal(asignacionModificada.IdProducto, asignacionModificada.IdProveedor);
                 }
                 catch (Exception ex)
                 {

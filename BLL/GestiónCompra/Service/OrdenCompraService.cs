@@ -24,52 +24,81 @@ namespace BLL.GestiónCompra.Service
             _uow = uow ?? throw new ArgumentNullException(nameof(uow));
         }
 
-        #region  Altas 
+        #region  CRUD 
 
         public void GenerarOrdenCompra(OrdenCompraDTO dto)
         {
-            //Validación Sintáctica Estricta 
+            // 1. Validación Sintáctica Estricta del Contrato
             ValidarDto(dto);
 
             try
             {
-                // Validaciones Lógicas / Reglas de Negocio
-                var proveedor = _uow.ProveedorRepository.GetById(dto.IdProveedor ?? Guid.Empty);
-                if (proveedor == null)
-                    throw new ReglaNegocioComprasException("El proveedor seleccionado no existe en el sistema.");
+                // 2. Validaciones Lógicas Básicas
+                if (dto.IdSucursal == null || dto.IdSucursal == Guid.Empty)
+                    throw new ReglaNegocioComprasException("No se especificó la sucursal de destino de la Orden de Compra.");
 
-                //  Preparación de Datos Comerciales
+                if (dto.IdUsuario == null || dto.IdUsuario == Guid.Empty)
+                    throw new ReglaNegocioComprasException("No se especificó el usuario responsable de la operación.");
+
+                if (!dto.Detalles.Any())
+                    throw new ReglaNegocioComprasException("La orden de compra no contiene productos.");
+
+                // 3. Construcción del Grafo Principal (Maestro)
                 Guid idOcNuevo = Guid.NewGuid();
-                dto.IdOrdenCompra = idOcNuevo;
-                dto.FechaOc = DateTime.Now;
-                dto.IdEstadoOc = 1; // Pendiente de Recepción (Emitida)
 
-                // Calcular Correlativo Secuencial Único
-                int ultimoNro = _uow.OrdenCompraRepository.ObtenerUltimoNumeroOc();
-                dto.NroOrdenCompra = ultimoNro + 1;
+                var nuevaOc = new OrdenCompra
+                {
+                    IdOrdenCompra = idOcNuevo,
+                    IdSucursal = dto.IdSucursal.Value,
+                    IdProveedor = dto.IdProveedor.Value,
+                    IdUsuario = dto.IdUsuario.Value,
+                    IdEstadoOc = 1, // 1 = Pendiente 
+                    FechaOc = DateTime.Now,
+                    NroSolicitud = CodigoGenerador.GenerarNumeroOcUnicoNumerico(),
+                    CostoTotal = dto.CostoTotal, // Magia de tu DTO calculado
+                    OrdenCompraDetalle = new List<OrdenCompraDetalle>()
+                };
 
-                // Mapeo a Entidad Física (El mapper inyecta los detalles y sus vínculos automáticamente)
-                OrdenCompra entity = dto.ToEntity(idOcNuevo);
+                // 4. Mapeo de Renglones (Detalles)
+                foreach (var detDto in dto.Detalles)
+                {
+                    var ocDetalle = new OrdenCompraDetalle
+                    {
+                        IdOrdenCompraDetalle = Guid.NewGuid(),
+                        IdOrdenCompra = idOcNuevo,
+                        IdProducto = detDto.IdProducto,
+                        CantidadPedida = detDto.CantidadPedida,
+                        CantidadRecibida = 0,
+                        PrecioPactado = detDto.PrecioPactado,
+                        Renglon = detDto.Renglon,
+                        IdProductoNavigation = null,
+                        VinculoSolicitudOc = new List<VinculoSolicitudOc>()
+                    };
 
-                //  Persistencia Atómica
-                _uow.OrdenCompraRepository.Add(entity);
+                    nuevaOc.OrdenCompraDetalle.Add(ocDetalle);
+                }
+
+                // 5. Persistencia Atómica a través del UoW
+                _uow.OrdenCompraRepository.Add(nuevaOc); 
                 _uow.SaveChanges();
+
+                
             }
             catch (RohanComprasException)
             {
-                throw; // Dejamos pasar las nuestras directas a la UI
+                throw; // Dejamos pasar excepciones de negocio a la UI
             }
             catch (Exception ex)
             {
-                throw new ComprasDomainException("Error crítico en la infraestructura de la DAL al intentar registrar la Orden de Compra.", ex);
+                throw new ComprasDomainException("Error crítico en la capa de datos al registrar la nueva Orden de Compra Manual.", ex);
             }
         }
-
+        
         public void ModificarEstadoOc(Guid idOc, int nuevoEstadoId)
         {
             try
             {
-                var oc = _uow.OrdenCompraRepository.GetById(idOc);
+                var oc = _uow.OrdenCompraRepository.GetById(idOc, incluirDetalles: true);
                 if (oc == null)
                     throw new ReglaNegocioComprasException("No se encontró la Orden de Compra solicitada.");
 
@@ -92,7 +121,7 @@ namespace BLL.GestiónCompra.Service
         {
             try
             {
-                var oc = _uow.OrdenCompraRepository.GetById(idOc);
+                var oc = _uow.OrdenCompraRepository.GetById(idOc, incluirDetalles: true);
                 if (oc == null)
                     throw new ReglaNegocioComprasException("La Orden de Compra que intenta cancelar no existe.");
 
@@ -108,6 +137,54 @@ namespace BLL.GestiónCompra.Service
             catch (Exception ex)
             {
                 throw new ComprasDomainException("Error al procesar la cancelación de la Orden de Compra.", ex);
+            }
+        }
+      
+        public void ActualizarOrdenCompra(OrdenCompraDTO Oc)
+        {
+            ValidarDto(Oc); 
+
+            try
+            {
+                // 1. Buscamos la OC Original con sus detalles actuales en la base de datos
+                var ocDb = _uow.OrdenCompraRepository.GetById(Oc.IdOrdenCompra, incluirDetalles: true);
+                if (ocDb == null) throw new ReglaNegocioComprasException("No se encontró la Orden de Compra.");
+
+                if (ocDb.IdEstadoOc != 1) // 1 = Pendiente
+                    throw new ReglaNegocioComprasException("Solo se pueden modificar Órdenes de Compra en estado Pendiente.");
+
+                // 2. Actualizamos cabecera 
+                ocDb.CostoTotal = Oc.CostoTotal;
+                ocDb.IdUsuario = Oc.IdUsuario.Value;
+
+                // 3. ELIMINAMOS los detalles viejos 
+                _uow.OrdenCompraRepository.RemoveDetalle(ocDb.OrdenCompraDetalle);
+                ocDb.OrdenCompraDetalle.Clear();
+
+                // 4. INSERTAMOS los detalles nuevos/modificados desde el DTO
+                int nroRenglon = 1;
+                foreach (var detDto in Oc.Detalles)
+                {
+                    ocDb.OrdenCompraDetalle.Add(new OrdenCompraDetalle
+                    {
+                        IdOrdenCompraDetalle = Guid.NewGuid(),
+                        IdOrdenCompra = ocDb.IdOrdenCompra,
+                        IdProducto = detDto.IdProducto,
+                        CantidadPedida = detDto.CantidadPedida,
+                        CantidadRecibida = 0,
+                        PrecioPactado = detDto.PrecioPactado,
+                        Renglon = nroRenglon++
+                    });
+                }
+
+                // 5. Persistencia Atómica
+                _uow.OrdenCompraRepository.Update(ocDb);
+                _uow.SaveChanges();
+            }
+            catch (RohanComprasException) { throw; }
+            catch (Exception ex)
+            {
+                throw new ComprasDomainException("Error crítico al actualizar la Orden de Compra.", ex);
             }
         }
 
@@ -206,6 +283,8 @@ namespace BLL.GestiónCompra.Service
                         decimal precioPactadoInicial = item.Item3;
                         int cantidadPedida = item.Item1.Cantidad ?? 0;
 
+                        var producto = _uow.ProductoRepository.GetById(item.Item1.IdProducto.Value);
+
                         Guid idDetalleNuevo = Guid.NewGuid();
 
                         var ocDetalle = new OrdenCompraDetalle
@@ -255,6 +334,8 @@ namespace BLL.GestiónCompra.Service
                 // 5. Cambiamos el estado de la Solicitud Madre
                 sol.IdEstadoSolicitud = 2; // 2 = Aprobada (Procesada)
                 _uow.SaveChanges();
+
+                
             }
             catch (RohanComprasException) { throw; }
             catch (Exception ex)
@@ -271,7 +352,7 @@ namespace BLL.GestiónCompra.Service
         {
             try
             {
-                var entity = _uow.OrdenCompraRepository.GetById(idOc);
+                var entity = _uow.OrdenCompraRepository.GetById(idOc, incluirDetalles: true);
                 return entity.ToDTO();
             }
             catch (Exception ex)
@@ -336,55 +417,60 @@ namespace BLL.GestiónCompra.Service
 
         #region Documentación Física (Bloc de Notas)
 
-        public void ExportarOcABlocDeNotas(Guid idOc, string rutaDirectorio)
+        public void ExportarOcABlocDeNotas(OrdenCompraDTO ocDto, string rutaDirectorio)
         {
             try
             {
-                var oc = _uow.OrdenCompraRepository.GetById(idOc);
-                if (oc == null) throw new Exception("No existe el documento para exportar.");
+                if (ocDto == null || ocDto.Detalles == null || !ocDto.Detalles.Any())
+                    throw new Exception("El DTO de la orden de compra está vacío o incompleto.");
 
                 // Validamos o creamos el directorio
                 if (!Directory.Exists(rutaDirectorio))
                     Directory.CreateDirectory(rutaDirectorio);
 
-                string nombreArchivo = $"OC_{oc.NroSolicitud:D6}.txt"; // Ej: OC_000005.txt
+                // Usamos el número de la OC del DTO
+                string nombreArchivo = $"OC_{ocDto.NroOrdenCompra:D6}.txt";
                 string rutaCompleta = Path.Combine(rutaDirectorio, nombreArchivo);
 
                 using (StreamWriter writer = new StreamWriter(rutaCompleta, false, System.Text.Encoding.UTF8))
                 {
                     writer.WriteLine("=======================================================================");
-                    writer.WriteLine($"        ORDEN DE COMPRA - SISTEMA DE GESTIÓN ROHAN (N° OC-{oc.NroSolicitud:D6})");
+                    writer.WriteLine($"        ORDEN DE COMPRA - SISTEMA DE GESTIÓN ROHAN (N° OC-{ocDto.NroOrdenCompra:D6})");
                     writer.WriteLine("=======================================================================");
-                    writer.WriteLine($"Fecha de Emisión: {oc.FechaOc:dd/MM/yyyy HH:mm}");
-                    writer.WriteLine($"Estado Actual   : {oc.IdEstadoSolicitudNavigation?.Descripcion ?? "Pendiente"}");
+                    writer.WriteLine($"Fecha de Emisión: {ocDto.FechaOc:dd/MM/yyyy HH:mm}");
+                    writer.WriteLine($"Estado Actual   : Pendiente de Recepción");
                     writer.WriteLine("-----------------------------------------------------------------------");
                     writer.WriteLine("DATOS DEL PROVEEDOR:");
-                    writer.WriteLine($"Razón Social: {oc.IdProveedorNavigation?.RazonSocial}");
-                    writer.WriteLine($"CUIT        : {oc.IdProveedorNavigation?.Cuit}");
-                    writer.WriteLine($"Teléfono    : {oc.IdProveedorNavigation?.Telefono ?? "S/D"}");
+                    // Como usamos el DTO, estos datos ya vienen en texto plano, sin riesgo de nulos por EF
+                    writer.WriteLine($"Razón Social: {ocDto.RazonSocialProveedor}");
+                    writer.WriteLine($"CUIT        : {ocDto.CuitProveedor}");
                     writer.WriteLine("=======================================================================");
-                    writer.WriteLine(string.Format("| {0,-4} | {1,-8} | {2,-30} | {3,-10} | {4,-10} |", "REN", "SKU", "PRODUCTO", "CANT.BULT", "PREC.PACT"));
+                    writer.WriteLine(string.Format("| {0,-4} | {1,-8} | {2,-30} | {3,-10} | {4,-10} |", "REN", "SKU", "PRODUCTO", "CANT.PED", "PREC.PACT"));
                     writer.WriteLine("-----------------------------------------------------------------------");
 
-                    foreach (var det in oc.OrdenCompraDetalle.OrderBy(d => d.Renglon))
+                    foreach (var det in ocDto.Detalles.OrderBy(d => d.Renglon))
                     {
+                        string nombreProdCorto = det.ProductoNombre.Length > 30
+                            ? det.ProductoNombre.Substring(0, 27) + "..."
+                            : det.ProductoNombre;
+
                         writer.WriteLine(string.Format("| {0,-4} | {1,-8} | {2,-30} | {3,-10} | ${4,-9:F2} |",
                             det.Renglon,
-                            det.IdProductoNavigation?.CodigoSku ?? 0,
-                            det.IdProductoNavigation?.Nombre.Length > 30 ? det.IdProductoNavigation.Nombre.Substring(0, 27) + "..." : det.IdProductoNavigation?.Nombre,
+                            det.CodigoSku,
+                            nombreProdCorto,
                             det.CantidadPedida,
-                            det.PrecioPactado ?? 0));
+                            det.PrecioPactado));
                     }
 
                     writer.WriteLine("=======================================================================");
-                    writer.WriteLine(string.Format("COSTO TOTAL DE LA ORDEN: ${0:F2}", oc.CostoTotal ?? 0));
+                    writer.WriteLine(string.Format("COSTO TOTAL DE LA ORDEN: ${0:F2}", ocDto.CostoTotal));
                     writer.WriteLine("=======================================================================");
                     writer.WriteLine("Documento oficial generado de forma automática por el departamento de Compras.");
                 }
             }
             catch (Exception ex)
             {
-                throw new ComprasDomainException("Error de I/O al intentar escribir el archivo físico de la Orden de Compra.", ex);
+                throw new Exception("Error de I/O al intentar escribir el archivo físico de la Orden de Compra.", ex);
             }
         }
 
@@ -497,7 +583,7 @@ namespace BLL.GestiónCompra.Service
                 throw new ComprasDomainException($"Fallo crítico en la capa de negocio al procesar la auditoría del historial de Órdenes de Compra para la sucursal {idSucursal}.", ex);
             }
         }
-
+  
         #endregion
     }
 }

@@ -127,9 +127,126 @@ namespace BLL.GestiónStock
         /// <summary>
         /// Registra el ingreso masivo de mercadería asociado a un documento comercial (Orden de Compra / Remito).
         /// </summary>
-        public void RegistrarStockPorOc(Guid idProducto, int cantidadComprada, decimal costoPactado, string nroRemitoOc, Guid idSucursal)
+        public  void RegistrarIngresoPorOrdenCompra(Guid idOrdenCompra, Guid idSucursal, string usuarioNombre, List<RecepcionMercaderiaDTO> detalleRecepcion)
         {
-            throw new NotImplementedException("Próximo módulo: Se implementará en la integración con el subsistema de compras.");
+            try
+            {
+                // 1. Validaciones Defensivas
+                if (idOrdenCompra == Guid.Empty)
+                    throw new StockValidationException("El identificador de la Orden de Compra es requerido.");
+
+                if (idSucursal == Guid.Empty)
+                    throw new StockValidationException("El contexto de la sucursal es inválido.");
+
+                if (detalleRecepcion == null || !detalleRecepcion.Any())
+                    throw new StockValidationException("Debe enviar al menos un artículo para registrar el ingreso.");
+
+                // 2. Recuperación del grafo de la BD
+                var ordenCompra = _uow.OrdenCompraRepository.GetById(idOrdenCompra, incluirDetalles: true);
+
+                if (ordenCompra == null)
+                    throw new StockValidationException($"No se encontró la Orden de Compra (ID: {idOrdenCompra}).");
+
+                if (ordenCompra.IdSucursal != idSucursal)
+                    throw new StockValidationException("La Orden de Compra no pertenece a esta sucursal.");
+
+                //  4 es Finalizada. Si ya está en 4, bloquea.
+                if (ordenCompra.IdEstadoOc == 4)
+                    throw new StockValidationException("Esta Orden de Compra ya fue finalizada y no admite nuevos ingresos.");
+
+                // 3. Iteración cruzada: BD vs Datos de la UI
+                int totalPedidoOriginal = 0;
+                int totalRealIngresado = 0;
+
+                foreach (var detalleBd in ordenCompra.OrdenCompraDetalle)
+                {
+                    totalPedidoOriginal += detalleBd.CantidadPedida ?? 0;
+
+                    // Buscamos lo que el usuario tipeó en la grilla para este renglón exacto
+                    var ingresoUi = detalleRecepcion.FirstOrDefault(d => d.IdOrdenCompraDetalle == detalleBd.IdOrdenCompraDetalle);
+
+                    // Si el usuario indicó que llegó mercadería (> 0)
+                    if (ingresoUi != null && ingresoUi.CantidadRealRecibida > 0)
+                    {
+                        int unidadesFisicasNetas = ingresoUi.CantidadRealRecibida * ingresoUi.UnidadesPorBulto;
+
+                        var productoMaestro = detalleBd.IdProductoNavigation;
+                        if (productoMaestro == null)
+                            throw new StockDomainException($"Falta navegación para el producto ID {detalleBd.IdProducto}.");
+
+                        // Cálculo de Vencimiento
+                        DateTime? fechaVencimientoCalculada = null;
+                        if (productoMaestro.DiasVidaUtil > 0)
+                        {
+                            fechaVencimientoCalculada = DateTime.Today.AddDays(productoMaestro.DiasVidaUtil ?? 0);
+                        }
+
+                        // 4. Creación del Lote Físico con la cantidad REAL recibida
+                        var nuevoLote = new Lote
+                        {
+                            IdLote = Guid.NewGuid(),
+                            IdProducto = detalleBd.IdProducto,
+                            IdSucursal = idSucursal,
+                            CantidadInicial = ingresoUi.CantidadRealRecibida,
+                            CantidadActual = ingresoUi.CantidadRealRecibida,
+                            CostoUnitario = detalleBd.PrecioPactado,
+                            FechaIngreso = DateTime.Now,
+                            NumeroLote = $"OC-{DateTime.Now:yyyyMMddHHmmss}-{ordenCompra.IdOrdenCompra.ToString().Substring(0, 4).ToUpper()}",
+                            FechaVencimiento = fechaVencimientoCalculada,
+                            IdOrdenCompraDetalle = detalleBd.IdOrdenCompraDetalle
+                        };
+
+                        _uow.LoteRepository.Add(nuevoLote);
+
+                        // 5. Motor de Auditoría
+                        string obsKardex = string.IsNullOrWhiteSpace(ingresoUi.Observaciones)
+                            ? $"Ingreso por OC. Lote: {nuevoLote.NumeroLote}"
+                            : $"OC: {ingresoUi.Observaciones} - Lote: {nuevoLote.NumeroLote}";
+
+                        _kardex.RegistrarMovimiento(
+                            idSucursal,
+                            nuevoLote,
+                            TipoMovimientoEnum.IngresoPorCompra,
+                            ingresoUi.CantidadRealRecibida,
+                            obsKardex,
+                            usuarioNombre
+                        );
+
+                        // Actualizar métricas del renglón en la BD
+                        detalleBd.CantidadRecibida += ingresoUi.CantidadRealRecibida;
+                        totalRealIngresado += detalleBd.CantidadRecibida ?? 0;
+                    }
+                }
+
+                // 6. Evaluación Automática de Estados
+                // Si ingresó todo lo que se pidió (o más), se cierra (Estado 4 = Finalizado)
+                if (totalRealIngresado >= totalPedidoOriginal)
+                {
+                    ordenCompra.IdEstadoOc = 4;
+                }
+                else
+                {
+                    // Si faltó mercadería, se marca como Parcial (Ej: Estado 5). 
+                    // Podés cambiar el '5' por el ID real que uses en tu diccionario para ingresos incompletos.
+                    ordenCompra.IdEstadoOc = 2;
+                }
+
+                _uow.OrdenCompraRepository.Update(ordenCompra);
+
+                // 7. Transacción Atómica a SQL
+                _uow.SaveChanges();
+            }
+            catch (RohanStockException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                var context = ExceptionContext.Crear(ex, new object[] { idOrdenCompra, idSucursal });
+                ExceptionLogger.Log(context);
+                throw new StockDomainException($"Error al orquestar el ingreso de la OC {idOrdenCompra}.", ex);
+            }
+
         }
 
         /// <summary>
@@ -226,6 +343,47 @@ namespace BLL.GestiónStock
                 throw new StockDomainException("Falla crítica al procesar la baja por merma sanitaria en el servidor.", ex);
             }
         }
+
+        public void RegistrarEgresoManualLote(Guid idLote, int cantidadADescontar, string observaciones, Guid idSucursal, string usuarioNombre)
+        {
+            try
+            {
+                if (cantidadADescontar <= 0)
+                    throw new StockValidationException("La cantidad a descontar debe ser mayor a cero.");
+
+                // 1. Recuperamos el lote físico
+                var loteDb = _uow.LoteRepository.GetById(idLote)
+                    ?? throw new StockDomainException("El lote seleccionado no existe o ya fue eliminado.");
+
+                // 2. Control Crítico de Stock Físico
+                if (cantidadADescontar > loteDb.CantidadActual)
+                    throw new StockValidationException($"Operación inválida. El lote dispone de {loteDb.CantidadActual} u. y se intentaron descontar {cantidadADescontar} u.");
+
+                // 3. Restamos las unidades del lote específico
+                loteDb.CantidadActual -= cantidadADescontar;
+                _uow.LoteRepository.Update(loteDb);
+
+                // 4. Auditoría y Kardex (¡La magia de tu arquitectura!)
+                string comentarioAuditoria = string.IsNullOrWhiteSpace(observaciones)
+                    ? $"Descuento manual de stock. Lote afectado: {loteDb.NumeroLote}"
+                    : observaciones;
+
+                // IMPORTANTE: Cambia 'EgresoManual' por el Enum exacto que tengas para bajas que NO son merma
+                _kardex.RegistrarMovimiento(idSucursal, loteDb, TipoMovimientoEnum.EgresoManual, cantidadADescontar, comentarioAuditoria, usuarioNombre);
+            }
+            catch (RohanStockException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                var context = ExceptionContext.Crear(ex, new object[] { idLote, cantidadADescontar, observaciones, idSucursal });
+                ExceptionLogger.Log(context);
+                throw new StockDomainException("Falla crítica al procesar el descuento manual de stock en el servidor.", ex);
+            }
+        }
+
+
 
         #endregion
     }

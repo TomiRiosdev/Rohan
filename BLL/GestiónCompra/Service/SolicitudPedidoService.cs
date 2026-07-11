@@ -113,7 +113,7 @@ namespace BLL.GestiónCompra.Service
             try
             {
                 // 1. Consumimos el consolidado de stock que ya tenés programado en tu módulo de Stock
-                var stockConsolidado = _uow.StockPorSucursalRepository.GetConsolidadoBySucursal(idSucursal);
+                var stockConsolidado = _uow.SolicitudPedidoRepository.ObtenerStockParaReposicionAutomatica(idSucursal);
 
                 var detallesSugeridos = new List<SolicitudPedidoDetalleDTO>();
                 int renglonContador = 1;

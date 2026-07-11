@@ -35,6 +35,7 @@
             dgvPreOrdenCompra = new DataGridView();
             btnGenerarOrdenCompra = new Button();
             btnCrear = new Button();
+            btnModificar = new Button();
             ((System.ComponentModel.ISupportInitialize)dgvDetalleOrdenCompra).BeginInit();
             ((System.ComponentModel.ISupportInitialize)dgvPreOrdenCompra).BeginInit();
             SuspendLayout();
@@ -43,9 +44,9 @@
             // 
             btnRechazar.BackColor = Color.Azure;
             btnRechazar.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnRechazar.Location = new Point(180, 353);
+            btnRechazar.Location = new Point(12, 356);
             btnRechazar.Name = "btnRechazar";
-            btnRechazar.Size = new Size(132, 67);
+            btnRechazar.Size = new Size(132, 49);
             btnRechazar.TabIndex = 29;
             btnRechazar.Text = "Rechazar ";
             btnRechazar.UseVisualStyleBackColor = false;
@@ -55,7 +56,7 @@
             // 
             lblDetalle.AutoSize = true;
             lblDetalle.Font = new Font("Segoe UI Semibold", 10F, FontStyle.Bold);
-            lblDetalle.Location = new Point(502, 39);
+            lblDetalle.Location = new Point(502, 12);
             lblDetalle.Name = "lblDetalle";
             lblDetalle.Size = new Size(119, 19);
             lblDetalle.TabIndex = 28;
@@ -65,7 +66,7 @@
             // 
             lblSolicitud.AutoSize = true;
             lblSolicitud.Font = new Font("Segoe UI Semibold", 10F, FontStyle.Bold);
-            lblSolicitud.Location = new Point(12, 39);
+            lblSolicitud.Location = new Point(12, 12);
             lblSolicitud.Name = "lblSolicitud";
             lblSolicitud.Size = new Size(144, 19);
             lblSolicitud.TabIndex = 27;
@@ -74,17 +75,17 @@
             // dgvDetalleOrdenCompra
             // 
             dgvDetalleOrdenCompra.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgvDetalleOrdenCompra.Location = new Point(502, 61);
+            dgvDetalleOrdenCompra.Location = new Point(502, 34);
             dgvDetalleOrdenCompra.Name = "dgvDetalleOrdenCompra";
-            dgvDetalleOrdenCompra.Size = new Size(642, 400);
+            dgvDetalleOrdenCompra.Size = new Size(642, 440);
             dgvDetalleOrdenCompra.TabIndex = 26;
             // 
             // dgvPreOrdenCompra
             // 
             dgvPreOrdenCompra.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgvPreOrdenCompra.Location = new Point(12, 61);
+            dgvPreOrdenCompra.Location = new Point(12, 34);
             dgvPreOrdenCompra.Name = "dgvPreOrdenCompra";
-            dgvPreOrdenCompra.Size = new Size(477, 266);
+            dgvPreOrdenCompra.Size = new Size(477, 306);
             dgvPreOrdenCompra.TabIndex = 25;
             dgvPreOrdenCompra.SelectionChanged += dgvPreOrdenCompra_SelectionChanged;
             // 
@@ -92,9 +93,9 @@
             // 
             btnGenerarOrdenCompra.BackColor = Color.Azure;
             btnGenerarOrdenCompra.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnGenerarOrdenCompra.Location = new Point(346, 353);
+            btnGenerarOrdenCompra.Location = new Point(178, 417);
             btnGenerarOrdenCompra.Name = "btnGenerarOrdenCompra";
-            btnGenerarOrdenCompra.Size = new Size(121, 67);
+            btnGenerarOrdenCompra.Size = new Size(132, 71);
             btnGenerarOrdenCompra.TabIndex = 24;
             btnGenerarOrdenCompra.Text = "Generar Orden";
             btnGenerarOrdenCompra.UseVisualStyleBackColor = false;
@@ -104,13 +105,25 @@
             // 
             btnCrear.BackColor = Color.Azure;
             btnCrear.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnCrear.Location = new Point(12, 353);
+            btnCrear.Location = new Point(178, 356);
             btnCrear.Name = "btnCrear";
-            btnCrear.Size = new Size(132, 67);
+            btnCrear.Size = new Size(132, 49);
             btnCrear.TabIndex = 30;
             btnCrear.Text = "Crear ";
             btnCrear.UseVisualStyleBackColor = false;
             btnCrear.Click += btnCrear_Click;
+            // 
+            // btnModificar
+            // 
+            btnModificar.BackColor = Color.Azure;
+            btnModificar.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            btnModificar.Location = new Point(357, 356);
+            btnModificar.Name = "btnModificar";
+            btnModificar.Size = new Size(132, 49);
+            btnModificar.TabIndex = 31;
+            btnModificar.Text = "Modificar";
+            btnModificar.UseVisualStyleBackColor = false;
+            btnModificar.Click += btnModificar_Click;
             // 
             // fmsCargarOrdenCompra
             // 
@@ -118,6 +131,7 @@
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.AliceBlue;
             ClientSize = new Size(1156, 500);
+            Controls.Add(btnModificar);
             Controls.Add(btnCrear);
             Controls.Add(btnRechazar);
             Controls.Add(lblDetalle);
@@ -143,5 +157,6 @@
         private DataGridView dgvPreOrdenCompra;
         private Button btnGenerarOrdenCompra;
         private Button btnCrear;
+        private Button btnModificar;
     }
 }

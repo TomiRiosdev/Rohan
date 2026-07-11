@@ -135,6 +135,7 @@ namespace Bootstrapper
             services.AddScoped<IMermaService, MermaService>();
             services.AddScoped<IKardexService, KardexService>();
             services.AddScoped<IFacade, StockFacade>();
+            services.AddTransient<StockFacade>();
 
             #endregion
 

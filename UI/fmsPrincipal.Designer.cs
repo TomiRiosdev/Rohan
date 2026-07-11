@@ -39,13 +39,14 @@
             lblAdministrador = new Label();
             panelContenedor = new Panel();
             btnGestionCompra = new Button();
+            btnBitacora = new Button();
             SuspendLayout();
             // 
             // btnGestionProducto
             // 
             btnGestionProducto.BackColor = Color.Azure;
             btnGestionProducto.Font = new Font("Segoe UI Semibold", 11.25F, FontStyle.Bold);
-            btnGestionProducto.Location = new Point(12, 393);
+            btnGestionProducto.Location = new Point(12, 224);
             btnGestionProducto.Name = "btnGestionProducto";
             btnGestionProducto.Size = new Size(93, 55);
             btnGestionProducto.TabIndex = 0;
@@ -57,7 +58,7 @@
             // 
             btnGestionProveedor.BackColor = Color.Azure;
             btnGestionProveedor.Font = new Font("Segoe UI Semibold", 11.25F, FontStyle.Bold);
-            btnGestionProveedor.Location = new Point(12, 466);
+            btnGestionProveedor.Location = new Point(12, 297);
             btnGestionProveedor.Name = "btnGestionProveedor";
             btnGestionProveedor.Size = new Size(93, 54);
             btnGestionProveedor.TabIndex = 1;
@@ -69,7 +70,7 @@
             // 
             btnGestionSucursal.BackColor = Color.Azure;
             btnGestionSucursal.Font = new Font("Segoe UI Semibold", 11.25F, FontStyle.Bold);
-            btnGestionSucursal.Location = new Point(12, 541);
+            btnGestionSucursal.Location = new Point(12, 372);
             btnGestionSucursal.Name = "btnGestionSucursal";
             btnGestionSucursal.Size = new Size(93, 49);
             btnGestionSucursal.TabIndex = 2;
@@ -81,7 +82,7 @@
             // 
             btnGestionUsuario.BackColor = Color.Azure;
             btnGestionUsuario.Font = new Font("Segoe UI Semibold", 11.25F, FontStyle.Bold);
-            btnGestionUsuario.Location = new Point(12, 615);
+            btnGestionUsuario.Location = new Point(12, 446);
             btnGestionUsuario.Name = "btnGestionUsuario";
             btnGestionUsuario.Size = new Size(93, 52);
             btnGestionUsuario.TabIndex = 3;
@@ -164,12 +165,25 @@
             btnGestionCompra.UseVisualStyleBackColor = false;
             btnGestionCompra.Click += btnGestionCompra_Click;
             // 
+            // btnBitacora
+            // 
+            btnBitacora.BackColor = Color.Azure;
+            btnBitacora.Font = new Font("Segoe UI Semibold", 11.25F, FontStyle.Bold);
+            btnBitacora.Location = new Point(12, 514);
+            btnBitacora.Name = "btnBitacora";
+            btnBitacora.Size = new Size(93, 55);
+            btnBitacora.TabIndex = 11;
+            btnBitacora.Text = "Bitácora";
+            btnBitacora.UseVisualStyleBackColor = false;
+            btnBitacora.Click += btnBitacora_Click;
+            // 
             // fmsPrincipal
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.AliceBlue;
             ClientSize = new Size(1327, 761);
+            Controls.Add(btnBitacora);
             Controls.Add(btnGestionCompra);
             Controls.Add(panelContenedor);
             Controls.Add(lblAdministrador);
@@ -201,5 +215,6 @@
         private Label lblAdministrador;
         private Panel panelContenedor;
         private Button btnGestionCompra;
+        private Button btnBitacora;
     }
 }

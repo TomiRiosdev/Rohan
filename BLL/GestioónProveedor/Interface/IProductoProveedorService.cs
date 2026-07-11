@@ -16,5 +16,7 @@ namespace BLL.GestiónProveedor.Interface
         // Consultas de listado cruzado para alimentar las Grillas Gemelas de la UI
         IEnumerable<ProductoProveedorDTO> ListarProductosPorProveedor(Guid idProveedor);
         IEnumerable<ProductoProveedorDTO> ListarProveedoresPorProducto(Guid idProducto);
+        void ActualizarPrecioUnitario(Guid idProducto, Guid idProveedor, decimal nuevoPrecioUnitario);
+        void EstablecerProveedorPrincipal(Guid idProducto, Guid idProveedor);   
     }
 }

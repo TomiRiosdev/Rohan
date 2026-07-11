@@ -100,40 +100,35 @@ namespace UI
             AbrirFormularioEnContenedor<fmsGestionCompra>();
         }
 
+        private void btnBitacora_Click(object sender, EventArgs e)
+        {
+  
+           AbrirFormularioEnContenedor<fmsBitacora>();
+        }
+
         private void AbrirFormularioEnContenedor<T>() where T : Form
         {
-            // 1. Si ya hay un formulario abierto, lo cerramos para liberar memoria RAM
+            //  Si ya hay un formulario abierto, lo cerramos para liberar memoria RAM
             if (formularioActivo != null)
             {
                 formularioActivo.Close();
             }
 
-            // 2. Pedimos la instancia del formulario al ServiceProvider (Inyección de Dependencias)
+            // Pedimos la instancia del formulario al ServiceProvider (Inyección de Dependencias)
             T formularioHijo = _serviceProvider.GetRequiredService<T>();
             formularioActivo = formularioHijo;
 
-            // 3. Configuraciones para que se comporte como un control común dentro del panel
+            // Configuraciones para que se comporte como un control común dentro del panel
             formularioHijo.TopLevel = false;
             formularioHijo.FormBorderStyle = FormBorderStyle.None;
 
             formularioHijo.Dock = DockStyle.Fill;
-            // Agregalo al panel de tu fmsPrincipal (reemplazá "panelContenedor" por el nombre de tu Panel)
+
             panelContenedor.Controls.Add(formularioHijo);
 
-            // 4. Lógica de centrado dinámico usando el tamaño de tu panel
-            //  formularioHijo.Location = new Point(
-            //      (panelContenedor.Width - formularioHijo.Width) / 2,
-            //      (panelContenedor.Height - formularioHijo.Height) / 2
-            //  );
-
-            // 5. Evitamos que se estire feo si se maximiza la pantalla principal
-            //   formularioHijo.Anchor = AnchorStyles.None;
-
-            formularioHijo.BringToFront(); // En C# es BringToFront(), ojo con el tipeo de la imagen
+            formularioHijo.BringToFront();
             formularioHijo.Show();
         }
-
-
 
     }
 }

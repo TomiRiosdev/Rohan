@@ -70,18 +70,19 @@
             // 
             btnCatalogoCosto.BackColor = Color.Azure;
             btnCatalogoCosto.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold);
-            btnCatalogoCosto.Location = new Point(278, 42);
+            btnCatalogoCosto.Location = new Point(232, 42);
             btnCatalogoCosto.Name = "btnCatalogoCosto";
             btnCatalogoCosto.Size = new Size(104, 49);
             btnCatalogoCosto.TabIndex = 24;
             btnCatalogoCosto.Text = "Catálogo y Costos";
             btnCatalogoCosto.UseVisualStyleBackColor = false;
+            btnCatalogoCosto.Click += btnCatalogoCosto_Click;
             // 
             // btnHistorialEstados
             // 
             btnHistorialEstados.BackColor = Color.Azure;
             btnHistorialEstados.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold);
-            btnHistorialEstados.Location = new Point(411, 42);
+            btnHistorialEstados.Location = new Point(342, 42);
             btnHistorialEstados.Name = "btnHistorialEstados";
             btnHistorialEstados.Size = new Size(104, 49);
             btnHistorialEstados.TabIndex = 23;
@@ -93,7 +94,7 @@
             // 
             btnCargaManualOC.BackColor = Color.Azure;
             btnCargaManualOC.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold);
-            btnCargaManualOC.Location = new Point(147, 42);
+            btnCargaManualOC.Location = new Point(122, 42);
             btnCargaManualOC.Name = "btnCargaManualOC";
             btnCargaManualOC.Size = new Size(104, 49);
             btnCargaManualOC.TabIndex = 22;

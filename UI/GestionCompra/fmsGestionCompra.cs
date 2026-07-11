@@ -35,32 +35,28 @@ namespace UI.GestionCompra
                 lblAlertaSolicitudes.Text = "⚠️ ATENCIÓN: Hay Solicitudes de Pedido pendientes de procesar.";
                 lblAlertaSolicitudes.ForeColor = Color.DarkRed;
                 lblAlertaSolicitudes.BackColor = Color.MistyRose;
-
-                // Opcional: Podés habilitar un pequeño icono de alerta al lado
-                //imgAlerta.Visible = true;
             }
             else
             {
                 lblAlertaSolicitudes.Text = "✅ No se registran solicitudes pendientes en el almacén.";
                 lblAlertaSolicitudes.ForeColor = Color.DarkGreen;
                 lblAlertaSolicitudes.BackColor = Color.Honeydew;
-                //imgAlerta.Visible = false;
+
             }
 
         }
-
+      
+        #region Botones de navegación
         private void btnSolicitud_Click(object sender, EventArgs e)
         {
             try
             {
 
                 var formSolicitudes = _serviceProvider.GetRequiredService<fmsSolicitudesPendientes>();
+                formSolicitudes.SolicitudProcesada += (s, args) => VerificarAlertasDeStock();
 
-                // Si en el futuro necesitas suscribirte a un evento del formulario (ej: avisarle a este padre que actualice el lbl de alertas)
-                // formSolicitudes.OnSolicitudProcesada += ActualizarCartelAlertaGeneral;
-
-                // Despachamos al contenedor general para que se dibuje a pantalla completa
                 AbrirFormInPanel(formSolicitudes);
+
             }
             catch (Exception ex)
             {
@@ -68,36 +64,7 @@ namespace UI.GestionCompra
                                 "Error Crítico de Carga", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-        private void AbrirFormInPanel(Form formHijo)
-        {
-            if (formHijo == null) return;
-
-            // 1. Limpieza de memoria RAM y desuscripción de eventos del formulario viejo
-            if (this.panelContenedor.Controls.Count > 0)
-            {
-                Form? formAnterior = this.panelContenedor.Controls[0] as Form;
-
-                // [Opcional]: Si tus pantallas de compras manejan eventos customizados, los desenganchás acá:
-                // if (formAnterior is fmsSolicitudesPendientes formSolViejo)
-                // {
-                //     formSolViejo.OnAlgúnEvento -= MiMétodoManejador;
-                // }
-
-                formAnterior?.Dispose();
-                this.panelContenedor.Controls.Clear();
-            }
-
-            // 2. Configuración para empotrar la ventana sin comportamiento flotante
-            formHijo.TopLevel = false;
-            formHijo.FormBorderStyle = FormBorderStyle.None;
-            formHijo.Dock = DockStyle.Fill; // 🚀 Clave para que use el 100% del recuadro gris
-
-            // 3. Inyección en el control visual y renderizado
-            this.panelContenedor.Controls.Add(formHijo);
-            this.panelContenedor.Tag = formHijo;
-            formHijo.Show();
-        }
-
+   
         private void btnCargaManualOC_Click(object sender, EventArgs e)
         {
             try
@@ -118,12 +85,52 @@ namespace UI.GestionCompra
             try
             {
 
-                var formHistorial= _serviceProvider.GetRequiredService<fmsHistorialOrdenCompra>();
+                var formHistorial = _serviceProvider.GetRequiredService<fmsHistorialOrdenCompra>();
                 AbrirFormInPanel(formHistorial);
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Error de infraestructura al inicializar la pantalla del historial de órdenes de compra: {ex.Message}",
+                                "Error Crítico de Carga", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        #endregion
+        private void AbrirFormInPanel(Form formHijo)
+        {
+            if (formHijo == null) return;
+
+            // 1. Limpieza de memoria RAM y desuscripción de eventos del formulario viejo
+            if (this.panelContenedor.Controls.Count > 0)
+            {
+                Form? formAnterior = this.panelContenedor.Controls[0] as Form;
+
+                formAnterior?.Dispose();
+                this.panelContenedor.Controls.Clear();
+            }
+
+            // 2. Configuración para empotrar la ventana sin comportamiento flotante
+            formHijo.TopLevel = false;
+            formHijo.FormBorderStyle = FormBorderStyle.None;
+            formHijo.Dock = DockStyle.Fill; 
+
+            // 3. Inyección en el control visual y renderizado
+            this.panelContenedor.Controls.Add(formHijo);
+            this.panelContenedor.Tag = formHijo;
+            formHijo.Show();
+        }
+
+        private void btnCatalogoCosto_Click(object sender, EventArgs e)
+        {
+            try
+            {
+
+                var formCatalogo = _serviceProvider.GetRequiredService<fmsCatalogoCostoProducto>();
+                AbrirFormInPanel(formCatalogo);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error de infraestructura al inicializar la pantalla de catálogo de costos: {ex.Message}",
                                 "Error Crítico de Carga", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }

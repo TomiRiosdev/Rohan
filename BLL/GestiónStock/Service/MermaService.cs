@@ -67,7 +67,7 @@ namespace BLL.GestiónStock
                 {
                     if (!lote.FechaIngreso.HasValue) continue;
 
-                    // 💡 Nota Logística: Al agregar FechaVencimiento en tu Lote, reemplazar esta simulación por 'lote.FechaVencimiento.Value'
+                    //  Nota Logística: Al agregar FechaVencimiento en tu Lote, reemplazar esta simulación por 'lote.FechaVencimiento.Value'
                     DateTime fechaVence = lote.FechaIngreso.Value.AddMonths(6).Date;
                     int cantidadLote = lote.CantidadActual ?? 0;
 

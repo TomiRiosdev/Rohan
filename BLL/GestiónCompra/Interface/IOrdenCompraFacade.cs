@@ -10,10 +10,11 @@ namespace BLL.GestiónCompra.Interface
     public interface IOrdenCompraFacade
     {
         // Escrituras 
-        void RegistrarNuevaOrdenCompra(OrdenCompraDTO dto);
+        void RegistrarNuevaOrdenCompra(OrdenCompraDTO Oc);
         void CambiarEstado(Guid idOc, int nuevoEstadoId);
         void DarDeBajaOrdenCompra(Guid idOc);
         void EjecutarGeneracionAutomatica(Guid idSucursal, Guid idSolicitud);
+        void ActualizarOrdenCompra(OrdenCompraDTO Oc);
 
         // Lecturas y Filtros para Grillas / Combos
         OrdenCompraDTO BuscarPorId(Guid idOc);

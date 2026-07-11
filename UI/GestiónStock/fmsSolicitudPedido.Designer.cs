@@ -143,6 +143,7 @@
             // 
             txtProductoNombre.Location = new Point(110, 27);
             txtProductoNombre.Name = "txtProductoNombre";
+            txtProductoNombre.ReadOnly = true;
             txtProductoNombre.Size = new Size(195, 27);
             txtProductoNombre.TabIndex = 37;
             // 
@@ -150,6 +151,7 @@
             // 
             txtSKU.Location = new Point(149, 79);
             txtSKU.Name = "txtSKU";
+            txtSKU.ReadOnly = true;
             txtSKU.Size = new Size(156, 27);
             txtSKU.TabIndex = 38;
             // 
@@ -191,7 +193,7 @@
             lblCargaAutomatica.AutoEllipsis = true;
             lblCargaAutomatica.AutoSize = true;
             lblCargaAutomatica.Font = new Font("Segoe UI Semibold", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            lblCargaAutomatica.Location = new Point(14, 33);
+            lblCargaAutomatica.Location = new Point(12, 33);
             lblCargaAutomatica.Name = "lblCargaAutomatica";
             lblCargaAutomatica.Size = new Size(214, 20);
             lblCargaAutomatica.TabIndex = 42;

@@ -6,9 +6,10 @@ namespace BLL.GestiónStock.Interface
     {
         // OPERACIONES DE STOCK CORE (Hacia StockService)
             void RegistrarStockManual(StockPorSucursalDTO stockDto, Guid idSucursal, string usuarioNombre);
-            void RegistrarStockPorOc(Guid idProducto, int cantidadComprada, decimal costoPactado, string nroRemitoOc, Guid idSucursal);
+            void RegistrarIngresoPorOrdenCompra(Guid idOrdenCompra, Guid idSucursal, string usuarioNombre, List<RecepcionMercaderiaDTO> detalleRecepcion);
             void RegistrarMermaLote(Guid idLote, int cantidadABajar, string observaciones, Guid idSucursal);
             IEnumerable<StockPorSucursalDTO> ObtenerConsolidadoPorSucursal(Guid idSucursal);
+            void RegistrarEgresoManualLote(Guid idLote, int cantidadADescontar, string observaciones, Guid idSucursal, string usuarioNombre);
 
             // TABLERO OPERATIVO Y LOGÍSTICA SANITARIA (Hacia MermaService)
             ConfiguracionAlertasDTO ObtenerAlertasPorProducto(Guid idProducto);

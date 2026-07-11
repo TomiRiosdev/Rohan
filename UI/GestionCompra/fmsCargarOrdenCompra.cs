@@ -1,5 +1,6 @@
 ﻿using BLL.DomainDtos;
 using BLL.GestiónCompra.Facade;
+using BLL.GestiónProveedor.Facade;
 using Microsoft.Extensions.DependencyInjection;
 using Service.Facade;
 using System;
@@ -8,19 +9,29 @@ namespace UI.GestionCompra
 {
     public partial class fmsCargarOrdenCompra : Form
     {
+        private readonly ProductoProveedorFacade _prodProvFacade;
+        private readonly OrdenCompraFacade _ordenCompraFacade;
+        private readonly ProveedorFacade _proveedorFacade;
+
         private readonly OrdenCompraFacade _comprasFacade;
         private readonly IServiceProvider _serviceProvider;
         private List<OrdenCompraDTO> _preOrdenesLocales;
 
+
         public fmsCargarOrdenCompra
         (
             OrdenCompraFacade comprasFacade,
+            ProductoProveedorFacade prodProvFacade,
+            ProveedorFacade proveedorFacade,
             IServiceProvider serviceProvider
         )
         {
             InitializeComponent();
-            _comprasFacade = comprasFacade ?? throw new ArgumentNullException(nameof(comprasFacade));
+            _ordenCompraFacade = comprasFacade ?? throw new ArgumentNullException(nameof(comprasFacade));
+            _prodProvFacade = prodProvFacade ?? throw new ArgumentNullException(nameof(prodProvFacade));
+            _proveedorFacade = proveedorFacade ?? throw new ArgumentNullException(nameof(proveedorFacade));
             _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+
         }
 
         private void fmsCargarOrdenCompra_Load(object sender, EventArgs e)
@@ -28,8 +39,6 @@ namespace UI.GestionCompra
             ConfigurarVistasDeGrillas();
             ActualizarPantallaCompleta();
         }
-     
-        
 
         private void btnCrear_Click(object sender, EventArgs e)
         {
@@ -37,15 +46,20 @@ namespace UI.GestionCompra
             {
                 if (formManual.ShowDialog() == DialogResult.OK)
                 {
+                    formManual.OnOrdenCreada += (s, args) =>
+                    {
+                        // Reemplaza esto con el nombre de tu método que consulta a la BLL y llena el dgvPreOrden
+                        ActualizarPantallaCompleta(); ;
+                    };
                     // Si el usuario guardó con éxito la pre-orden manual, refrescamos la grilla reactivamente
-                    ActualizarPantallaCompleta();
+
                 }
             }
         }
 
         private void btnRechazar_Click(object sender, EventArgs e)
         {
-            if(dgvPreOrdenCompra.CurrentRow == null) return;
+            if (dgvPreOrdenCompra.CurrentRow == null) return;
 
             try
             {
@@ -60,7 +74,7 @@ namespace UI.GestionCompra
                 if (result == DialogResult.Yes)
                 {
                     // Cambia el estado a Rechazada 
-                    _comprasFacade.CambiarEstado(solicitud.IdOrdenCompra, 3);
+                    _ordenCompraFacade.CambiarEstado(solicitud.IdOrdenCompra, 3);
 
                     MessageBox.Show("La solicitud fue desestimada y removida de la mesa de entradas.",
                                     "Información", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -87,7 +101,7 @@ namespace UI.GestionCompra
                 // 3. Pasamos (IdSucursal, IdProveedor = null, IdEstado = 1, fechaDesde, fechaHasta)
                 DateTime fechaDesde = DateTime.Now.AddMonths(-1); // Ejemplo: último mes
                 DateTime fechaHasta = DateTime.Now;
-                var todasLasOcs = _comprasFacade.ConsultarHistorial(idSucursalActual, null, 1, fechaDesde, fechaHasta);
+                var todasLasOcs = _ordenCompraFacade.ConsultarHistorial(idSucursalActual, null, 1, fechaDesde, fechaHasta);
 
                 _preOrdenesLocales = new List<OrdenCompraDTO>(todasLasOcs);
 
@@ -139,12 +153,12 @@ namespace UI.GestionCompra
                 if (result == DialogResult.Yes)
                 {
                     // 1. Pasamos el estado de 1 (Pendiente) a 2 (Emitida)
-                    _comprasFacade.CambiarEstado(oc.IdOrdenCompra, 2);
+                    _ordenCompraFacade.CambiarEstado(oc.IdOrdenCompra, 2);
 
                     // 2. Generamos el archivo Bloc de Notas en la carpeta del sistema
                     string rutaDestino = AppDomain.CurrentDomain.BaseDirectory + "OrdenesEmitidas";
                     Directory.CreateDirectory(rutaDestino);
-                    _comprasFacade.GenerarDocumentoTexto(oc.IdOrdenCompra, rutaDestino);
+                    _ordenCompraFacade.GenerarDocumentoTexto(oc.IdOrdenCompra, rutaDestino);
 
                     MessageBox.Show("Orden de Compra emitida y exportada a TXT con éxito.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     ActualizarPantallaCompleta();
@@ -209,6 +223,7 @@ namespace UI.GestionCompra
             colTotal.DefaultCellStyle.Format = "C2"; // Formato moneda local (Ej: $150.00)
             dgvPreOrdenCompra.Columns.Add(colTotal);
         }
+
         private void ConfigurarGrillaDetalle()
         {
             dgvDetalleOrdenCompra.AutoGenerateColumns = false;
@@ -286,11 +301,13 @@ namespace UI.GestionCompra
             colSubtotal.DefaultCellStyle.Format = "C2";
             dgvDetalleOrdenCompra.Columns.Add(colSubtotal);
         }
+
         private void ConfigurarVistasDeGrillas()
         {
             ConfigurarGrillaMaestro();
             ConfigurarGrillaDetalle();
-        }  
+        }
+
         private void dgvPreOrdenCompra_SelectionChanged(object sender, EventArgs e)
         {
             if (dgvPreOrdenCompra.Rows.Count == 0 || dgvPreOrdenCompra.CurrentRow == null || dgvPreOrdenCompra.CurrentRow.Index < 0)
@@ -311,6 +328,27 @@ namespace UI.GestionCompra
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message, "Error al cargar detalle", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void btnModificar_Click(object sender, EventArgs e)
+        {
+            if (dgvPreOrdenCompra.CurrentRow?.DataBoundItem is OrdenCompraDTO ocSeleccionada)
+            {
+                // Validamos estado visualmente 
+                if (ocSeleccionada.EstadoDescripcion != "Pendiente")
+                {
+                    MessageBox.Show("Solo puede modificar órdenes pendientes."); return;
+                }
+
+                var formModificar = new fmsModificarOrdenCompra(
+                    ocSeleccionada.IdOrdenCompra,
+                    _prodProvFacade,
+                    _ordenCompraFacade
+                );
+
+                formModificar.OnOrdenModificada += (s, args) => ActualizarPantallaCompleta();
+                formModificar.ShowDialog();
             }
         }
     }

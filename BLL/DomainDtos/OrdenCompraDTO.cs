@@ -12,6 +12,7 @@ namespace BLL.DomainDtos
         public Guid IdOrdenCompra { get; set; }
         public Guid? IdProveedor { get; set; }
         public Guid? IdUsuario { get; set; }
+        public Guid? IdSucursal { get; set; } 
         public string NombreUsuario { get; set; } = string.Empty;
 
         // Información Comercial del Comprobante

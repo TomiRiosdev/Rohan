@@ -9,8 +9,10 @@ namespace BLL.GestiónStock.Interface
         //Maneja los saldos consolidados y la creación física de los lotes.Es el único que usa los métodos de inserción(Add) de la base de datos de stock.
         
         void RegistrarStockManual(StockPorSucursalDTO stockDto, Guid idSucursal, string usuarioNombre);
-        void RegistrarStockPorOc(Guid idProducto, int cantidadComprada, decimal costoPactado, string nroRemitoOc, Guid idSucursal);
+        void RegistrarIngresoPorOrdenCompra(Guid idOrdenCompra, Guid idSucursal, string usuarioNombre, List<RecepcionMercaderiaDTO> detalleRecepcion);
         void RegistrarMermaLote(Guid idLote, int cantidadABajar, string observaciones, Guid idSucursal);
+        void RegistrarEgresoManualLote(Guid idLote, int cantidadADescontar, string observaciones, Guid idSucursal, string usuarioNombre);
         IEnumerable<StockPorSucursalDTO> ObtenerConsolidadoPorSucursal(Guid idSucursal);
     }
 }
+ 

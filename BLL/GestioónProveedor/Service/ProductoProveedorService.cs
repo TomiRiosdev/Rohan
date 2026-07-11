@@ -109,5 +109,39 @@ namespace BLL.GestiónProveedor.Service
                 throw new Exception("Error analítico al recuperar los canales de suministro del producto.", ex);
             }
         }
+
+        public void ActualizarPrecioUnitario(Guid idProducto, Guid idProveedor, decimal nuevoPrecioUnitario)
+        {
+            try
+            {
+                if (nuevoPrecioUnitario < 0)
+                    throw new Exception("El precio no puede ser un valor negativo.");
+
+                _uow.ProductoProveedorRepository.UpdatePrecioUnitario(idProducto, idProveedor, nuevoPrecioUnitario);
+                _uow.SaveChanges(); // Persistencia atómica
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error al actualizar el costo del producto en el catálogo del proveedor.", ex);
+            }
+        }
+
+        public void EstablecerProveedorPrincipal(Guid idProducto, Guid idProveedor)
+        {
+            try
+            {
+                // Regla de negocio: Asegurar que el vínculo exista antes de marcarlo como principal
+                bool existe = _uow.ProductoProveedorRepository.ExisteRelacion(idProducto, idProveedor);
+                if (!existe)
+                    throw new Exception("El vínculo producto-proveedor no existe, no se puede asignar como principal.");
+
+                _uow.ProductoProveedorRepository.AgregarProveedorPrincipal(idProducto, idProveedor);
+                _uow.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error al reasignar el proveedor principal.", ex);
+            }
+        }
     }
 }

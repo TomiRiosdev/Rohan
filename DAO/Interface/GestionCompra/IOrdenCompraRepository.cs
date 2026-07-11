@@ -24,8 +24,9 @@ namespace DAO.Interface.GestionCompra
         /// Recupera una Orden de Compra específica mediante su clave primaria.
         /// </summary>
         /// <param name="idOc">Guid identificador de la orden.</param>
+        /// <param name="incluirDetalles">Indica si se deben incluir los detalles de la orden.</param>
         /// <returns>La entidad OrdenCompra o null si no se encuentra.</returns>
-        OrdenCompra GetById(Guid idOc);
+        OrdenCompra GetById(Guid idOc, bool incluirDetalles);
 
         /// <summary>
         /// Trae el historial de órdenes de compra filtrado estrictamente por el contexto de la sucursal activa,
@@ -58,7 +59,14 @@ namespace DAO.Interface.GestionCompra
         /// </summary>
         /// <param name="idProveedor">Identificador del proveedor.</param>
         /// <returns>True si el proveedor tiene órdenes activas, False en caso contrario.</returns>
-        bool TieneOrdenesActivas(Guid idProveedor);     
-       
+        bool TieneOrdenesActivas(Guid idProveedor);
+
+        /// <summary>
+        /// Elimina los renglones de detalle de la orden de compra en la base de datos.
+        /// </summary>
+        /// <param name="detalle">Colección de renglones de detalle a eliminar.</param>
+        void RemoveDetalle(IEnumerable<OrdenCompraDetalle> detalle);
+
+
     }
 }

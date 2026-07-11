@@ -18,16 +18,14 @@ namespace BLL.GestiónCompra.Mapper
                 IdOrdenCompra = entity.IdOrdenCompra,
                 IdProveedor = entity.IdProveedor,
                 IdUsuario = entity.IdUsuario,
+                IdSucursal = entity.IdSucursal,
                 FechaOc = entity.FechaOc ?? DateTime.Now,
                 IdEstadoOc = entity.IdEstadoOc ?? 1,
                 EstadoDescripcion = entity.IdEstadoSolicitudNavigation?.Descripcion ?? "Pendiente",
                 NroOrdenCompra = entity.NroSolicitud ?? 0,
                 //NombreUsuario = entity.IdUsuarioNavigation?.NombreUsuario ?? "Sistema / Automático",
-
-                // Datos extendidos del proveedor para la UI/Documento
                 RazonSocialProveedor = entity.IdProveedorNavigation?.RazonSocial ?? "Proveedor no identificado",
                 CuitProveedor = entity.IdProveedorNavigation?.Cuit ?? string.Empty,
-
                 // Mapeo en cascada de los renglones
                 Detalles = entity.OrdenCompraDetalle != null
                     ? entity.OrdenCompraDetalle.Select(d => d.ToDTO()).ToList()

@@ -43,7 +43,7 @@
             // 
             lblDetalle.AutoSize = true;
             lblDetalle.Font = new Font("Segoe UI Semibold", 10F, FontStyle.Bold);
-            lblDetalle.Location = new Point(684, 81);
+            lblDetalle.Location = new Point(717, 53);
             lblDetalle.Name = "lblDetalle";
             lblDetalle.Size = new Size(119, 19);
             lblDetalle.TabIndex = 35;
@@ -53,7 +53,7 @@
             // 
             lblSolicitud.AutoSize = true;
             lblSolicitud.Font = new Font("Segoe UI Semibold", 10F, FontStyle.Bold);
-            lblSolicitud.Location = new Point(12, 81);
+            lblSolicitud.Location = new Point(12, 53);
             lblSolicitud.Name = "lblSolicitud";
             lblSolicitud.Size = new Size(124, 19);
             lblSolicitud.TabIndex = 34;
@@ -62,17 +62,17 @@
             // dgvDetalleHistorial
             // 
             dgvDetalleHistorial.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgvDetalleHistorial.Location = new Point(684, 103);
+            dgvDetalleHistorial.Location = new Point(717, 75);
             dgvDetalleHistorial.Name = "dgvDetalleHistorial";
-            dgvDetalleHistorial.Size = new Size(460, 372);
+            dgvDetalleHistorial.Size = new Size(427, 413);
             dgvDetalleHistorial.TabIndex = 33;
             // 
             // dgvMasterHistorial
             // 
             dgvMasterHistorial.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgvMasterHistorial.Location = new Point(12, 103);
+            dgvMasterHistorial.Location = new Point(12, 75);
             dgvMasterHistorial.Name = "dgvMasterHistorial";
-            dgvMasterHistorial.Size = new Size(655, 372);
+            dgvMasterHistorial.Size = new Size(682, 413);
             dgvMasterHistorial.TabIndex = 32;
             dgvMasterHistorial.SelectionChanged += dgvMasterHistorial_SelectionChanged;
             // 
@@ -81,7 +81,7 @@
             cbxBuscar.FormattingEnabled = true;
             cbxBuscar.Location = new Point(81, 23);
             cbxBuscar.Name = "cbxBuscar";
-            cbxBuscar.Size = new Size(202, 23);
+            cbxBuscar.Size = new Size(231, 23);
             cbxBuscar.TabIndex = 38;
             // 
             // label2
@@ -98,7 +98,7 @@
             // 
             btnBuscar.BackColor = Color.Azure;
             btnBuscar.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold);
-            btnBuscar.Location = new Point(298, 16);
+            btnBuscar.Location = new Point(330, 16);
             btnBuscar.Name = "btnBuscar";
             btnBuscar.Size = new Size(69, 33);
             btnBuscar.TabIndex = 36;

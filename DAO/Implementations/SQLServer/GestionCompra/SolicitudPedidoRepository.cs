@@ -2,9 +2,6 @@
 using DAO.Interface.GestionCompra;
 using Microsoft.EntityFrameworkCore;
 using Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Implementations.SQLServer.GestionCompra
 {
@@ -24,7 +21,10 @@ namespace Implementations.SQLServer.GestionCompra
         /// Inicializa una nueva instancia de la clase <see cref="SolicitudPedidoRepository"/>.
         /// </summary>
         /// <param name="dbContext">Contexto de datos de Entity Framework.</param>
-        public SolicitudPedidoRepository(RohanContext dbContext)
+        public SolicitudPedidoRepository
+        (
+            RohanContext dbContext
+        )
         {
             _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext), "El contexto no puede ser nulo.");
             Estados = new EstadoSolicitudRepository(_dbContext);
@@ -120,6 +120,25 @@ namespace Implementations.SQLServer.GestionCompra
             catch (Exception ex)
             {
                 throw new InvalidOperationException($"Error nativo en la DAL al actualizar la Solicitud de Pedido ID: {entity.IdSolicitudPedido}.", ex);
+            }
+        }
+
+        public IEnumerable<StockPorSucursal> ObtenerStockParaReposicionAutomatica(Guid idSucursal)
+        {
+            try
+            {
+                return _dbContext.StockPorSucursal
+                    .Include(s => s.IdProductoNavigation)
+                    .Where(s =>
+                        s.IdSucursal == idSucursal &&
+                        s.IdProductoNavigation.Habilitado == true && 
+                        s.CantidadTotal <= s.StockMinimo            
+                    )
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"DAO Error: No se pudo evaluar el stock para reposición en la sucursal {idSucursal}.", ex);
             }
         }
     }

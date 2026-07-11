@@ -53,6 +53,8 @@ namespace DAO.Interface.GestionCompra
         /// </summary>
         /// <param name="entity">Entidad física SolicitudPedido a actualizar.</param>
         void Update(SolicitudPedido entity);
+         
+        IEnumerable<StockPorSucursal> ObtenerStockParaReposicionAutomatica(Guid idSucursal);
     }
 
     /// <summary>

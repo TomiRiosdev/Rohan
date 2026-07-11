@@ -38,8 +38,12 @@
             groupBox1 = new GroupBox();
             btnBuscar = new Button();
             btnRegistrarMerma = new Button();
+            btnDescontarStock = new Button();
+            nupCantidad = new NumericUpDown();
+            label1 = new Label();
             ((System.ComponentModel.ISupportInitialize)dgvLote).BeginInit();
             groupBox1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)nupCantidad).BeginInit();
             SuspendLayout();
             // 
             // dgvLote
@@ -51,6 +55,7 @@
             dgvLote.TabIndex = 0;
             dgvLote.CellContentClick += dgvLote_CellContentClick;
             dgvLote.CellFormatting += dgvLote_CellFormatting;
+            dgvLote.SelectionChanged += dgvLote_SelectionChanged;
             // 
             // btnCerrar
             // 
@@ -141,7 +146,7 @@
             // 
             btnRegistrarMerma.BackColor = Color.Azure;
             btnRegistrarMerma.Font = new Font("Segoe UI Semibold", 11.25F, FontStyle.Bold);
-            btnRegistrarMerma.Location = new Point(12, 548);
+            btnRegistrarMerma.Location = new Point(464, 550);
             btnRegistrarMerma.Name = "btnRegistrarMerma";
             btnRegistrarMerma.Size = new Size(137, 43);
             btnRegistrarMerma.TabIndex = 22;
@@ -149,12 +154,44 @@
             btnRegistrarMerma.UseVisualStyleBackColor = false;
             btnRegistrarMerma.Click += btnRegistrarMerma_Click;
             // 
+            // btnDescontarStock
+            // 
+            btnDescontarStock.BackColor = Color.Azure;
+            btnDescontarStock.Font = new Font("Segoe UI Semibold", 11.25F, FontStyle.Bold);
+            btnDescontarStock.Location = new Point(249, 550);
+            btnDescontarStock.Name = "btnDescontarStock";
+            btnDescontarStock.Size = new Size(137, 43);
+            btnDescontarStock.TabIndex = 23;
+            btnDescontarStock.Text = "Descontar stock";
+            btnDescontarStock.UseVisualStyleBackColor = false;
+            btnDescontarStock.Click += btnDescontarStock_Click;
+            // 
+            // nupCantidad
+            // 
+            nupCantidad.Location = new Point(98, 559);
+            nupCantidad.Name = "nupCantidad";
+            nupCantidad.Size = new Size(130, 23);
+            nupCantidad.TabIndex = 24;
+            // 
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.Font = new Font("Segoe UI Semibold", 11.25F, FontStyle.Bold);
+            label1.Location = new Point(18, 557);
+            label1.Name = "label1";
+            label1.Size = new Size(74, 20);
+            label1.TabIndex = 25;
+            label1.Text = "Cantidad:";
+            // 
             // fmsVencimientosProducto
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.AliceBlue;
             ClientSize = new Size(792, 647);
+            Controls.Add(label1);
+            Controls.Add(nupCantidad);
+            Controls.Add(btnDescontarStock);
             Controls.Add(btnRegistrarMerma);
             Controls.Add(btnBuscar);
             Controls.Add(groupBox1);
@@ -168,6 +205,7 @@
             ((System.ComponentModel.ISupportInitialize)dgvLote).EndInit();
             groupBox1.ResumeLayout(false);
             groupBox1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)nupCantidad).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -184,5 +222,8 @@
         private GroupBox groupBox1;
         private Button btnBuscar;
         private Button btnRegistrarMerma;
+        private Button btnDescontarStock;
+        private NumericUpDown nupCantidad;
+        private Label label1;
     }
 }

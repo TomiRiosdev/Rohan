@@ -8,10 +8,10 @@ using System.Threading.Tasks;
 
 namespace BLL.GestiónProveedor.Facade
 {
-    public class ProductoProveedorFacade 
+    public class ProductoProveedorFacade
     {
         private readonly IProductoProveedorService _productoProveedorService;
-        
+
         public ProductoProveedorFacade
         (
             IProductoProveedorService productoProveedorService
@@ -44,6 +44,14 @@ namespace BLL.GestiónProveedor.Facade
                 disposableService.Dispose();
             }
         }
-    }
+        public void ActualizarPrecioUnitario(Guid idProducto, Guid idProveedor, decimal nuevoPrecioUnitario)
+        {
+            _productoProveedorService.ActualizarPrecioUnitario(idProducto, idProveedor, nuevoPrecioUnitario);
+        }
+        public void EstablecerProveedorPrincipal(Guid idProducto, Guid idProveedor)
+        {
+            _productoProveedorService.EstablecerProveedorPrincipal(idProducto, idProveedor);
+        }
 
+    }
 }

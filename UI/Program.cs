@@ -41,6 +41,7 @@ namespace UI
             // FORMULARIOS 
             services.AddTransient<Login>();
             services.AddTransient<fmsPrincipal>();
+            services.AddTransient<fmsBitacora>();
  
 
 
@@ -87,6 +88,8 @@ namespace UI
             services.AddTransient<fmsCargarOrdenCompra>();
             services.AddTransient<fmsCrearManualOC>();
             services.AddTransient<fmsHistorialOrdenCompra>();
+            services.AddTransient<fmsCatalogoCostoProducto>();
+            services.AddTransient<fmsModificarOrdenCompra>();
 
         }
     }
