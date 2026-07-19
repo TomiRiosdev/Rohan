@@ -143,6 +143,38 @@ namespace Service.DateAccess.Implementations
 
             return SqlHelper.ExecuteDataTable(query, CommandType.Text);
         }
+        // Solo trae los datos. No arma el objeto, solo devuelve las filas.
+        public List<object[]> GetPatentesByUsuario(Guid idUsuario)
+        {
+            string query = "SELECT p.IdPatente, p.DataKey, p.TipoAcceso FROM [dbo].[Patente] p INNER JOIN [dbo].[UsuarioPatente] up ON p.IdPatente = up.IdPatente WHERE up.IdUsuario = @IdUsuario";
+            return ExecuteQuery(query, new SqlParameter("@IdUsuario", idUsuario));
+        }
 
+        public List<object[]> GetFamiliasByUsuario(Guid idUsuario)
+        {
+            string query = "SELECT f.IdFamilia, f.Nombre FROM [dbo].[Familia] f INNER JOIN [dbo].[UsuarioFamilia] uf ON f.IdFamilia = uf.IdFamilia WHERE uf.IdUsuario = @IdUsuario";
+            return ExecuteQuery(query, new SqlParameter("@IdUsuario", idUsuario));
+        }
+
+        public List<object[]> GetPatentesByFamilia(Guid idFamilia)
+        {
+            string query = "SELECT p.IdPatente, p.DataKey, p.TipoAcceso FROM [dbo].[Patente] p INNER JOIN [dbo].[FamiliaPatente] fp ON p.IdPatente = fp.IdPatente WHERE fp.IdFamilia = @IdFamilia";
+            return ExecuteQuery(query, new SqlParameter("@IdFamilia", idFamilia));
+        }
+        // Método privado para evitar repetir el ciclo del SqlDataReader
+        private List<object[]> ExecuteQuery(string query, SqlParameter param)
+        {
+            var resultados = new List<object[]>();
+            using (SqlDataReader reader = SqlHelper.ExecuteReader(query, CommandType.Text, param))
+            {
+                while (reader.Read())
+                {
+                    object[] data = new object[reader.FieldCount];
+                    reader.GetValues(data);
+                    resultados.Add(data);
+                }
+            }
+            return resultados;
+        }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Service.DateAccess.Implementations;
 using Service.DomainModel.Logging;
+using Service.Facade;
 using System;
 using System.Collections.Generic;
 
@@ -15,7 +16,7 @@ namespace Service.Logic
         }
 
         // Este es el método que vas a llamar desde todo el sistema
-        public void RegistrarLog(string mensaje, Criticidad criticidad, Guid? idUsuario = null)
+        public void RegistrarLog(string mensaje, Criticidad criticidad, Guid? idUsuario = null, string nombreUsuario = null, Guid? idSucursal = null)
         {
             try
             {
@@ -23,7 +24,9 @@ namespace Service.Logic
                 {
                     Mensaje = mensaje,
                     Criticidad = criticidad,
-                    IdUsuario = idUsuario
+                    IdUsuario = idUsuario,
+                    NombreUsuario = nombreUsuario,
+                    IdSucursal = idSucursal ?? SessionManager.Current.IdSucursalActual ?? Guid.Empty
                 };
 
                 _bitacoraRepo.Insertar(nuevoLog);
@@ -36,17 +39,18 @@ namespace Service.Logic
             }
         }
 
-        public List<Bitácora> ListarBitacora()
+        public List<Bitácora> ListarBitacoraSegunRol()
         {
-            try
-            {
-                return _bitacoraRepo.ListarTodos();
-            }
-            catch (Exception ex)
-            {
-                // Si hay error, lo ideal es avisar a la UI
-                throw new Exception("Error al consultar la bitácora: " + ex.Message);
-            }
+            // Obtenemos el perfil del usuario actual
+            var usuario = SessionManager.Current.UsuarioLogueado;
+
+            // Si es Administrador, pasamos null (trae todo)
+            // Si no lo es, le pasamos su sucursal actual (filtra)
+            Guid? filtroSucursal = SessionManager.Current.TienePermiso("Administrador")
+                                  ? (Guid?)null
+                                  : SessionManager.Current.IdSucursalActual;
+
+            return _bitacoraRepo.Listar(filtroSucursal);
         }
     }
 }

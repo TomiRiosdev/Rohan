@@ -32,6 +32,7 @@ namespace UI
         {
             var loginForm = _serviceProvider.GetRequiredService<Login>();
             this.Close();
+            LoginService.Logout();
             loginForm.Show();
         }
 
@@ -67,7 +68,7 @@ namespace UI
         private void fmsPrincipal_Load(object sender, EventArgs e)
         {
             btnCambiarSucursal.Visible = (SessionManager.Current.UsuarioLogueado.IdSucursal == null);
-
+            AplicarSeguridadUI(this.Controls);
         }
 
         private void btnCambiarSucursal_Click(object sender, EventArgs e)
@@ -130,5 +131,28 @@ namespace UI
             formularioHijo.Show();
         }
 
+        private void AplicarSeguridadUI(Control.ControlCollection controles)
+        {
+            foreach (Control c in controles)
+            {
+                // Si el control tiene un Tag, validamos contra el SessionManager
+                if (c.Tag != null && !string.IsNullOrEmpty(c.Tag.ToString()))
+                {
+                    string permisoRequerido = c.Tag.ToString();
+
+                    // Usamos tu método del SessionManager
+                    bool tieneAcceso = SessionManager.Current.TienePermiso(permisoRequerido);
+
+                    // Ocultamos si no tiene permiso
+                    c.Visible = tieneAcceso;
+                }
+
+                // Si el control tiene hijos (como un Panel, GroupBox o ToolStrip), llamamos recursivamente
+                if (c.HasChildren)
+                {
+                    AplicarSeguridadUI(c.Controls);
+                }
+            }
+        }
     }
 }

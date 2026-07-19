@@ -1,5 +1,6 @@
 ﻿using BLL.GestiónSucursal.Facade;
 using Microsoft.Extensions.DependencyInjection;
+using Models;
 using Service.Facade;
 
 
@@ -9,6 +10,8 @@ namespace UI
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly SucursalFacade _sucursalFacade;
+
+        public Sucursal SucursalSeleccionada { get; private set; }
         public fmsSeleccionarSucursal
         (
             IServiceProvider serviceProvider,
@@ -35,6 +38,9 @@ namespace UI
                 // 2. Extraemos los datos del ComboBox
                 Guid idSucursalElegida = (Guid)cbxSucursal.SelectedValue;
                 string nombreSucursalElegida = cbxSucursal.Text;
+
+
+                this.SucursalSeleccionada = idSucursalElegida != Guid.Empty ? new Sucursal { IdSucursal = idSucursalElegida, Nombre = nombreSucursalElegida } : null;
 
                 // 3. Impactamos el Contexto de Ejecución Temporal en el SessionManager
                 SessionManager.Current.IdSucursalActual = idSucursalElegida;

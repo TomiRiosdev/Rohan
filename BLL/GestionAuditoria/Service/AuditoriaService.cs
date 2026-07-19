@@ -16,8 +16,9 @@ namespace BLL.GestionAuditoria.Service
             _uow = uow;
         }
 
-        public void Registrar(Guid idEntidad, string operacion, string detalle, UsuarioContext contexto)
+        public void Registrar(Guid idEntidad, string operacion, string detalle)
         {
+           
             var nuevaAuditoria = new Auditoria
             { 
                 IdAuditoria = Guid.NewGuid(),
@@ -25,12 +26,11 @@ namespace BLL.GestionAuditoria.Service
                 IdEntidadRelacionada = idEntidad,
                 Operacion = operacion,
                 Detalle = detalle,
-                IdUsuario = contexto.IdUsuario,
-                IdSucursal = contexto.IdSucursal
+          
             };
 
             _uow.AuditoriaRepository.AddAuditoria(nuevaAuditoria);
-            _uow.SaveChanges();
+           
         }
     }
 }

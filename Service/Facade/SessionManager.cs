@@ -1,72 +1,73 @@
 ﻿using Service.DomainModel.Composite;
 using System;
+using System.Linq;
 
 namespace Service.Facade
 {
+    /// <summary>
+    /// Maneja el estado global de la sesión del usuario (Patrón Singleton).
+    /// </summary>
     public class SessionManager
     {
         private static SessionManager _instance;
-
-        // Singleton
-        public static SessionManager Current
-        {
-            get
-            {
-                if (_instance == null)
-                    _instance = new SessionManager();
-                return _instance;
-            }
-        }
+        public static SessionManager Current => _instance ?? (_instance = new SessionManager());
 
         private SessionManager() { }
+
         public Usuario UsuarioLogueado { get; private set; }
         public Guid? IdSucursalActual { get; set; }
         public string NombreSucursalActual { get; set; }
 
         public void Login(Usuario usuario)
-        {
+        { 
             UsuarioLogueado = usuario;
-            IdSucursalActual = usuario.IdSucursal;
+            IdSucursalActual = usuario.IdSucursal; 
         }
-
-        public void Logout()
-        {
+        public void Logout() 
+        { 
             UsuarioLogueado = null;
-            IdSucursalActual = null;
+            IdSucursalActual = null; 
             NombreSucursalActual = null;
         }
 
-        // Método clave para que los Forms validen permisos rápidamente
+        /// <summary>
+        /// Valida si el usuario actual posee un permiso específico (basado en el Composite).
+        /// </summary>
         public bool TienePermiso(string dataKeyPermiso)
-        {
-            if (UsuarioLogueado == null) return false;
+        {// 1. Control de seguridad defensivo
+            if (UsuarioLogueado == null)
+            {
+                System.Diagnostics.Debug.WriteLine("DEBUG: Intento de validación sin usuario logueado.");
+                return false;
+            }
 
-            // Ahora lee correctamente la mochila del usuario
+            // 2. Control de privilegios nulos (si no se cargaron, no tiene permisos)
+            if (UsuarioLogueado.Privilegios == null)
+            {
+                System.Diagnostics.Debug.WriteLine("DEBUG: El usuario logueado no tiene privilegios cargados.");
+                return false;
+            }
+
             foreach (var privilegio in UsuarioLogueado.Privilegios)
             {
-                if (ValidarPermisoRecursivo(privilegio, dataKeyPermiso))
-                    return true;
+                if (ValidarPermisoRecursivo(privilegio, dataKeyPermiso)) return true;
             }
             return false;
         }
 
+        /// <summary>
+        /// Método recursivo para navegar el árbol de permisos (Patrón Composite).
+        /// </summary>
         private bool ValidarPermisoRecursivo(Component componente, string nombreODataKey)
         {
-            // Si es una Patente, comparamos el DataKey
             if (componente is Patente patente)
             {
-                if (patente.DataKey == nombreODataKey) return true;
+                return patente.DataKey == nombreODataKey;
             }
-            // Si es una Familia, comparamos el Nombre Y buscamos en los hijos
             else if (componente is Familia familia)
             {
-                // CAMBIO CLAVE: También comparamos el nombre de la familia
                 if (familia.Nombre == nombreODataKey) return true;
-
-                foreach (var hijo in familia.GetHijos())
-                {
-                    if (ValidarPermisoRecursivo(hijo, nombreODataKey)) return true;
-                }
+                return familia.GetHijos().Any(hijo => ValidarPermisoRecursivo(hijo, nombreODataKey));
             }
             return false;
         }

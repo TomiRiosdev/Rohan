@@ -67,6 +67,7 @@
             btnExportar.TabIndex = 12;
             btnExportar.Text = "Exportar";
             btnExportar.UseVisualStyleBackColor = false;
+            btnExportar.Click += btnExportar_Click;
             // 
             // btnActualizar
             // 
@@ -78,6 +79,7 @@
             btnActualizar.TabIndex = 30;
             btnActualizar.Text = "Actualizar";
             btnActualizar.UseVisualStyleBackColor = false;
+            btnActualizar.Click += btnActualizar_Click;
             // 
             // lblBuscar
             // 
@@ -108,6 +110,7 @@
             btnBuscar.TabIndex = 27;
             btnBuscar.Text = "Buscar ";
             btnBuscar.UseVisualStyleBackColor = false;
+            btnBuscar.Click += btnBuscar_Click;
             // 
             // comboBox1
             // 

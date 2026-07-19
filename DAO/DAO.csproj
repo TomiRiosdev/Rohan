@@ -24,4 +24,8 @@
     <ProjectReference Include="..\ModelsDTO\DomainModel.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="DataBase\" />
+  </ItemGroup>
+
 </Project>

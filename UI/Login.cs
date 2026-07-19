@@ -1,6 +1,7 @@
 ﻿using BLL.GestiónSucursal.Facade;
 using Microsoft.Extensions.DependencyInjection;
 using Service.DateAccess.Implementations;
+using Service.DomainModel.Logging;
 using Service.Facade;
 using Service.Logic;
 
@@ -24,72 +25,59 @@ namespace UI
         private void btnIniciarSesión_Click(object sender, EventArgs e)
         {
             try
-            { 
-                var usuarioService = _serviceProvider.GetRequiredService<UsuarioService>();
-                var permisosRepo = _serviceProvider.GetRequiredService<PermisosRepository>();
+            {
+                // 1. AUTENTICACIÓN: Delegamos la validación al LoginService
+                // Si las credenciales fallan, este método lanza una excepción y el catch la captura.
+                var usuarioValido = LoginService.Autenticar(txtUserName.Text, txtPassword.Text);
 
-                // 2. Validamos credenciales
-                var usuarioValido = usuarioService.ValidarCredenciales(txtUserName.Text, txtPassword.Text);
+                var permisosService = _serviceProvider.GetRequiredService<PermisosService>();
+              
+                permisosService.CargarPrivilegios(usuarioValido);
 
-                if (usuarioValido != null)
+                SessionManager.Current.Login(usuarioValido);
+                // 2. LÓGICA DE SUCURSAL Y PERMISOS
+                // Comprobamos si es administrador global mediante el permiso "Administrador"
+                bool esAdminGlobal = SessionManager.Current.TienePermiso("Administrador");
+
+                if (esAdminGlobal)
                 {
-                    // 3. Cargamos la mochila de privilegios (Composite) antes de decidir el flujo
-                    permisosRepo.CargarPrivilegios(usuarioValido);
+                    // FLUJO ADMIN: Debe elegir sucursal
+                    var fmsSelector = _serviceProvider.GetRequiredService<fmsSeleccionarSucursal>();
+                    fmsSelector.StartPosition = FormStartPosition.CenterParent;
 
-                    // 4. Seteamos la sesión inicial
-                    SessionManager.Current.Login(usuarioValido);
-
-                    // 5. Validamos si es Administrador Real por Patente/Permiso
-                    // Usamos el DataKey 
-                    bool esAdminGlobal = SessionManager.Current.TienePermiso("Administrador");
-
-                    if (esAdminGlobal)
+                    if (fmsSelector.ShowDialog() == DialogResult.OK)
                     {
-                        // Flujo Admin: Debe elegir sucursal obligatoriamente
-                        var fmsSelector = _serviceProvider.GetRequiredService<fmsSeleccionarSucursal>();
-                        fmsSelector.StartPosition = FormStartPosition.CenterParent;
+                        var sucursal = fmsSelector.SucursalSeleccionada;
 
-                        if (fmsSelector.ShowDialog() == DialogResult.OK)
-                        {
-                            AbrirPrincipal(usuarioValido.Nombre);
-                        }
-                        else
-                        {
-                            // Si cancela el selector, cerramos la sesión por seguridad
-                            SessionManager.Current.Logout();
-                        }
-                    }
-                    else if (usuarioValido.IdSucursal != null)
-                    {
-                        SessionManager.Current.Login(usuarioValido);
-
-                        // Si el usuario tiene una sucursal fija (no es Admin)
-                        if (usuarioValido.IdSucursal.HasValue)
-                        {
-                            // Usamos el SucursalService para traer la info de esa sucursal específica
-                            var sucursalService = _serviceProvider.GetRequiredService<SucursalFacade>();
-                            var sucursal = sucursalService.GetById(usuarioValido.IdSucursal.Value);
-
-                            // Guardamos el nombre en el SessionManager
-                            SessionManager.Current.NombreSucursalActual = sucursal.Nombre;
-                            AbrirPrincipal(usuarioValido.Nombre);
-                        }
-                        else
-                        {
-                            // Usuario sin sucursal y sin ser Admin (Error de seguridad)
-                            SessionManager.Current.Logout();
-                            throw new Exception("El usuario no tiene una sucursal asignada. Contacte al Administrador.");
-                        }
+                        LoginService.FinalizarLogin(usuarioValido, sucursal.IdSucursal, sucursal.Nombre);
+                        AbrirPrincipal(usuarioValido.Nombre);
                     }
                     else
                     {
-                        MessageBox.Show("Credenciales inválidas.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+                        return;
                     }
+                }
+                else
+                {
+                    // FLUJO USUARIO ESTÁNDAR: Validación de sucursal fija
+                    if (!usuarioValido.IdSucursal.HasValue)
+                        throw new Exception("El usuario no tiene una sucursal asignada. Contacte al Administrador.");
+
+                    // Obtenemos info de la sucursal
+                    var sucursalService = _serviceProvider.GetRequiredService<SucursalFacade>();
+                    var sucursal = sucursalService.GetById(usuarioValido.IdSucursal.Value);
+
+                    // Finalizamos el login
+                    LoginService.FinalizarLogin(usuarioValido, sucursal.Id, sucursal.Nombre);
+                    AbrirPrincipal(usuarioValido.Nombre);
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Error de autenticación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                // Manejo centralizado de errores: usuario o contraseña incorrectos, 
+                // fallos de red o falta de sucursal.
+                MessageBox.Show(ex.Message, "Autenticación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
 
         }
