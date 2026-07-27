@@ -23,7 +23,7 @@ public partial class OrdenCompra
 
     public string? UsuarioNombre { get; set; }
 
-    public virtual EstadoSolicitud? IdEstadoSolicitudNavigation { get; set; }
+    public virtual Estados? IdEstadoSolicitudNavigation { get; set; }
 
     public virtual Proveedor? IdProveedorNavigation { get; set; }
 

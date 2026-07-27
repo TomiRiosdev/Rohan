@@ -16,11 +16,13 @@ public partial class SolicitudPedido
     public DateTime? FechaSolicitud { get; set; }
 
     public int? IdEstadoSolicitud { get; set; }
+
     public string? UsuarioNombre { get; set; }
+
+    public virtual Estados? IdEstadoSolicitudNavigation { get; set; }
 
     public virtual Sucursal? IdSucursalNavigation { get; set; }
 
-    public virtual EstadoSolicitud? IdEstadoSolicitudNavigation { get; set; }
-
+    public virtual ICollection<OrdenTraspaso> OrdenTraspaso { get; set; } = new List<OrdenTraspaso>();
     public virtual ICollection<SolicitudPedidoDetalle> SolicitudPedidoDetalle { get; set; } = new List<SolicitudPedidoDetalle>();
 }

@@ -26,6 +26,7 @@ namespace DAO.Interface
         IOrdenCompraRepository OrdenCompraRepository { get; }
         ICompraSolicitudQueryRepository CompraSolicitudQueryRepository { get; }
         IAuditoriaRepository AuditoriaRepository { get; }
+        IOrdenTraspasoRepository OrdenTraspasoRepository { get; }
 
         // Método para guardar los cambios en la base de datos
 

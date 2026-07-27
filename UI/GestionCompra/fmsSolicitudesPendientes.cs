@@ -33,7 +33,7 @@ namespace UI.GestionCompra
             this.dgvSolicitudPedido.SelectionChanged += dgvSolicitudPedido_SelectionChanged!;
         }
         private void fmsSolicitudesPendientes_Load(object sender, EventArgs e)
-        {     
+        {
             ConfigurarGrillaMaestro();
             ConfigurarGrillaDetalle();
             ActualizarPantallaCompleta();
@@ -108,7 +108,7 @@ namespace UI.GestionCompra
                     Guid idSucursalActual = SessionManager.Current.IdSucursalActual
                         ?? throw new Exception("No se detectó una sucursal activa en la sesión actual.");
 
-                
+
                     _comprasFacade.EjecutarGeneracionAutomatica(idSucursalActual, solicitud.IdSolicitudPedido);
 
                     MessageBox.Show("Pre-Órdenes de Compra generadas correctamente en el Historial.",
@@ -180,7 +180,7 @@ namespace UI.GestionCompra
                                 "Error de Renderizado", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-        
+
         #endregion
 
         #region Configuración de los dgv
@@ -289,8 +289,13 @@ namespace UI.GestionCompra
             dgvDetalleSolicitud.Columns.Add(colCant);
 
         }
-       
+
         #endregion
+
+        private void btnSolicitarTraspaso_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }
 

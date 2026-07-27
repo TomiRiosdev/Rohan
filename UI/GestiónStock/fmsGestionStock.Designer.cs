@@ -36,6 +36,7 @@
             btnVerInventario = new Button();
             label1 = new Label();
             panelContenedor = new Panel();
+            btnTraspaso = new Button();
             SuspendLayout();
             // 
             // btnAgregarManual
@@ -124,8 +125,19 @@
             // 
             panelContenedor.Location = new Point(1, 107);
             panelContenedor.Name = "panelContenedor";
-            panelContenedor.Size = new Size(1162, 519);
+            panelContenedor.Size = new Size(1170, 530);
             panelContenedor.TabIndex = 21;
+            // 
+            // btnTraspaso
+            // 
+            btnTraspaso.BackColor = Color.Azure;
+            btnTraspaso.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold);
+            btnTraspaso.Location = new Point(672, 52);
+            btnTraspaso.Name = "btnTraspaso";
+            btnTraspaso.Size = new Size(104, 49);
+            btnTraspaso.TabIndex = 22;
+            btnTraspaso.Text = "Traspaso Sucursal";
+            btnTraspaso.UseVisualStyleBackColor = false;
             // 
             // fmsGestionStock
             // 
@@ -133,6 +145,7 @@
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.AliceBlue;
             ClientSize = new Size(1175, 638);
+            Controls.Add(btnTraspaso);
             Controls.Add(panelContenedor);
             Controls.Add(label1);
             Controls.Add(btnVerInventario);
@@ -158,5 +171,6 @@
         private Button btnVerInventario;
         private Label label1;
         private Panel panelContenedor;
+        private Button btnTraspaso;
     }
 }

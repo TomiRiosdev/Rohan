@@ -15,11 +15,11 @@ public partial class RohanContext : DbContext
     {
     }
 
-    public virtual DbSet<Auditoria> Auditorias { get; set; }
+    public virtual DbSet<Auditoria> Auditoria { get; set; }
 
     public virtual DbSet<Categoria> Categoria { get; set; }
 
-    public virtual DbSet<EstadoSolicitud> EstadoSolicitud { get; set; }
+    public virtual DbSet<Estados> Estados { get; set; }
 
     public virtual DbSet<Lote> Lote { get; set; }
 
@@ -27,6 +27,9 @@ public partial class RohanContext : DbContext
     public virtual DbSet<OrdenCompra> OrdenCompra { get; set; }
 
     public virtual DbSet<OrdenCompraDetalle> OrdenCompraDetalle { get; set; }
+
+    public virtual DbSet<OrdenTraspaso> OrdenTraspasos { get; set; }
+    public virtual DbSet<OrdenTraspasoDetalle> OrdenTraspasoDetalles { get; set; }
 
     public virtual DbSet<Producto> Producto { get; set; }
 
@@ -84,11 +87,9 @@ public partial class RohanContext : DbContext
                 .IsUnicode(false);
         });
 
-        modelBuilder.Entity<EstadoSolicitud>(entity =>
+        modelBuilder.Entity<Estados>(entity =>
         {
             entity.HasKey(e => e.IdEstadoSolicitud).HasName("PK_EstadoSolicitud_1");
-
-            entity.ToTable("EstadoSolicitud");
 
             entity.Property(e => e.IdEstadoSolicitud).ValueGeneratedNever();
             entity.Property(e => e.Descripcion)
@@ -212,6 +213,57 @@ public partial class RohanContext : DbContext
                   .HasConstraintName("FK_OrdenCompraDetalle_Producto"); 
         });
 
+        modelBuilder.Entity<OrdenTraspaso>(entity =>
+        {
+            entity.HasKey(e => e.IdOrdenTraspaso);
+
+            entity.ToTable("OrdenTraspaso");
+
+            entity.Property(e => e.IdOrdenTraspaso).ValueGeneratedNever();
+            entity.Property(e => e.FechaEmision).HasColumnType("datetime");
+            entity.Property(e => e.FechaRecepcion).HasColumnType("datetime");
+            entity.Property(e => e.Observaciones)
+                .HasMaxLength(100)
+                .IsUnicode(false);
+
+            entity.HasOne(d => d.IdEstadoSolicitudNavigation).WithMany(p => p.OrdenTraspaso)
+                .HasForeignKey(d => d.IdEstado)
+                .HasConstraintName("FK_OrdenTraspaso_Estados");
+
+            entity.HasOne(d => d.IdSolicitudPedidoNavigation).WithMany(p => p.OrdenTraspaso)
+                .HasForeignKey(d => d.IdSolicitudPedido)
+                .HasConstraintName("FK_OrdenTraspaso_SolicitudPedido");
+
+            entity.HasOne(d => d.IdSucursalDestinoNavigation).WithMany(p => p.OrdenTraspasoIdSucursalDestinoNavigations)
+                .HasForeignKey(d => d.IdSucursalDestino)
+                .HasConstraintName("FK_OrdenTraspaso_Sucursal1");
+
+            entity.HasOne(d => d.IdSucursalOrigenNavigation).WithMany(p => p.OrdenTraspasoIdSucursalOrigenNavigations)
+                .HasForeignKey(d => d.IdSucursalOrigen)
+                .HasConstraintName("FK_OrdenTraspaso_Sucursal");
+        });
+
+        modelBuilder.Entity<OrdenTraspasoDetalle>(entity =>
+        {
+            entity.HasKey(e => e.IdOrdenTraspasoDetalle);
+
+            entity.ToTable("OrdenTraspasoDetalle");
+
+            entity.Property(e => e.IdOrdenTraspasoDetalle).ValueGeneratedNever();
+
+            entity.HasOne(d => d.IdLoteOrigenNavigation).WithMany(p => p.OrdenTraspasoDetalle)
+                .HasForeignKey(d => d.IdLoteOrigen)
+                .HasConstraintName("FK_OrdenTraspasoDetalle_Lote");
+
+            entity.HasOne(d => d.IdOrdenTraspasoNavigation).WithMany(p => p.OrdenTraspasoDetalle)
+                .HasForeignKey(d => d.IdOrdenTraspaso)
+                .HasConstraintName("FK_OrdenTraspasoDetalle_OrdenTraspaso");
+
+            entity.HasOne(d => d.IdProductoNavigation).WithMany(p => p.OrdenTraspasoDetalle)
+                .HasForeignKey(d => d.IdProducto)
+                .HasConstraintName("FK_OrdenTraspasoDetalle_Producto");
+        });
+
         modelBuilder.Entity<Producto>(entity =>
         {
             entity.HasKey(e => e.IdProducto);
@@ -296,7 +348,6 @@ public partial class RohanContext : DbContext
             entity.Property(e => e.UsuarioNombre)
                 .HasMaxLength(100)
                 .IsUnicode(false);
-
 
             entity.HasOne(d => d.IdEstadoSolicitudNavigation)
                 .WithMany(p => p.SolicitudPedido)

@@ -65,12 +65,12 @@ namespace DAO.Interface.GestionCompra
         /// <summary>
         /// Trae la lista completa de estados para rellenar combos de filtrado en la UI.
         /// </summary>
-        IEnumerable<EstadoSolicitud> GetAll();
+        IEnumerable<Estados> GetAll();
 
         /// <summary>
         /// Busca un estado puntual por su nombre exacto (útil para validaciones lógicas duras en la BLL).
         /// </summary>
         /// <param name="descripcion">Texto del estado (Ej: "Pendiente").</param>
-        EstadoSolicitud GetByDescripcion(string descripcion);
+        Estados GetByDescripcion(string descripcion);
     }
 }

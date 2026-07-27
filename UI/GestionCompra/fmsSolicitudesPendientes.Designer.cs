@@ -34,6 +34,7 @@
             lblSolicitud = new Label();
             lblDetalle = new Label();
             btnRechazar = new Button();
+            btnSolicitarTraspaso = new Button();
             ((System.ComponentModel.ISupportInitialize)dgvSolicitudPedido).BeginInit();
             ((System.ComponentModel.ISupportInitialize)dgvDetalleSolicitud).BeginInit();
             SuspendLayout();
@@ -42,7 +43,7 @@
             // 
             btnGenerarOrdenCompra.BackColor = Color.Azure;
             btnGenerarOrdenCompra.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnGenerarOrdenCompra.Location = new Point(330, 377);
+            btnGenerarOrdenCompra.Location = new Point(365, 406);
             btnGenerarOrdenCompra.Name = "btnGenerarOrdenCompra";
             btnGenerarOrdenCompra.Size = new Size(121, 67);
             btnGenerarOrdenCompra.TabIndex = 18;
@@ -53,9 +54,9 @@
             // dgvSolicitudPedido
             // 
             dgvSolicitudPedido.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgvSolicitudPedido.Location = new Point(9, 44);
+            dgvSolicitudPedido.Location = new Point(10, 47);
             dgvSolicitudPedido.Name = "dgvSolicitudPedido";
-            dgvSolicitudPedido.Size = new Size(477, 309);
+            dgvSolicitudPedido.Size = new Size(477, 334);
             dgvSolicitudPedido.TabIndex = 19;
             dgvSolicitudPedido.SelectionChanged += dgvSolicitudPedido_SelectionChanged;
             // 
@@ -64,7 +65,7 @@
             dgvDetalleSolicitud.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgvDetalleSolicitud.Location = new Point(499, 44);
             dgvDetalleSolicitud.Name = "dgvDetalleSolicitud";
-            dgvDetalleSolicitud.Size = new Size(642, 400);
+            dgvDetalleSolicitud.Size = new Size(642, 429);
             dgvDetalleSolicitud.TabIndex = 20;
             // 
             // lblSolicitud
@@ -91,7 +92,7 @@
             // 
             btnRechazar.BackColor = Color.Azure;
             btnRechazar.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnRechazar.Location = new Point(27, 377);
+            btnRechazar.Location = new Point(9, 406);
             btnRechazar.Name = "btnRechazar";
             btnRechazar.Size = new Size(132, 67);
             btnRechazar.TabIndex = 23;
@@ -99,12 +100,25 @@
             btnRechazar.UseVisualStyleBackColor = false;
             btnRechazar.Click += btnRechazar_Click;
             // 
+            // btnSolicitarTraspaso
+            // 
+            btnSolicitarTraspaso.BackColor = Color.Azure;
+            btnSolicitarTraspaso.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            btnSolicitarTraspaso.Location = new Point(190, 406);
+            btnSolicitarTraspaso.Name = "btnSolicitarTraspaso";
+            btnSolicitarTraspaso.Size = new Size(132, 67);
+            btnSolicitarTraspaso.TabIndex = 24;
+            btnSolicitarTraspaso.Text = "Solicitar a Central";
+            btnSolicitarTraspaso.UseVisualStyleBackColor = false;
+            btnSolicitarTraspaso.Click += btnSolicitarTraspaso_Click;
+            // 
             // fmsSolicitudesPendientes
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.AliceBlue;
             ClientSize = new Size(1156, 500);
+            Controls.Add(btnSolicitarTraspaso);
             Controls.Add(btnRechazar);
             Controls.Add(lblDetalle);
             Controls.Add(lblSolicitud);
@@ -127,5 +141,6 @@
         private Label lblSolicitud;
         private Label lblDetalle;
         private Button btnRechazar;
+        private Button btnSolicitarTraspaso;
     }
 }

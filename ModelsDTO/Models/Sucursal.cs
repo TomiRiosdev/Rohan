@@ -32,6 +32,9 @@ public partial class Sucursal
     public virtual ICollection<MovimientosStock> MovimientosStockIdSucursalNavigations { get; set; } = new List<MovimientosStock>();
 
     public virtual ICollection<MovimientosStock> MovimientosStockIdSucursalOrigenNavigations { get; set; } = new List<MovimientosStock>();
+    public virtual ICollection<OrdenTraspaso> OrdenTraspasoIdSucursalDestinoNavigations { get; set; } = new List<OrdenTraspaso>();
+
+    public virtual ICollection<OrdenTraspaso> OrdenTraspasoIdSucursalOrigenNavigations { get; set; } = new List<OrdenTraspaso>();
 
     public virtual ICollection<SolicitudPedido> SolicitudPedido { get; set; } = new List<SolicitudPedido>();
 

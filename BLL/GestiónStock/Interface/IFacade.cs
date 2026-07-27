@@ -19,6 +19,9 @@ namespace BLL.GestiónStock.Interface
 
             // LIBRO CONTABLE DE AUDITORÍA (Hacia KardexService)
             IEnumerable<MovimientoStockDTO> ObtenerHistorialKardex(Guid idSucursal, DateTime desde, DateTime hasta);
-        
+
+            // GESTIÓN DE TRASPASOS (Hacia TraspasoService)
+            void GenerarTraspasoDesdeSolicitud(Guid idSucursalOrigen, Guid idSolicitud);
+
     }
 }

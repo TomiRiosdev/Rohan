@@ -16,12 +16,12 @@ namespace DAO.Implementations.SQLServer.GestionAuditoria
 
         public void AddAuditoria(Auditoria auditoria)
         {
-            _dbContext.Auditorias.Add(auditoria);
+            _dbContext.Auditoria.Add(auditoria);
         }
       
         IEnumerable<Auditoria> IAuditoriaRepository.GetAll()
         {
-            return _dbContext.Auditorias.OrderByDescending(x => x.Fecha).ToList();
+            return _dbContext.Auditoria.OrderByDescending(x => x.Fecha).ToList();
         }
     }
 }

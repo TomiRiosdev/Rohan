@@ -155,16 +155,16 @@ namespace Implementations.SQLServer.GestionCompra
             _dbContext = dbContext;
         }
 
-        public IEnumerable<EstadoSolicitud> GetAll()
+        public IEnumerable<Estados> GetAll()
         {
-            return _dbContext.EstadoSolicitud.AsNoTracking().ToList();
+            return _dbContext.Estados.AsNoTracking().ToList();
         }
 
-        public EstadoSolicitud GetByDescripcion(string descripcion)
+        public Estados GetByDescripcion(string descripcion)
         {
             if (string.IsNullOrWhiteSpace(descripcion)) return null!;
 
-            return _dbContext.EstadoSolicitud
+            return _dbContext.Estados
                 .FirstOrDefault(e => e.Descripcion.ToLower() == descripcion.ToLower())!;
         }
     }

@@ -34,6 +34,7 @@ namespace DAO.Implementations.SQLServer
         public IOrdenCompraRepository OrdenCompraRepository { get; private set; }
         public ICompraSolicitudQueryRepository CompraSolicitudQueryRepository { get; private set; }
         public IAuditoriaRepository AuditoriaRepository { get; private set; }
+        public IOrdenTraspasoRepository OrdenTraspasoRepository { get; private set; }
 
 
         // Recibe el contexto único administrado por el ServiceProvider
@@ -57,6 +58,7 @@ namespace DAO.Implementations.SQLServer
             OrdenCompraRepository = new OrdenCompraRepository(_dbContext);
             CompraSolicitudQueryRepository = new CompraSolicitudQueryRepository(_dbContext);
             AuditoriaRepository = new AuditoriaRepository(_dbContext);
+            OrdenTraspasoRepository = new OrdenTraspasoRepository(_dbContext);
 
         }
 

@@ -10,18 +10,21 @@ namespace BLL.GestiónStock.Facade
         private readonly IStockService _stockService;
         private readonly IKardexService _kardexService;
         private readonly IMermaService _mermaService;
+        private readonly ITraspasoService _traspasoService;
 
         // El constructor unifica el subsistema mediante inyección
         public StockFacade
         (
             IStockService stockService,
             IKardexService kardexService, 
-            IMermaService mermaService
+            IMermaService mermaService,
+            ITraspasoService traspasoService
         )
         {
             _stockService = stockService ?? throw new ArgumentNullException(nameof(stockService));
             _kardexService = kardexService ?? throw new ArgumentNullException(nameof(kardexService));
             _mermaService = mermaService ?? throw new ArgumentNullException(nameof(mermaService));
+            _traspasoService = traspasoService ?? throw new ArgumentNullException(nameof(traspasoService));
         }
         // Delegados hacia StockService
         public void RegistrarStockManual(StockPorSucursalDTO stockDto, Guid idSucursal, string usuarioNombre)
@@ -53,6 +56,9 @@ namespace BLL.GestiónStock.Facade
 
         public void RegistrarEgresoManualLote(Guid idLote, int cantidadADescontar, string observaciones, Guid idSucursal, string usuarioNombre)
           => _stockService.RegistrarEgresoManualLote(idLote, cantidadADescontar, observaciones, idSucursal, usuarioNombre);
-        
+
+        public void GenerarTraspasoDesdeSolicitud(Guid idSucursalOrigen, Guid idSolicitud)
+            => _traspasoService.GenerarTraspasoDesdeSolicitud(idSucursalOrigen, idSolicitud);
+
     }
 }

@@ -16,8 +16,7 @@ public partial class SolicitudPedidoDetalle
     public int? Renglon { get; set; }
 
     public virtual Producto? IdProductoNavigation { get; set; }
-
     public virtual SolicitudPedido? IdSolicitudPedidoNavigation { get; set; }
-
     public virtual ICollection<VinculoSolicitudOc> VinculoSolicitudOc { get; set; } = new List<VinculoSolicitudOc>();
+
 }

@@ -37,6 +37,7 @@ using Service.DateAccess.Implementations;
 using Service.DateAccess.Interface;
 using Service.Logic;
 using BLL.GestiónCompra.Facade;
+using BLL.GestiónStock.Service;
 
 
 
@@ -125,7 +126,8 @@ namespace Bootstrapper
             services.AddTransient<IStockRepository, StockRepository>();
             services.AddTransient<IMovimientosStockRepository, MovimientosStockRepository>();
             services.AddTransient<ILoteRepository, LoteRepository>();                       
-            services.AddTransient<ITipoMovimientoRepository, TipoMovimientoRepository>();     
+            services.AddTransient<ITipoMovimientoRepository, TipoMovimientoRepository>();
+            services.AddTransient<IOrdenTraspasoRepository, OrdenTraspasoRepository>();
 
             // Validadores (FluentValidation)
             services.AddScoped<IValidator<StockPorSucursalDTO>, StockValidator>();
@@ -134,6 +136,7 @@ namespace Bootstrapper
             services.AddScoped<IStockService, StockService>();
             services.AddScoped<IMermaService, MermaService>();
             services.AddScoped<IKardexService, KardexService>();
+            services.AddScoped<ITraspasoService, TraspasoService>();
             services.AddScoped<IFacade, StockFacade>();
             services.AddTransient<StockFacade>();
 

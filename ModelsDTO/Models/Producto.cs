@@ -37,6 +37,8 @@ public partial class Producto
 
     public virtual ICollection<Lote> Lote { get; set; } = new List<Lote>();
 
+    public virtual ICollection<OrdenTraspasoDetalle> OrdenTraspasoDetalle { get; set; } = new List<OrdenTraspasoDetalle>();
+
     public virtual ICollection<ProductoProveedor> ProductoProveedor { get; set; } = new List<ProductoProveedor>();
 
     public virtual ICollection<SolicitudPedidoDetalle> SolicitudPedidoDetalle { get; set; } = new List<SolicitudPedidoDetalle>();

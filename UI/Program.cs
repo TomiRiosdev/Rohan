@@ -81,6 +81,7 @@ namespace UI
             services.AddTransient<fmsListarProductosPopUp>();
             services.AddTransient<fmsHistorial>();
             services.AddTransient<fmsVencimientosProducto>();
+            services.AddTransient<fmsTraspasoSucursal>();
 
             // Formularios de Gestión de Compra
             services.AddTransient<fmsGestionCompra>();
