@@ -21,9 +21,7 @@ namespace DAO.Implementations.SQLServer.GestionStock
         {
             if (entity == null) throw new ArgumentNullException(nameof(entity));
             _dbContext.Lote.Add(entity);
-        }
-
-        
+        }     
 
         public Lote GetById(Guid idLote)
         {
