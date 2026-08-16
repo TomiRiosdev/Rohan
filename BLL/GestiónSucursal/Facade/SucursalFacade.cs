@@ -43,19 +43,27 @@ namespace BLL.GestiónSucursal.Facade
         {
             return _sucursalService.GetById(id);
         }
+      
         public List<SucursalDTO> GetHabilitados()
         {
             return _sucursalService.GetHabilitados();
         }
+        
         public List<SucursalDTO> GetDeshabilitados()
         {
             return _sucursalService.GetDeshabilitados();
         }
+    
         public List<SucursalDTO> GetByNombre(string nombre)
         {
             return _sucursalService.GetByNombre(nombre);
         }
 
+        public Guid ObtenerIdDepositoCentral()
+        {
+            return _sucursalService.ObtenerIdDepositoCentral();
+        }
+       
         #endregion
 
 

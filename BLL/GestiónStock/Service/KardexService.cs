@@ -43,7 +43,7 @@ namespace BLL.GestiónStock
                 CrearHistorialMovimiento(idSucursal, lote.IdLote, tipoMovimientoDb.IdTipoMovimiento, cantidad, observaciones, usuarioNombre);
 
                 // 3. Resolver Álgebra Logística: Suma o Resta según descripción del movimiento
-                int cambioNetoFisico = CalcularCambioFisico(tipoMovimientoDb.Descripcion, cantidad);
+                int cambioNetoFisico = CalcularCambioFisico(tipo, cantidad);
 
                 // 4. Lógica de Unicidad Industrial (Upsert Consolidado)
                 UpsertStockConsolidado(idSucursal, lote.IdProducto.Value, cambioNetoFisico);
@@ -99,18 +99,17 @@ namespace BLL.GestiónStock
             _uow.MovimientosStockRepository.Add(movimiento);
         }
 
-        private int CalcularCambioFisico(string descripcionTipo, int cantidad)
+        private int CalcularCambioFisico(TipoMovimientoEnum tipo, int cantidad)
         {
-            string textoDesc = descripcionTipo.ToLower();
-            int multiplicadorEfectivo = 1;
-
-            // Si el texto descriptivo mapea una salida, invertimos el signo algebraico
-            if (textoDesc.Contains("egreso") || textoDesc.Contains("merma") || textoDesc.Contains("rotura") || textoDesc.Contains("venta"))
+           
+            if (tipo == TipoMovimientoEnum.EgresoManual ||
+                tipo == TipoMovimientoEnum.EgresoPorMerma ||
+                tipo == TipoMovimientoEnum.EgresoPorTransferencia)
             {
-                multiplicadorEfectivo = -1;
+                return cantidad * -1; // Es salida garantizada
             }
 
-            return cantidad * multiplicadorEfectivo;
+            return cantidad; // Es ingreso garantizado
         }
 
         private void UpsertStockConsolidado(Guid idSucursal, Guid idProducto, int cambioNetoFisico)

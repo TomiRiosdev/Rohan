@@ -1,5 +1,6 @@
 ﻿using BLL.DomainDtos;
 using BLL.GestiónStock.Interface;
+using Microsoft.EntityFrameworkCore.SqlServer.Query.Internal;
 using System.Collections.Generic;
 
 
@@ -59,6 +60,21 @@ namespace BLL.GestiónStock.Facade
 
         public void GenerarTraspasoDesdeSolicitud(Guid idSucursalOrigen, Guid idSolicitud)
             => _traspasoService.GenerarTraspasoDesdeSolicitud(idSucursalOrigen, idSolicitud);
+
+        public IEnumerable<OrdenTraspasoDTO> ObtenerTraspasosEnPreparacion(Guid idSucursalOrigen)
+            => _traspasoService.ObtenerTraspasosEnPreparacion(idSucursalOrigen);
+
+        public void ConfirmarEnvioTraspaso(Guid idOrdenTraspaso, string usuarioNombre, List<OrdenTraspasoDetalleDTO> detallesConfirmados)
+            => _traspasoService.ConfirmarEnvioTraspaso(idOrdenTraspaso, usuarioNombre, detallesConfirmados);
+
+        public void RecibirTraspasoEnDestino(Guid idOrdenTraspaso, Guid idSucursalDestino, string usuarioNombre)
+            => _traspasoService.RecibirTraspasoEnDestino(idOrdenTraspaso, idSucursalDestino, usuarioNombre);
+
+        public void CancelarTraspaso(Guid idOrdenTraspaso, string usuarioNombre)
+            => _traspasoService.CancelarTraspaso(idOrdenTraspaso, usuarioNombre);
+
+        public IEnumerable<OrdenTraspasoDTO> ObtenerTraspasosEnTransito(Guid idSucursalDestino)
+            => _traspasoService.ObtenerTraspasosEnTransito(idSucursalDestino);
 
     }
 }

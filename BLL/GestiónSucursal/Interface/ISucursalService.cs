@@ -16,5 +16,7 @@ namespace BLL.GestiónSucursal.Interface
         List<SucursalDTO> GetDeshabilitados();
         SucursalDTO GetById(Guid id);
         List<SucursalDTO> GetByNombre(string nombre);
+        Guid ObtenerIdDepositoCentral();
+
     }
 }

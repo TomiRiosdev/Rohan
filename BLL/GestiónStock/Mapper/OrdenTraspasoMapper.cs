@@ -52,6 +52,11 @@ namespace BLL.GestiónStock.Mapper
                 ProductoNombre = entity.IdProductoNavigation?.Nombre ?? "Producto desconocido",
                 CodigoSku = entity.IdProductoNavigation?.CodigoSku ?? 0,
 
+                // Mapeamos el coeficiente logístico
+                CantidadPorBulto = entity.IdProductoNavigation?.CantidadPorBulto ?? 1,
+
+                // Inicialmente, lo que se guardó en CantidadEnviada es lo que se solicitó
+                CantidadSolicitada = entity.CantidadEnviada ?? 0,
                 CantidadEnviada = entity.CantidadEnviada ?? 0,
                 CantidadRecibida = entity.CantidadRecibida ?? 0,
 

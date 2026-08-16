@@ -22,6 +22,9 @@ namespace BLL.GestiónStock.Interface
 
             // GESTIÓN DE TRASPASOS (Hacia TraspasoService)
             void GenerarTraspasoDesdeSolicitud(Guid idSucursalOrigen, Guid idSolicitud);
-
+            IEnumerable<OrdenTraspasoDTO> ObtenerTraspasosEnPreparacion(Guid idSucursalOrigen);
+            void ConfirmarEnvioTraspaso(Guid idOrdenTraspaso, string usuarioNombre, List<OrdenTraspasoDetalleDTO> detallesConfirmados);
+    
     }
 }
+    

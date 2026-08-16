@@ -13,7 +13,8 @@ namespace BLL.Enum
         IngresoPorCompra = 2,
         EgresoManual = 3,
         EgresoPorMerma = 4,
-        Transferencia = 5
+        EgresoPorTransferencia = 5, 
+        IngresoPorTransferencia = 6 
     }
     
 }

@@ -12,5 +12,6 @@ namespace DAO.Interface.GestionStock
         void AddOrdenTraspaso(OrdenTraspaso entity);
         OrdenTraspaso GetById(Guid id);
         IEnumerable<OrdenTraspaso> GetTraspasosPendientes(Guid idSucursalOrigen);
+        IEnumerable<OrdenTraspaso> GetTraspasosEnviados(Guid idSucursalOrigen);
     }
 }

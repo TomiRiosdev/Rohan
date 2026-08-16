@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using BLL.GestiónSucursal.Facade;
+using Microsoft.Extensions.DependencyInjection;
 using Service.Facade;
 using UI.GestionCompra;
 using UI.GestiónProducto;
@@ -16,10 +17,12 @@ namespace UI
         public fmsPrincipal
         (
             IServiceProvider serviceProvider
+          
         )
         {
             InitializeComponent();
             _serviceProvider = serviceProvider;
+    
             CargarInformacionSucursal();
         }
 
@@ -154,5 +157,8 @@ namespace UI
                 }
             }
         }
+
+     
+
     }
 }

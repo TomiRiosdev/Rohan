@@ -207,6 +207,38 @@ namespace BLL.GestiónSucursal.Service
             }
         }
 
+        public Guid ObtenerIdDepositoCentral()
+        {
+            try
+            {
+                // 1. Buscamos el ID del Tipo de Sucursal usando su Descripción exacta
+                var tipoDeposito = _uow.TipoSucursalRepository.GetAll()
+                    .FirstOrDefault(t => t.Descripcion != null &&
+                                         t.Descripcion.Equals("Depósito y Stock", StringComparison.OrdinalIgnoreCase));
+
+                if (tipoDeposito == null)
+                    throw new SucursalServiceException("Error de Configuración: No existe el tipo de sucursal 'Depósito y Stock' en el sistema.");
+
+                // 2. Buscamos la sucursal habilitada que tenga asignado ese Tipo
+                var depositoCentral = _uow.SucursalRepository.GetAll()
+                    .FirstOrDefault(s => s.IdTipoSucursal == tipoDeposito.IdTipoSucursal && s.Habilitado == true);
+
+                if (depositoCentral == null)
+                    throw new SucursalServiceException("No hay ninguna sucursal habilitada configurada como Depósito Central.");
+
+                // 3. Retornamos el Guid de la sucursal (Rohan HQ en tu caso)
+                return depositoCentral.IdSucursal;
+            }
+            catch (SucursalServiceException)
+            {
+                throw; // Relanzamos si es nuestra excepción controlada
+            }
+            catch (Exception ex)
+            {
+                throw new SucursalServiceException("Error interno al intentar localizar el depósito central.", ex);
+            }
+        }
+
         #endregion
 
         #region Validaciones

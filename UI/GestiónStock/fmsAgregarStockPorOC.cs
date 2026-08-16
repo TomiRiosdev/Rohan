@@ -11,24 +11,32 @@ namespace UI.GestiónStock
     {
         private readonly StockFacade _stockFacade;
         private readonly OrdenCompraFacade _comprasFacade;
-        private List<OrdenCompraDTO> _ordenesAprobadasLocales;
-        private readonly IServiceProvider _serviceProvider;
-        public fmsAgregarStockPorOC
-        (
-            StockFacade stockFacade,
-            OrdenCompraFacade comprasFacade
-        )
+
+        // Variables para mantener los datos en memoria según el modo
+        private List<OrdenCompraDTO> _ordenesCompraPendientes;
+        private List<OrdenTraspasoDTO> _traspasosPendientes;
+
+        public fmsAgregarStockPorOC(StockFacade stockFacade, OrdenCompraFacade comprasFacade)
         {
             InitializeComponent();
             _stockFacade = stockFacade ?? throw new ArgumentNullException(nameof(stockFacade));
             _comprasFacade = comprasFacade ?? throw new ArgumentNullException(nameof(comprasFacade));
         }
 
-      
-
         private void fmsAgregarStockPorOC_Load(object sender, EventArgs e)
         {
-            ConfigurarVistasDeGrillas();
+            // Inicializamos el ComboBox
+            cmbTipoRecepcion.Items.Add("Órdenes de Compra (Proveedores Externos)");
+            cmbTipoRecepcion.Items.Add("Traspasos Internos (Depósito Central)");
+            cmbTipoRecepcion.SelectedIndex = 0; // Selecciona OC por defecto
+
+            cmbTipoRecepcion.SelectedIndexChanged += CmbTipoRecepcion_SelectedIndexChanged;
+
+            ActualizarPantallaCompleta();
+        }
+
+        private void CmbTipoRecepcion_SelectedIndexChanged(object sender, EventArgs e)
+        {
             ActualizarPantallaCompleta();
         }
 
@@ -36,40 +44,45 @@ namespace UI.GestiónStock
         {
             try
             {
-                // 1. DESVINCULAMOS EVENTOS PARA EVITAR EJECUCIONES INDESEADAS DURANTE LA ACTUALIZACIÓN DE DATOS
                 dgvOrdenCompra.SelectionChanged -= dgvOrdenCompra_SelectionChanged!;
-
-                // 2. CAPTURAMOS EL CONTEXTO REGIONAL DE LA SESIÓN ACTIVA
-                Guid idSucursalActual = SessionManager.Current.IdSucursalActual
-                    ?? throw new Exception("No se detectó una sucursal activa en la sesión del usuario.");
-
-                // 3. CONSULTAMOS LAS ORDENES DE COMPRA APROBADAS PARA LA SUCURSAL ACTUAL
-                DateTime fechaDesde = DateTime.Today.AddDays(-30); // Últimos 30 días
-                DateTime fechaHasta = DateTime.Today;
-
-                var ocsAprobadas = _comprasFacade.ConsultarHistorial(idSucursalActual, null, 2, fechaDesde, fechaHasta);
-                _ordenesAprobadasLocales = new List<OrdenCompraDTO>(ocsAprobadas);
-
-                // 4. Volcar datos
                 dgvOrdenCompra.DataSource = null;
-                dgvOrdenCompra.DataSource = _ordenesAprobadasLocales;
+                dgvDetalleOrdenCompra.DataSource = null;
+                dgvOrdenCompra.Columns.Clear();
+                dgvDetalleOrdenCompra.Columns.Clear();
 
-                // 5. Sincronizar grilla hija
-                if (_ordenesAprobadasLocales.Count > 0 && dgvOrdenCompra.CurrentRow != null)
+                Guid idSucursalActual = SessionManager.Current.IdSucursalActual
+                    ?? throw new Exception("No se detectó una sucursal activa en la sesión.");
+
+                // MODO 0: ÓRDENES DE COMPRA
+                if (cmbTipoRecepcion.SelectedIndex == 0)
                 {
-                    if (dgvOrdenCompra.CurrentRow.DataBoundItem is OrdenCompraDTO ocSeleccionada)
-                    {
-                        PrepararDetallesParaRecepcion(ocSeleccionada.Detalles);
-                        dgvDetalleOrdenCompra.DataSource = null;
-                        dgvDetalleOrdenCompra.DataSource = ocSeleccionada.Detalles;
-                    }
+                    ConfigurarGrillasModoOC();
+                    DateTime fechaDesde = DateTime.Today.AddDays(-30);
+
+                    var ocsAprobadas = _comprasFacade.ConsultarHistorial(idSucursalActual, null, 2, fechaDesde, DateTime.Today);
+                    _ordenesCompraPendientes = new List<OrdenCompraDTO>(ocsAprobadas);
+
+                    dgvOrdenCompra.DataSource = _ordenesCompraPendientes;
                 }
-                else
+                // MODO 1: TRASPASOS EN TRÁNSITO
+                else if (cmbTipoRecepcion.SelectedIndex == 1)
                 {
-                    dgvDetalleOrdenCompra.DataSource = null;
+                    ConfigurarGrillasModoTraspaso();
+
+                    var traspasos = _stockFacade.ObtenerTraspasosEnTransito(idSucursalActual);
+                    _traspasosPendientes = new List<OrdenTraspasoDTO>(traspasos);
+
+                    dgvOrdenCompra.DataSource = _traspasosPendientes;
                 }
 
-                btnIngresar.Enabled = _ordenesAprobadasLocales.Count > 0;
+                btnIngresar.Enabled = dgvOrdenCompra.Rows.Count > 0;
+
+                // Forzar selección del primer elemento si existe
+                if (dgvOrdenCompra.Rows.Count > 0)
+                {
+                    dgvOrdenCompra.Rows[0].Selected = true;
+                    dgvOrdenCompra_SelectionChanged(null, null);
+                }
             }
             catch (Exception ex)
             {
@@ -81,211 +94,200 @@ namespace UI.GestiónStock
             }
         }
 
-        private void PrepararDetallesParaRecepcion(IEnumerable<OrdenCompraDetalleDTO> detalles)
-        {
-            // Inicializa la cantidad recibida por defecto igual a la pedida para agilizar la carga
-            foreach (var det in detalles)
-            {
-                if (det.CantidadRecibida == 0) // Previene sobreescribir si ya tiene datos
-                {
-                    det.CantidadRecibida = det.CantidadPedida;
-                }
-            }
-        }
-        #region Configuración de Vistas de Grillas
-        private void ConfigurarVistasDeGrillas()
-        {
-            ConfigurarGrillaMaestro();
-            ConfigurarGrillaDetalle();
-        }
-
-        private void ConfigurarGrillaDetalle()
-        {
-            dgvOrdenCompra.AutoGenerateColumns = false;
-            dgvOrdenCompra.AllowUserToAddRows = false;
-            dgvOrdenCompra.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dgvOrdenCompra.RowHeadersVisible = false;
-            dgvOrdenCompra.BackgroundColor = Color.White;
-            dgvOrdenCompra.BorderStyle = BorderStyle.None;
-            dgvOrdenCompra.ReadOnly = true;
-            dgvOrdenCompra.MultiSelect = false;
-
-            dgvOrdenCompra.Columns.Clear();
-            dgvOrdenCompra.Columns.Add(new DataGridViewTextBoxColumn
-            {
-                Name = "NroOrdenCompra",
-                DataPropertyName = "NroOrdenCompra",
-                HeaderText = "N° Orden",
-                Width = 90
-            });
-
-            dgvOrdenCompra.Columns.Add(new DataGridViewTextBoxColumn
-            {
-                Name = "Proveedor",
-                DataPropertyName = "RazonSocialProveedor",
-                HeaderText = "Proveedor",
-                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
-            });
-
-            var colFecha = new DataGridViewTextBoxColumn
-            {
-                Name = "FechaOc",
-                DataPropertyName = "FechaOc",
-                HeaderText = "Fecha",
-                Width = 90
-            };
-
-            colFecha.DefaultCellStyle.Format = "dd/MM/yyyy";
-            dgvOrdenCompra.Columns.Add(colFecha);
-        }
-
-        private void ConfigurarGrillaMaestro()
-        {
-            dgvDetalleOrdenCompra.AutoGenerateColumns = false;
-            dgvDetalleOrdenCompra.AllowUserToAddRows = false;
-            dgvDetalleOrdenCompra.RowHeadersVisible = false;
-            dgvDetalleOrdenCompra.BackgroundColor = Color.White;
-            dgvDetalleOrdenCompra.BorderStyle = BorderStyle.None;
-
-            // ATENCIÓN: La grilla no es de solo lectura, se bloquea por columna
-            dgvDetalleOrdenCompra.ReadOnly = false;
-            dgvDetalleOrdenCompra.SelectionMode = DataGridViewSelectionMode.CellSelect; // Permite navegar celdas para editar
-            dgvDetalleOrdenCompra.EditMode = DataGridViewEditMode.EditOnKeystrokeOrF2;
-
-            dgvDetalleOrdenCompra.Columns.Clear();
-
-            // 1. Columnas de solo lectura
-            dgvDetalleOrdenCompra.Columns.Add(new DataGridViewTextBoxColumn
-            {
-                DataPropertyName = "CodigoSku",
-                HeaderText = "SKU",
-                Width = 70,
-                ReadOnly = true
-            });
-
-            dgvDetalleOrdenCompra.Columns.Add(new DataGridViewTextBoxColumn
-            {
-                DataPropertyName = "ProductoNombre",
-                HeaderText = "Artículo",
-                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill,
-                ReadOnly = true
-            });
-
-            var colCantPedida = new DataGridViewTextBoxColumn
-            {
-                DataPropertyName = "CantidadPedida",
-                HeaderText = "Pedida",
-                Width = 70,
-                ReadOnly = true
-            };
-
-            colCantPedida.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-            dgvDetalleOrdenCompra.Columns.Add(colCantPedida);
-
-            // 2. Columnas Editables (Se les da un color de fondo sutil para guiar al usuario)
-            var colCantRecibida = new DataGridViewTextBoxColumn
-            {
-                DataPropertyName = "CantidadRecibida", // Tu DTO debe tener set; en esta propiedad
-                HeaderText = "Ingresa",
-                Width = 80,
-                ReadOnly = false
-            };
-            colCantRecibida.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-            colCantRecibida.DefaultCellStyle.BackColor = Color.LightYellow;
-            colCantRecibida.DefaultCellStyle.Font = new Font(dgvDetalleOrdenCompra.Font, FontStyle.Bold);
-            dgvDetalleOrdenCompra.Columns.Add(colCantRecibida);
-
-            var colObs = new DataGridViewTextBoxColumn
-            {
-                DataPropertyName = "Observaciones", // Tu DTO debe tener una prop string Observaciones
-                HeaderText = "Observación Recepción",
-                Width = 150,
-                ReadOnly = false
-            };
-            colObs.DefaultCellStyle.BackColor = Color.LightYellow;
-            dgvDetalleOrdenCompra.Columns.Add(colObs);
-        }
-
-        #endregion
-
-        private void dgvDetalleOrdenCompra_CellContentClick(object sender, DataGridViewCellEventArgs e)
-        {
-
-        }
-
-        #region Eventos
-
         private void dgvOrdenCompra_SelectionChanged(object sender, EventArgs e)
         {
-            if (dgvOrdenCompra.CurrentRow == null || dgvOrdenCompra.CurrentRow.Index < 0)
-            {
-                dgvDetalleOrdenCompra.DataSource = null;
-                return;
-            }
+            if (dgvOrdenCompra.CurrentRow == null) return;
 
-            if (dgvOrdenCompra.CurrentRow.DataBoundItem is OrdenCompraDTO ocSeleccionada)
+            dgvDetalleOrdenCompra.DataSource = null;
+
+            if (cmbTipoRecepcion.SelectedIndex == 0)
             {
-                PrepararDetallesParaRecepcion(ocSeleccionada.Detalles);
-                dgvDetalleOrdenCompra.DataSource = null;
-                dgvDetalleOrdenCompra.DataSource = ocSeleccionada.Detalles;
+                var oc = (OrdenCompraDTO)dgvOrdenCompra.CurrentRow.DataBoundItem;
+                foreach (var det in oc.Detalles) { if (det.CantidadRecibida == 0) det.CantidadRecibida = det.CantidadPedida; }
+                dgvDetalleOrdenCompra.DataSource = oc.Detalles;
+            }
+            else
+            {
+                var traspaso = (OrdenTraspasoDTO)dgvOrdenCompra.CurrentRow.DataBoundItem;
+                // Pre-cargamos lo recibido igual a lo enviado para agilizar
+                foreach (var det in traspaso.Detalles) { if (det.CantidadRecibida == 0) det.CantidadRecibida = det.CantidadEnviada; }
+                dgvDetalleOrdenCompra.DataSource = traspaso.Detalles;
             }
         }
-        // Maneja errores de formato en la grilla de detalle
-        private void dgvDetalleOrdenCompra_DataError(object sender, DataGridViewDataErrorEventArgs e)
-        {
-            MessageBox.Show("Valor ingresado inválido. Ingrese un número entero.", "Error de Formato", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            e.Cancel = true;
-        }
+
         private void btnIngresar_Click(object sender, EventArgs e)
         {
             if (dgvOrdenCompra.CurrentRow == null) return;
-            dgvDetalleOrdenCompra.EndEdit(); // Fuerza a consolidar la última celda editada
+            dgvDetalleOrdenCompra.EndEdit();
 
-            var oc = (OrdenCompraDTO)dgvOrdenCompra.CurrentRow.DataBoundItem;
+            Guid idSucursal = SessionManager.Current.IdSucursalActual.Value;
+            string usuario = SessionManager.Current.UsuarioLogueado?.Nombre ?? "Sistema";
 
             try
             {
-                // 1. Armar la lista de DTOs 
-                var detallesBound = (IEnumerable<OrdenCompraDetalleDTO>)dgvDetalleOrdenCompra.DataSource;
-
-                var listaRecepcion = detallesBound.Select(d => new RecepcionMercaderiaDTO
+                // PROCESAMIENTO ORDEN DE COMPRA
+                if (cmbTipoRecepcion.SelectedIndex == 0)
                 {
-                    IdOrdenCompraDetalle = d.IdOrdenCompraDetalle,
-                    IdProducto = d.IdProducto,
-                    CantidadRealRecibida = d.CantidadRecibida,
-                    UnidadesPorBulto = d.UnidadesPorBulto,
-                    Observaciones = d.Observaciones
+                    var oc = (OrdenCompraDTO)dgvOrdenCompra.CurrentRow.DataBoundItem;
+                    var detalles = (IEnumerable<OrdenCompraDetalleDTO>)dgvDetalleOrdenCompra.DataSource;
 
-                }).ToList();
+                    var listaRecepcion = detalles.Select(d => new RecepcionMercaderiaDTO
+                    {
+                        IdOrdenCompraDetalle = d.IdOrdenCompraDetalle,
+                        IdProducto = d.IdProducto,
+                        CantidadRealRecibida = d.CantidadRecibida,
+                        UnidadesPorBulto = d.UnidadesPorBulto,
+                        Observaciones = d.Observaciones
+                    }).ToList();
 
-                if (!listaRecepcion.Any(r => r.CantidadRealRecibida > 0))
-                {
-                    MessageBox.Show("No se detectaron cantidades a ingresar.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
+                    if (!listaRecepcion.Any(r => r.CantidadRealRecibida > 0)) { MessageBox.Show("No hay cantidades a ingresar."); return; }
+
+                    if (MessageBox.Show($"¿Confirma el ingreso de la OC N° {oc.NroOrdenCompra}?", "Confirmar", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                    {
+                        _stockFacade.RegistrarIngresoPorOrdenCompra(oc.IdOrdenCompra, idSucursal, usuario, listaRecepcion);
+                        MessageBox.Show("Ingreso de Proveedor procesado con éxito.");
+                        ActualizarPantallaCompleta();
+                    }
                 }
-
-                DialogResult result = MessageBox.Show(
-                    $"¿Confirma el ingreso físico de mercadería para la OC N° {oc.NroOrdenCompra}?",
-                    "Confirmación de Ingreso", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-
-                if (result == DialogResult.Yes)
+                // PROCESAMIENTO TRASPASO
+                else
                 {
-                    Guid idSucursal = SessionManager.Current.IdSucursalActual.Value;
-                    string usuario = SessionManager.Current.UsuarioLogueado?.Nombre ?? "Sistema";
+                    var traspaso = (OrdenTraspasoDTO)dgvOrdenCompra.CurrentRow.DataBoundItem;
+                    var detalles = ((IEnumerable<OrdenTraspasoDetalleDTO>)dgvDetalleOrdenCompra.DataSource).ToList();
 
-                    // 2. Llamada a la Facade orquestadora
-                    _stockFacade.RegistrarIngresoPorOrdenCompra(oc.IdOrdenCompra, idSucursal, usuario, listaRecepcion);
+                    if (!detalles.Any(r => r.CantidadRecibida > 0)) { MessageBox.Show("No hay cantidades a ingresar."); return; }
 
-                    MessageBox.Show("Ingreso de stock procesado y auditado con éxito.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    ActualizarPantallaCompleta();
+                    if (MessageBox.Show($"¿Confirma la recepción del Traspaso N° {traspaso.NroTraspaso} desde Depósito?", "Confirmar", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                    {
+                        // AQUÍ LLAMAS A TU NUEVO MÉTODO DE RECEPCIÓN
+                        _stockFacade.RecibirTraspasoEnDestino(traspaso.IdOrdenTraspaso, idSucursal, usuario);
+                        MessageBox.Show("Mercadería interna ingresada al inventario del local con éxito.");
+                        ActualizarPantallaCompleta();
+                    }
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Error al Ingresar Stock", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(ex.Message, "Error Operativo", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
+        #region Configuración Dinámica de Grillas
+
+        private void ConfigurarGrillasModoOC()
+        {
+            dgvOrdenCompra.AutoGenerateColumns = false;
+            dgvOrdenCompra.AllowUserToAddRows = false;
+            dgvOrdenCompra.RowHeadersVisible = false;
+            dgvOrdenCompra.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            dgvOrdenCompra.MultiSelect = false;
+            dgvOrdenCompra.BackgroundColor = Color.White;
+            dgvOrdenCompra.BorderStyle = BorderStyle.None;
+            dgvOrdenCompra.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+
+            // COLOR DE SELECCIÓN AZUL CLARO SUAVE
+            dgvOrdenCompra.DefaultCellStyle.SelectionBackColor = Color.FromArgb(204, 229, 255); // Azul pastel claro
+            dgvOrdenCompra.DefaultCellStyle.SelectionForeColor = Color.Black;
+
+            dgvOrdenCompra.Columns.Clear();
+            dgvOrdenCompra.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "NroOrdenCompra", HeaderText = "N° OC", Width = 80 });
+            dgvOrdenCompra.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "RazonSocialProveedor", HeaderText = "Proveedor", AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill });
+
+            var colFechaOc = new DataGridViewTextBoxColumn { DataPropertyName = "FechaOc", HeaderText = "Fecha", Width = 90 };
+            colFechaOc.DefaultCellStyle.Format = "dd/MM/yyyy";
+            dgvOrdenCompra.Columns.Add(colFechaOc);
+
+
+            dgvDetalleOrdenCompra.AutoGenerateColumns = false;
+            dgvDetalleOrdenCompra.AllowUserToAddRows = false;
+            dgvDetalleOrdenCompra.RowHeadersVisible = false;
+            dgvDetalleOrdenCompra.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            dgvDetalleOrdenCompra.BackgroundColor = Color.White;
+            dgvDetalleOrdenCompra.BorderStyle = BorderStyle.None;
+            dgvDetalleOrdenCompra.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+
+            // COLOR DE SELECCIÓN AZUL CLARO SUAVE
+            dgvDetalleOrdenCompra.DefaultCellStyle.SelectionBackColor = Color.FromArgb(204, 229, 255);
+            dgvDetalleOrdenCompra.DefaultCellStyle.SelectionForeColor = Color.Black;
+
+            dgvDetalleOrdenCompra.Columns.Clear();
+            dgvDetalleOrdenCompra.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "CodigoSku", HeaderText = "SKU", Width = 70, ReadOnly = true });
+            dgvDetalleOrdenCompra.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "ProductoNombre", HeaderText = "Artículo", AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill, ReadOnly = true });
+
+            var colPedida = new DataGridViewTextBoxColumn { DataPropertyName = "CantidadPedida", HeaderText = "Pedida", Width = 70, ReadOnly = true };
+            colPedida.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+            dgvDetalleOrdenCompra.Columns.Add(colPedida);
+
+            var colIngresa = new DataGridViewTextBoxColumn { DataPropertyName = "CantidadRecibida", HeaderText = "Ingresa", Width = 80, ReadOnly = false };
+            colIngresa.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+            colIngresa.DefaultCellStyle.BackColor = Color.LightYellow; // Destaca la celda editable
+            dgvDetalleOrdenCompra.Columns.Add(colIngresa);
+        }
+
+        private void ConfigurarGrillasModoTraspaso()
+        {
+            dgvOrdenCompra.AutoGenerateColumns = false;
+            dgvOrdenCompra.AllowUserToAddRows = false;
+            dgvOrdenCompra.RowHeadersVisible = false;
+            dgvOrdenCompra.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            dgvOrdenCompra.MultiSelect = false;
+            dgvOrdenCompra.BackgroundColor = Color.White;
+            dgvOrdenCompra.BorderStyle = BorderStyle.None;
+            dgvOrdenCompra.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+
+            dgvOrdenCompra.DefaultCellStyle.SelectionBackColor = Color.FromArgb(204, 229, 255);
+            dgvOrdenCompra.DefaultCellStyle.SelectionForeColor = Color.Black;
+
+            dgvOrdenCompra.Columns.Clear();
+            dgvOrdenCompra.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "NroTraspaso", HeaderText = "N° Remito", Width = 90 });
+            dgvOrdenCompra.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "SucursalOrigenNombre", HeaderText = "Origen", AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill });
+
+            var colFechaTraspaso = new DataGridViewTextBoxColumn { DataPropertyName = "FechaEmision", HeaderText = "Despachado", Width = 90 };
+            colFechaTraspaso.DefaultCellStyle.Format = "dd/MM/yyyy HH:mm";
+            dgvOrdenCompra.Columns.Clear(); // Limpiamos bien antes de añadir
+
+            // Reconstrucción limpia de columnas para Traspaso Maestro
+            dgvOrdenCompra.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "NroTraspaso", HeaderText = "N° Remito", Width = 80 });
+            dgvOrdenCompra.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "SucursalOrigenNombre", HeaderText = "Depósito Origen", AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill });
+            dgvOrdenCompra.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "FechaEmision", HeaderText = "Fecha Envío", Width = 90 });
+
+            dgvDetalleOrdenCompra.AutoGenerateColumns = false;
+            dgvDetalleOrdenCompra.AllowUserToAddRows = false;
+            dgvDetalleOrdenCompra.RowHeadersVisible = false;
+            dgvDetalleOrdenCompra.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            dgvDetalleOrdenCompra.BackgroundColor = Color.White;
+            dgvDetalleOrdenCompra.BorderStyle = BorderStyle.None;
+            dgvDetalleOrdenCompra.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+
+            dgvDetalleOrdenCompra.DefaultCellStyle.SelectionBackColor = Color.FromArgb(204, 229, 255);
+            dgvDetalleOrdenCompra.DefaultCellStyle.SelectionForeColor = Color.Black;
+
+            dgvDetalleOrdenCompra.Columns.Clear();
+            dgvDetalleOrdenCompra.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "CodigoSku", HeaderText = "SKU", Width = 70, ReadOnly = true });
+            dgvDetalleOrdenCompra.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "ProductoNombre", HeaderText = "Artículo", AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill, ReadOnly = true });
+
+            var colEnviada = new DataGridViewTextBoxColumn { DataPropertyName = "CantidadEnviada", HeaderText = "Enviada", Width = 80, ReadOnly = true };
+            colEnviada.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+            dgvDetalleOrdenCompra.Columns.Add(colEnviada);
+
+            var colRecibida = new DataGridViewTextBoxColumn { DataPropertyName = "CantidadRecibida", HeaderText = "Recibe Físico", Width = 90, ReadOnly = false };
+            colRecibida.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+            colRecibida.DefaultCellStyle.BackColor = Color.LightCyan; // Celeste claro para indicar recepción interna
+            dgvDetalleOrdenCompra.Columns.Add(colRecibida);
+        }
+
         #endregion
+
+        private void dgvDetalleOrdenCompra_DataError(object sender, DataGridViewDataErrorEventArgs e)
+        {
+            MessageBox.Show("Valor inválido. Ingrese un número entero.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            e.Cancel = true;
+        }
+
+        private void btnActualizar_Click(object sender, EventArgs e)
+        {
+            ActualizarPantallaCompleta();
+        }
     }
 }
+

@@ -55,6 +55,7 @@
             btnRechazar.TabIndex = 30;
             btnRechazar.Text = "Rechazar ";
             btnRechazar.UseVisualStyleBackColor = false;
+            btnRechazar.Click += btnRechazar_Click;
             // 
             // lblDetalle
             // 
@@ -83,6 +84,7 @@
             dgvDetalle.Name = "dgvDetalle";
             dgvDetalle.Size = new Size(631, 357);
             dgvDetalle.TabIndex = 27;
+      
             // 
             // dgvSolicitud
             // 
@@ -91,6 +93,7 @@
             dgvSolicitud.Name = "dgvSolicitud";
             dgvSolicitud.Size = new Size(460, 294);
             dgvSolicitud.TabIndex = 26;
+   
             // 
             // btnConfirmar
             // 
@@ -102,6 +105,7 @@
             btnConfirmar.TabIndex = 25;
             btnConfirmar.Text = "Confirmar";
             btnConfirmar.UseVisualStyleBackColor = false;
+            btnConfirmar.Click += btnConfirmar_Click;
             // 
             // cbxSucursal
             // 
@@ -153,7 +157,7 @@
             groupBox2.TabIndex = 41;
             groupBox2.TabStop = false;
             // 
-            // TraspasoSucursal
+            // fmsTraspasoSucursal
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
@@ -166,7 +170,7 @@
             Controls.Add(btnBuscar);
             Controls.Add(btnRechazar);
             Controls.Add(btnConfirmar);
-            Name = "TraspasoSucursal";
+            Name = "fmsTraspasoSucursal";
             Text = "Traspaso a Sucursal";
             ((System.ComponentModel.ISupportInitialize)dgvDetalle).EndInit();
             ((System.ComponentModel.ISupportInitialize)dgvSolicitud).EndInit();

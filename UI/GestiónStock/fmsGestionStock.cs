@@ -10,7 +10,7 @@ namespace UI.GestiónStock
     public partial class fmsGestionStock : Form
     {
         private readonly StockFacade _stockFacade;
-        private readonly ProductoFacade _productoFacade; 
+        private readonly ProductoFacade _productoFacade;
         private readonly OrdenCompraFacade _comprasFacade;
         private readonly IServiceProvider _serviceProvider;
 
@@ -25,7 +25,7 @@ namespace UI.GestiónStock
             InitializeComponent();
             _stockFacade = stockFacade;
             _productoFacade = productoFacade;
-            _serviceProvider = serviceProvider; 
+            _serviceProvider = serviceProvider;
             _comprasFacade = comprasFacade;
         }
         #region buttons
@@ -33,10 +33,10 @@ namespace UI.GestiónStock
         {
             var formInventario = new fmsInventario(_stockFacade);
 
-      
+
             formInventario.OnSolicitarVerVencimientos += VerVencimientosForms;
 
-         
+
             formInventario.OnSolicitarConfiguracionMermas += SolicitudMermasAlertaForms;
 
             // Despachamos al contenedor general
@@ -58,7 +58,7 @@ namespace UI.GestiónStock
                 }
             }
         }
-   
+
         private void btnAgregarPorOC_Click(object sender, EventArgs e)
         {
             try
@@ -111,7 +111,22 @@ namespace UI.GestiónStock
         {
             AbrirFormInPanel(new fmsHistorial(_stockFacade));
         }
-       
+
+
+        private void btnTraspaso_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                var fmsSolicitudTraspaso = _serviceProvider.GetRequiredService<fmsTraspasoSucursal>();
+                AbrirFormInPanel(fmsSolicitudTraspaso);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error de infraestructura al incrustar la Solicitud de Pedido: {ex.Message}",
+                                "Error Crítico", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
         #endregion
 
         #region Eventos Generales del Formulario Contenedor
@@ -119,7 +134,7 @@ namespace UI.GestiónStock
         {
             btnVerInventario_Click(this, EventArgs.Empty);
         }
-      
+
         #endregion
 
         #region Motor de Renderizado (Sub-Paneles Dinámicos)
@@ -173,7 +188,7 @@ namespace UI.GestiónStock
                     }
                 }
             }
-           
+
         }
         private void VerVencimientosForms(object sender, StockPorSucursalDTO productoElegido)
         {
@@ -194,5 +209,6 @@ namespace UI.GestiónStock
         }
 
         #endregion
+
     }
 }

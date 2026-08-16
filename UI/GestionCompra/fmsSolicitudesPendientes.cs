@@ -1,15 +1,11 @@
 ﻿using BLL.DomainDtos;
+using BLL.GestiónCompra.Exceptions;
 using BLL.GestiónCompra.Facade;
+using BLL.GestiónStock.Facade;
+using BLL.GestiónSucursal.Exceptions;
+using BLL.GestiónSucursal.Facade;
 using Service.Facade;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 
 namespace UI.GestionCompra
 {
@@ -19,17 +15,23 @@ namespace UI.GestionCompra
         private List<SolicitudPedidoDTO> _solicitudesLocales;
         private readonly SolicitudPedidoFacade _solicitudFacade;
         public event EventHandler SolicitudProcesada;
+        private readonly StockFacade _stockFacade;
+        private readonly SucursalFacade _sucursalFacade;
 
 
         public fmsSolicitudesPendientes
         (
             OrdenCompraFacade comprasFacade,
-            SolicitudPedidoFacade solicitudFacade
+            SolicitudPedidoFacade solicitudFacade,
+            StockFacade stockFacade,
+            SucursalFacade sucursalFacade
         )
         {
             InitializeComponent();
             _comprasFacade = comprasFacade ?? throw new ArgumentNullException(nameof(comprasFacade));
             _solicitudFacade = solicitudFacade ?? throw new ArgumentNullException(nameof(solicitudFacade));
+            _stockFacade = stockFacade ?? throw new ArgumentNullException(nameof(stockFacade));
+            _sucursalFacade = sucursalFacade ?? throw new ArgumentNullException(nameof(sucursalFacade));
             this.dgvSolicitudPedido.SelectionChanged += dgvSolicitudPedido_SelectionChanged!;
         }
         private void fmsSolicitudesPendientes_Load(object sender, EventArgs e)
@@ -294,7 +296,66 @@ namespace UI.GestionCompra
 
         private void btnSolicitarTraspaso_Click(object sender, EventArgs e)
         {
+            if (dgvSolicitudPedido.CurrentRow == null)
+            {
+                MessageBox.Show("Por favor, seleccione una solicitud de la lista.", "Atención",
+                                MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
 
+            try
+            {
+                var solicitud = (SolicitudPedidoDTO)dgvSolicitudPedido.CurrentRow.DataBoundItem;
+
+                // 1. Buscamos cuál es el verdadero Depósito Central en la BD (La Opción B)
+                Guid idDepositoCentral = _sucursalFacade.ObtenerIdDepositoCentral();
+
+                // 2. Identificamos en qué sucursal está trabajando el operario actualmente
+                Guid idSucursalActual = SessionManager.Current.IdSucursalActual
+                                         ?? throw new Exception("No se detectó sucursal en sesión.");
+                if (idSucursalActual == idDepositoCentral)
+                {
+                    MessageBox.Show("Estás operando desde el Depósito Central.\n\n" +
+                                    "No puedes solicitar un traspaso hacia tu propio depósito. " +
+                                    "Para reabastecerte, debes usar la opción 'Generar pre OC' para pedirle a un proveedor externo.",
+                                    "Operación Logística Inválida", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                    return;
+                }
+
+                // 3. Confirmación al usuario
+                DialogResult result = MessageBox.Show(
+                    $"¿Desea derivar la Solicitud N° {solicitud.NroSolicitud} al Depósito Central para armar un Traspaso?\n\n" +
+                    "Esto sacará la solicitud de tu mesa de compras local y la enviará al área de logística.",
+                    "Confirmación de Traspaso",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question);
+
+                if (result == DialogResult.Yes)
+                {
+                    // 4. Enviamos el traspaso hacia el idDepositoCentral
+                    _stockFacade.GenerarTraspasoDesdeSolicitud(idDepositoCentral, solicitud.IdSolicitudPedido);
+
+                    MessageBox.Show("La solicitud fue derivada exitosamente al Depósito Central y se encuentra en estado 'Preparación'.",
+                                    "Traspaso Derivado", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                    // Refrescamos las grillas para que la solicitud desaparezca de aquí
+                    ActualizarPantallaCompleta();
+                }
+            }
+            catch (SucursalServiceException ex)
+            {
+                // Esto atrapará si por error borraron la sucursal de depósito de la BD
+                MessageBox.Show(ex.Message, "Error de Configuración", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            catch (ReglaNegocioComprasException ex)
+            {
+                MessageBox.Show(ex.Message, "Validación de Negocio", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Ocurrió un error al intentar derivar el traspaso: " + ex.Message,
+                                "Error Interno", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
     }
 }

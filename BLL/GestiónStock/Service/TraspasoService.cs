@@ -13,13 +13,21 @@ namespace BLL.GestiónStock.Service
     public class TraspasoService : ITraspasoService
     {
         private readonly IUnitOfWork _uow;
+        private readonly IKardexService _kardex;
 
         public TraspasoService
         (
-            IUnitOfWork unitOfWork
+            IUnitOfWork unitOfWork,
+            IKardexService kardexService
         )
         {
             _uow = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+            _kardex = kardexService ?? throw new ArgumentNullException(nameof(kardexService));
+        }
+
+        public void CancelarTraspaso(Guid idOrdenTraspaso, string usuarioNombre)
+        {
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -40,71 +48,53 @@ namespace BLL.GestiónStock.Service
 
             try
             {
-                // 1. Obtener la Orden (Trackeada por EF para poder modificarla)
                 var orden = _uow.OrdenTraspasoRepository.GetById(idOrdenTraspaso);
 
-                if (orden == null || orden.IdEstado != 5) // 5 = Preparacion
-                    throw new ReglaNegocioComprasException("El traspaso no existe o no está en estado de preparación.");
+                if (orden == null || orden.IdEstado != 1)
+                    throw new ReglaNegocioComprasException("El traspaso no existe o no está en estado Pendiente.");
 
                 Guid idSucursalOrigen = orden.IdSucursalOrigen.Value;
                 Guid idSucursalDestino = orden.IdSucursalDestino.Value;
 
-                // 2. Procesar cada detalle confirmado por el usuario en la grilla
                 foreach (var detConfirmado in detallesConfirmados)
                 {
-                    if (detConfirmado.CantidadEnviada <= 0) continue; // Si mandó 0, lo salteamos
+                    if (detConfirmado.CantidadEnviada <= 0) continue;
 
-                    // 3. Buscar lotes usando tu método existente y aplicando el filtro FIFO
                     var lotesDisponibles = _uow.LoteRepository.GetLotesActivosPorSucursal(idSucursalOrigen)
                         .Where(l => l.IdProducto == detConfirmado.IdProducto)
-                        .OrderBy(l => l.FechaVencimiento ?? DateTime.MaxValue) // FIFO: Primero los que vencen antes
+                        .OrderBy(l => l.FechaVencimiento ?? DateTime.MaxValue)
                         .ThenBy(l => l.FechaIngreso)
                         .ToList();
 
                     int cantidadARestar = detConfirmado.CantidadEnviada;
 
-                    // 3. Algoritmo FIFO de Descuento
                     foreach (var lote in lotesDisponibles)
                     {
-                        if (cantidadARestar == 0) break; // Ya restamos todo lo necesario
+                        if (cantidadARestar == 0) break;
 
                         int cantidadATomarDelLote = Math.Min(cantidadARestar, lote.CantidadActual.Value);
 
-                        // A) Descontar del Lote
                         lote.CantidadActual -= cantidadATomarDelLote;
+                        cantidadARestar -= cantidadATomarDelLote; // Actualizamos lo que falta
 
-                        // B) Generar el Movimiento de Stock (EGRESO del Depósito)
-                        var movimientoEgreso = new MovimientosStock
-                        {
-                            IdMovimiento = Guid.NewGuid(),
-                            IdSucursal = idSucursalOrigen,
-                            IdTipoMovimiento = (int)TipoMovimientoEnum.Transferencia,
-                            IdLote = lote.IdLote,
-                            IdSucursalOrigen = idSucursalOrigen,
-                            IdSucursalDestino = idSucursalDestino,
-                            Cantidad = -cantidadATomarDelLote, // Negativo porque sale
-                            FechaMovimiento = DateTime.Now,
-                            UsuarioNombre = usuarioNombre,
-                            Observaciones = $"Envío Traspaso N° {orden.NroTraspaso}"
-                        };
-                        _uow.MovimientosStockRepository.Add(movimientoEgreso); // Asegúrate de tener este repo en IUnitOfWork
-
-                        // C) Registrar la trazabilidad del Lote en el Detalle del Traspaso
-                        // NOTA ARQUITECTÓNICA: Si un producto se sacó de 2 lotes distintos, el detalle original
-                        // se "parte" en dos. Para simplificar, actualizaremos el registro original si es 1 lote,
-                        // o crearemos uno nuevo si necesitamos sacar de múltiples lotes.
+                        _kardex.RegistrarMovimiento(
+                             idSucursalOrigen,
+                             lote,
+                             TipoMovimientoEnum.EgresoPorTransferencia,
+                             cantidadATomarDelLote,
+                             $"Envío Traspaso N° {orden.NroTraspaso}",
+                             usuarioNombre
+                        );
 
                         var detalleDb = orden.OrdenTraspasoDetalle.FirstOrDefault(d => d.IdOrdenTraspasoDetalle == detConfirmado.IdOrdenTraspasoDetalle);
 
                         if (detalleDb.IdLoteOrigen == null)
                         {
-                            // Es el primer lote del que sacamos, actualizamos el registro existente
                             detalleDb.IdLoteOrigen = lote.IdLote;
                             detalleDb.CantidadEnviada = cantidadATomarDelLote;
                         }
                         else
                         {
-                            // Ya usamos un lote para este detalle, necesitamos clonar la fila para el segundo lote
                             var nuevoDetalleRenglon = new OrdenTraspasoDetalle
                             {
                                 IdOrdenTraspasoDetalle = Guid.NewGuid(),
@@ -115,27 +105,21 @@ namespace BLL.GestiónStock.Service
                                 Renglon = detalleDb.Renglon,
                                 IdLoteOrigen = lote.IdLote
                             };
-
                             orden.OrdenTraspasoDetalle.Add(nuevoDetalleRenglon);
                         }
-
-                        // Si después de recorrer todos los lotes aún falta cantidad, es que el stock real era menor
-                        // al que el operario intentó enviar (inconsistencia).
-                        if (cantidadARestar > 0)
-                        {
-                            var prod = _uow.ProductoRepository.GetById(detConfirmado.IdProducto);
-                            throw new ReglaNegocioComprasException($"No hay stock físico suficiente para cubrir el envío de {prod.Nombre}. Faltan {cantidadARestar} unidades.");
-                        }
+                    } 
+                    if (cantidadARestar > 0)
+                    {
+                        var prod = _uow.ProductoRepository.GetById(detConfirmado.IdProducto);
+                        throw new ReglaNegocioComprasException($"No hay stock físico suficiente para cubrir el envío de {prod.Nombre}. Faltan {cantidadARestar} unidades.");
                     }
-
-                    // 4. Cambiar el estado de la Orden a "En Tránsito"
-                    orden.IdEstado = 6; // 6 = Transito
-                    orden.FechaEmision = DateTime.Now;
-                    // orden.IdUsuarioEmisior = SessionManager.Current.UsuarioLogueado.IdUsuario;
-
-                    // 5. Commit de toda la transacción (Lotes descontados + Movimientos + Estado Orden)
-                    _uow.SaveChanges();
                 }
+
+                // Según tu nueva regla, pasa a estado 5 (Preparación / Listo para ingresar)
+                orden.IdEstado = 5;
+                orden.FechaEmision = DateTime.Now;
+
+                _uow.SaveChanges();
             }
             catch (ReglaNegocioComprasException) { throw; }
             catch (Exception ex)
@@ -154,87 +138,69 @@ namespace BLL.GestiónStock.Service
         /// <exception cref="ReglaNegocioComprasException">Se lanza si la solicitud no existe, ya fue procesada o no tiene renglones válidos.</exception>
         public void GenerarTraspasoDesdeSolicitud(Guid idSucursalOrigen, Guid idSolicitud)
         {
-            // Validaciones 
             if (idSucursalOrigen == Guid.Empty || idSolicitud == Guid.Empty)
                 throw new ComprasValidationException("Error de contexto: Identificadores inválidos.");
 
             try
             {
-                // 1. Buscamos la solicitud original
                 var sol = _uow.SolicitudPedidoRepository.GetById(idSolicitud);
 
-                if (sol == null)
-                    throw new ReglaNegocioComprasException("La solicitud no existe.");
+                if (sol == null || sol.IdEstadoSolicitud != 1)
+                    throw new ReglaNegocioComprasException("La solicitud no existe o ya fue procesada.");
 
-                if (sol.IdEstadoSolicitud != 1) // 1 = Pendiente
-                    throw new ReglaNegocioComprasException("Esta solicitud ya fue procesada.");
-
-                // 2. Extraemos renglones válidos
-                var renglonesValidos = sol.SolicitudPedidoDetalle
+                var renglonesAgrupados = sol.SolicitudPedidoDetalle
                     .Where(d => d.IdProducto != null && (d.Cantidad ?? 0) > 0)
-                    .ToList();
+                    .GroupBy(d => d.IdProducto)
+                    .Select(g => new {
+                        IdProducto = g.Key.Value,
+                        CantidadBultosPedidos = g.Sum(x => x.Cantidad ?? 0) // Sumamos todos los renglones iguales
+                    }).ToList();
 
-                if (!renglonesValidos.Any())
+                if (!renglonesAgrupados.Any())
                     throw new ReglaNegocioComprasException("La solicitud no contiene renglones válidos.");
 
-                // 3. Generamos la Cabecera del Traspaso
                 Guid idTraspasoNuevo = Guid.NewGuid();
 
                 var nuevoTraspaso = new OrdenTraspaso
                 {
                     IdOrdenTraspaso = idTraspasoNuevo,
-                    IdSucursalOrigen = idSucursalOrigen, // Quien envía (Depósito)
-                    IdSucursalDestino = sol.IdSucursal,          // Quien pidió (Local)
+                    IdSucursalOrigen = idSucursalOrigen,
+                    IdSucursalDestino = sol.IdSucursal,
                     IdSolicitudPedido = sol.IdSolicitudPedido,
-                    IdEstado = 5,                                // 5 = Preparacion
+                    IdEstado = 1,
                     FechaEmision = DateTime.Now,
                     NroTraspaso = CodigoGenerador.GenerarNumeroOcUnicoNumerico(),
-
-                    // Navegaciones en null para evitar que EF intente re-crearlos
-                    IdEstadoSolicitudNavigation = null,
-                    IdSolicitudPedidoNavigation = null,
-                    IdSucursalDestinoNavigation = null,
-                    IdSucursalOrigenNavigation = null,
                     OrdenTraspasoDetalle = new List<OrdenTraspasoDetalle>()
                 };
 
-                // 4. Generamos los Detalles
                 int nroRenglon = 1;
-                foreach (var item in renglonesValidos)
+                foreach (var item in renglonesAgrupados)
                 {
+                    var productoDb = _uow.ProductoRepository.GetById(item.IdProducto);
+                    int multiplicador = productoDb?.CantidadPorBulto ?? 1;
+
                     var traspasoDetalle = new OrdenTraspasoDetalle
                     {
                         IdOrdenTraspasoDetalle = Guid.NewGuid(),
                         IdOrdenTraspaso = idTraspasoNuevo,
                         IdProducto = item.IdProducto,
-                        CantidadEnviada = item.Cantidad, // Inicialmente seteamos lo mismo que pidieron
+                        CantidadEnviada = item.CantidadBultosPedidos * multiplicador,
                         CantidadRecibida = 0,
                         Renglon = nroRenglon,
-
-                        // CRÍTICO: Dejamos IdLoteOrigen en NULL por ahora.
-                        // Se completará cuando el operario confirme el envío físico y apliquemos FIFO.
-                        IdLoteOrigen = null,
-
-                        IdProductoNavigation = null,
-                        IdLoteOrigenNavigation = null
+                        IdLoteOrigen = null
                     };
 
                     nuevoTraspaso.OrdenTraspasoDetalle.Add(traspasoDetalle);
                     nroRenglon++;
                 }
 
-                // 5. Guardamos el Traspaso
                 _uow.OrdenTraspasoRepository.AddOrdenTraspaso(nuevoTraspaso);
-
-                // 6. Cambiamos el estado de la Solicitud Madre
-                sol.IdEstadoSolicitud = 5; // 5 = Preparacion (o el estado que prefieras para indicar que ya se tomó)
-
-                // 7. Commit a la base de datos
+                sol.IdEstadoSolicitud = 4;
                 _uow.SaveChanges();
             }
             catch (Exception ex)
             {
-                throw new ComprasDomainException($"Error al generar el traspaso para la solicitud {idSolicitud}.", ex);
+                throw new ComprasDomainException($"Error al generar el traspaso.", ex);
             }
         }
 
@@ -251,12 +217,141 @@ namespace BLL.GestiónStock.Service
 
             try
             {
+                // 1. Obtenemos los traspasos
                 var traspasos = _uow.OrdenTraspasoRepository.GetTraspasosPendientes(idSucursalOrigen);
-                return traspasos.ToDTOList(); // Usa el mapper que armamos antes
+                var traspasosDto = traspasos.ToDTOList().ToList();
+
+                // 2. Traemos el inventario actual de ESTA sucursal (El Depósito)
+                // Usamos AsNoTracking porque solo es lectura para la grilla
+                var stockDelDeposito = _uow.StockPorSucursalRepository.GetAll()
+                                           .Where(s => s.IdSucursal == idSucursalOrigen)
+                                           .ToList();
+
+                // 3. Inyectamos el Stock Actual a cada renglón del detalle
+                foreach (var traspaso in traspasosDto)
+                {
+                    foreach (var detalle in traspaso.Detalles)
+                    {
+                        var stockProducto = stockDelDeposito.FirstOrDefault(s => s.IdProducto == detalle.IdProducto);
+
+                        // Le asignamos el stock físico actual. Si no existe, es 0.
+                        detalle.StockActual = stockProducto?.CantidadTotal ?? 0;
+                    }
+                }
+
+                return traspasosDto;
             }
             catch (Exception ex)
             {
                 throw new ComprasDomainException("Error al consultar el listado de traspasos pendientes.", ex);
+            }
+        }
+
+        // Recupera el listado de todas las órdenes de traspaso asignadas a un depósito que se encuentran 
+        // en tránsito (Estado: 5). Retorna los datos mapeados a DTOs listos para la UI.
+        public IEnumerable<OrdenTraspasoDTO> ObtenerTraspasosEnTransito(Guid idSucursalDestino)
+        {
+            if (idSucursalDestino == Guid.Empty)
+                throw new ComprasValidationException("La sucursal de destino es inválida.");
+
+            try
+            {
+                // 1. Obtenemos los traspasos dirigidos a este local (Estado 5)
+                var traspasos = _uow.OrdenTraspasoRepository.GetTraspasosEnviados(idSucursalDestino);
+                var traspasosDto = traspasos.ToDTOList().ToList();
+                var stockDelLocalDestino = _uow.StockPorSucursalRepository.GetAll()
+                                           .Where(s => s.IdSucursal == idSucursalDestino)
+                                           .ToList();
+
+                // 3. Inyectamos el Stock Actual a cada renglón del detalle
+                foreach (var traspaso in traspasosDto)
+                {
+                    foreach (var detalle in traspaso.Detalles)
+                    {
+                        var stockProducto = stockDelLocalDestino.FirstOrDefault(s => s.IdProducto == detalle.IdProducto);
+
+                        // Le asignamos el stock físico actual que tiene el local. Si no existe, es 0.
+                        detalle.StockActual = stockProducto?.CantidadTotal ?? 0;
+                    }
+                }
+
+                return traspasosDto;
+            }
+            catch (Exception ex)
+            {
+                throw new ComprasDomainException("Error al consultar el listado de traspasos entrantes.", ex);
+            }
+        }
+
+        // Ingreso de mercadería en la sucursal de destino
+        public void RecibirTraspasoEnDestino(Guid idOrdenTraspaso, Guid idSucursalDestino, string usuarioNombre)
+        {
+            try
+            {
+                var orden = _uow.OrdenTraspasoRepository.GetById(idOrdenTraspaso);
+
+                if (orden == null || orden.IdEstado != 5)
+                    throw new ReglaNegocioComprasException("El traspaso no existe o no se encuentra en tránsito.");
+
+                if (orden.IdSucursalDestino != idSucursalDestino)
+                    throw new ReglaNegocioComprasException("Esta orden no pertenece a su sucursal.");
+
+                foreach (var detalle in orden.OrdenTraspasoDetalle)
+                {
+                    if (detalle.CantidadEnviada <= 0) continue;
+
+                    // 1. BÚSQUEDA DEL LOTE PADRE PARA HEREDAR TRAZABILIDAD
+                    DateTime? fechaVencimientoHeredada = null;
+                    decimal costoHeredado = 0;
+
+                    if (detalle.IdLoteOrigen.HasValue)
+                    {
+                        var loteOrigen = _uow.LoteRepository.GetById(detalle.IdLoteOrigen.Value);
+                        if (loteOrigen != null)
+                        {
+                            fechaVencimientoHeredada = loteOrigen.FechaVencimiento;
+                            costoHeredado = loteOrigen.CostoUnitario ??0;
+                        }
+                    }
+
+                    // 2. Creación del nuevo Lote clonado
+                    var nuevoLote = new Lote
+                    {
+                        IdLote = Guid.NewGuid(),
+                        IdProducto = detalle.IdProducto,
+                        IdSucursal = idSucursalDestino,
+                        CantidadInicial = detalle.CantidadEnviada,
+                        CantidadActual = detalle.CantidadEnviada,
+                        FechaIngreso = DateTime.Now,
+                        NumeroLote = $"TR-{orden.NroTraspaso}-{DateTime.Now:MMdd}",
+                        FechaVencimiento = fechaVencimientoHeredada,
+                        CostoUnitario = costoHeredado
+                    };
+
+                    _uow.LoteRepository.Add(nuevoLote);
+
+                    // 3. Ingresar la mercadería por el Kardex (Usando el NUEVO ENUM)
+                    _kardex.RegistrarMovimiento(
+                        idSucursalDestino,
+                        nuevoLote,
+                        TipoMovimientoEnum.IngresoPorTransferencia, 
+                        detalle.CantidadEnviada ?? 0,
+                        $"Recepción de Traspaso N° {orden.NroTraspaso}",
+                        usuarioNombre
+                    );
+
+                    detalle.CantidadRecibida = detalle.CantidadEnviada;
+                }
+
+                orden.IdEstado = 4; // Finalizado
+                orden.FechaRecepcion = DateTime.Now;
+
+                _uow.SaveChanges();
+            }
+            catch (ReglaNegocioComprasException) { throw; }
+            catch (Exception ex)
+            {
+                throw new ComprasDomainException("Error al intentar ingresar la mercadería a la sucursal de destino.", ex);
             }
         }
     }

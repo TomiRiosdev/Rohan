@@ -187,8 +187,8 @@ namespace BLL.GestiónStock
                             IdLote = Guid.NewGuid(),
                             IdProducto = detalleBd.IdProducto,
                             IdSucursal = idSucursal,
-                            CantidadInicial = ingresoUi.CantidadRealRecibida,
-                            CantidadActual = ingresoUi.CantidadRealRecibida,
+                            CantidadInicial = unidadesFisicasNetas,
+                            CantidadActual = unidadesFisicasNetas,  
                             CostoUnitario = detalleBd.PrecioPactado,
                             FechaIngreso = DateTime.Now,
                             NumeroLote = $"OC-{DateTime.Now:yyyyMMddHHmmss}-{ordenCompra.IdOrdenCompra.ToString().Substring(0, 4).ToUpper()}",
@@ -207,7 +207,7 @@ namespace BLL.GestiónStock
                             idSucursal,
                             nuevoLote,
                             TipoMovimientoEnum.IngresoPorCompra,
-                            ingresoUi.CantidadRealRecibida,
+                            unidadesFisicasNetas,
                             obsKardex,
                             usuarioNombre
                         );

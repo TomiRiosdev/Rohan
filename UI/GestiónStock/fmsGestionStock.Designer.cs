@@ -138,6 +138,7 @@
             btnTraspaso.TabIndex = 22;
             btnTraspaso.Text = "Traspaso Sucursal";
             btnTraspaso.UseVisualStyleBackColor = false;
+            btnTraspaso.Click += btnTraspaso_Click;
             // 
             // fmsGestionStock
             // 
